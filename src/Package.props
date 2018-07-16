@@ -1,0 +1,18 @@
+<Project>
+
+  <PropertyGroup>
+    <Product>Green Donut</Product>
+    <Authors>ChilliCream authors and contributors</Authors>
+    <Company>ChilliCream</Company>
+    <Copyright>Copyright © 2018 ChilliCream (Michael &amp; Rafael Staib)</Copyright>
+    <PackageLicenseUrl>https://github.com/ChilliCream/greendonut/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/ChilliCream/greendonut</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ChilliCream/greendonut</RepositoryUrl>
+    <PackageTags>GraphQL ChilliCream</PackageTags>
+    <PackageReleaseNotes>Release notes: https://github.com/ChilliCream/greendonut/releases/$(PackageVersion)</PackageReleaseNotes>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageIconUrl>https://cdn.rawgit.com/ChilliCream/greendonut-logo/master/img/greendonut-signet.png</PackageIconUrl>
+    <RepositoryType>GitHub</RepositoryType>
+  </PropertyGroup>
+
+</Project>
