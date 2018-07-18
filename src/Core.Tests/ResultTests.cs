@@ -8,7 +8,7 @@ namespace GreenDonut
         #region Reject
 
         [Fact(DisplayName = "Reject: Should throw an argument null exception for errorMessage")]
-        public void RejectStringNull()
+        public void RejectErrorMessageNull()
         {
             // arrange
             string errorMessage = null;
@@ -21,7 +21,7 @@ namespace GreenDonut
         }
 
         [Fact(DisplayName = "Reject: Should not throw any exception")]
-        public void RejectStringNotNull()
+        public void RejectErrorMessageNotNull()
         {
             // arrange
             string errorMessage = "Foo";

@@ -71,7 +71,7 @@ namespace GreenDonut
                 () =>
                 {
                     _ranking.Remove(_cache[key].Rank);
-                    _cache.Remove(key);
+                    _cache = _cache.Remove(key);
                     _first = _ranking.First;
                 });
         }
@@ -96,7 +96,7 @@ namespace GreenDonut
 
                     ClearSpaceForNewEntry();
                     _ranking.AddFirst(entry.Rank);
-                    _cache = _cache.SetItem(entry.Key, entry);
+                    _cache = _cache.Add(entry.Key, entry);
                     _first = entry.Rank;
                 });
         }

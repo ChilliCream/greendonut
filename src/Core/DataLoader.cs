@@ -24,7 +24,7 @@ namespace GreenDonut
     public class DataLoader<TKey, TValue>
         : DataLoaderBase<TKey, TValue>
     {
-        private FetchDataDelegate<TKey, TValue> _fetch;
+        private readonly FetchDataDelegate<TKey, TValue> _fetch;
 
         /// <summary>
         /// Initializes a new instance of the
