@@ -5,7 +5,7 @@
     <AssemblyName>GreenDonut</AssemblyName>
     <RootNamespace>GreenDonut</RootNamespace>
     <PackageId>GreenDonut</PackageId>
-    <Description>Comming soon...</Description>
+    <Description>Green Donut is a DataLoader implementation for .net core and classic</Description>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

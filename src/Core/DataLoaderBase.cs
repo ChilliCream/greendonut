@@ -12,10 +12,10 @@ namespace GreenDonut
     /// SQL table or document name in a MongoDB database, given a batch loading
     /// function. -- facebook
     ///
-    /// Each `DataLoader` instance contains a unique memoized cache.Use caution
-    /// when used in long-lived applications or those which serve many users
-    /// with different access permissions and consider creating a new instance
-    /// per web request. -- facebook
+    /// Each <c>DataLoader</c> instance contains a unique memoized cache. Use
+    /// caution when used in long-lived applications or those which serve many
+    /// users with different access permissions and consider creating a new
+    /// instance per web request. -- facebook
     ///
     /// This is an abstraction for <c>DataLoaders</c>.
     /// </summary>
@@ -138,7 +138,8 @@ namespace GreenDonut
             return this;
         }
 
-        public IDataLoader<TKey, TValue> Set(TKey key,
+        public IDataLoader<TKey, TValue> Set(
+            TKey key,
             Task<Result<TValue>> value)
         {
             if (key == null)
@@ -170,7 +171,8 @@ namespace GreenDonut
             return copy;
         }
 
-        private async Task DispatchAsync(TKey resolvedKey,
+        private async Task DispatchAsync(
+            TKey resolvedKey,
             TaskCompletionSource<Result<TValue>> promise)
         {
             var keys = new TKey[] { resolvedKey };
@@ -181,9 +183,8 @@ namespace GreenDonut
         }
 
         /// <summary>
-        /// Dispatches a one  batch request.
+        /// Dispatches one or more batch requests.
         /// </summary>
-        /// <returns></returns>
         protected Task DispatchBatchAsync()
         {
             return _sync.Lock(
