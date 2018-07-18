@@ -3,22 +3,20 @@ using System;
 namespace GreenDonut
 {
     /// <summary>
-    /// Represents <see cref="DataLoader"/> options.
+    /// An options object to configure the behavior for data loaders.
     /// </summary>
-    /// <typeparam name="TKey">The key type.</typeparam>
-    /// <typeparam name="TValue">The value type.</typeparam>
-    public class DataLoaderOptions<TKey, TValue>
+    /// <typeparam name="TKey">A key type</typeparam>
+    public class DataLoaderOptions<TKey>
     {
         /// <summary>
         /// Initializes a new instance of the
-        /// <see cref="DataLoaderOptions{TKey, TValue}"/> class.
+        /// <see cref="DataLoaderOptions{TKey}"/> class.
         /// </summary>
         /// <param name="cacheKeyResolver"></param>
-        public DataLoaderOptions(Func<TValue, TKey> cacheKeyResolver)
+        public DataLoaderOptions()
         {
             BatchRequestDelay = TimeSpan.Zero;
-            CacheKeyResolver = cacheKeyResolver ??
-                throw new ArgumentNullException(nameof(cacheKeyResolver));
+            CacheSize = 1000;
             SlidingExpiration = TimeSpan.Zero;
         }
 
@@ -32,7 +30,9 @@ namespace GreenDonut
         /// </summary>
         public TimeSpan BatchRequestDelay { get; set; }
 
-        public Func<TValue, TKey> CacheKeyResolver { get; private set; }
+        public Func<TKey, TKey> CacheKeyResolver { get; private set; }
+
+        public int CacheSize { get; set; }
 
         public bool DisableBatching { get; set; }
 
