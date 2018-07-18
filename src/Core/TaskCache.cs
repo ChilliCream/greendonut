@@ -1,49 +1,47 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GreenDonut
 {
-    public class TaskCache<TKey, TValue>
+    internal class TaskCache<TKey, TValue>
         : IDisposable
     {
-        private readonly object _sync = new object();
+        private ImmutableDictionary<TKey, CacheEntry> _cache =
+            ImmutableDictionary<TKey, CacheEntry>.Empty;
+        private CancellationTokenSource _dispose;
         private bool _disposed;
-        private Dictionary<TKey, TaskCacheItem<TKey, TValue>> _map;
-        private TimeSpan _slidingExpiration;
+        private Task _expiredEntryDetectionCycle;
+        private LinkedListNode<TKey> _first;
+        private readonly LinkedList<TKey> _ranking = new LinkedList<TKey>();
+        private readonly object _sync = new object();
 
-        public TaskCache(TimeSpan slidingExpiration)
+        public TaskCache(int size, TimeSpan slidingExpiration)
         {
-            _slidingExpiration = slidingExpiration;
-            _map = new Dictionary<TKey, TaskCacheItem<TKey, TValue>>();
+            Size = (size < 10) ? 10 : size;
+            SlidingExpirartion = slidingExpiration;
+
+            StartExpiredEntryDetectionCycle();
         }
+
+        public int Size { get; }
+
+        public TimeSpan SlidingExpirartion { get; }
+
+        public int Usage => _cache.Count;
 
         public void Clear()
         {
-            Dictionary<TKey, TaskCacheItem<TKey, TValue>> oldMap;
-
-            if (_map.Count > 0)
-            {
-                lock (_sync)
+            _sync.Lock(
+                () => _cache.Count > 0,
+                () =>
                 {
-                    if (_map.Count > 0)
-                    {
-                        oldMap = _map;
-                        _map = new Dictionary<TKey, TaskCacheItem<TKey,
-                            TValue>>();
-
-                        Task.Run(() =>
-                        {
-                            foreach (TKey key in oldMap.Keys)
-                            {
-                                oldMap[key].Dispose();
-                            }
-
-                            oldMap.Clear();
-                        });
-                    }
-                }
-            }
+                    _ranking.Clear();
+                    _cache = _cache.Clear();
+                    _first = null;
+                });
         }
 
         public Task<Result<TValue>> Get(TKey key)
@@ -53,10 +51,12 @@ namespace GreenDonut
                 throw new ArgumentNullException(nameof(key));
             }
 
-            return (_map.TryGetValue(key,
-                    out TaskCacheItem<TKey, TValue> item))
-                ? item.Value
-                : default;
+            if (_cache.TryGetValue(key, out CacheEntry entry))
+            {
+                TouchEntry(entry);
+            }
+
+            return entry?.Value;
         }
 
         public void Remove(TKey key)
@@ -66,20 +66,14 @@ namespace GreenDonut
                 throw new ArgumentNullException(nameof(key));
             }
 
-            if (_map.ContainsKey(key))
-            {
-                lock (_sync)
+            _sync.Lock(
+                () => _cache.ContainsKey(key),
+                () =>
                 {
-                    if (_map.ContainsKey(key))
-                    {
-                        var newMap = new Dictionary<TKey, TaskCacheItem<TKey,
-                            TValue>>(_map);
-
-                        newMap.Remove(key);
-                        _map = newMap;
-                    }
-                }
-            }
+                    _ranking.Remove(_cache[key].Rank);
+                    _cache.Remove(key);
+                    _first = _ranking.First;
+                });
         }
 
         public void Set(TKey key, Task<Result<TValue>> value)
@@ -94,22 +88,88 @@ namespace GreenDonut
                 throw new ArgumentNullException(nameof(value));
             }
 
-            if (!_map.ContainsKey(key))
-            {
-                lock (_sync)
+            _sync.Lock(
+                () => !_cache.ContainsKey(key),
+                () =>
                 {
-                    if (!_map.ContainsKey(key))
-                    {
-                        var newMap = new Dictionary<TKey, TaskCacheItem<TKey,
-                            TValue>>(_map);
-                        var item = new TaskCacheItem<TKey, TValue>(this, key,
-                            value, _slidingExpiration);
+                    CacheEntry entry = new CacheEntry(key, value);
 
-                        newMap.Add(key, item);
-                        _map = newMap;
-                    }
-                }
+                    ClearSpaceForNewEntry();
+                    _ranking.AddFirst(entry.Rank);
+                    _cache = _cache.SetItem(entry.Key, entry);
+                    _first = entry.Rank;
+                });
+        }
+
+        private void TouchEntry(CacheEntry entry)
+        {
+            _sync.Lock(
+                () => _first != entry.Rank,
+                () =>
+                {
+                    entry.LastTouched = DateTimeOffset.UtcNow;
+                    _ranking.Remove(entry.Rank);
+                    _ranking.AddFirst(entry.Rank);
+                    _first = entry.Rank;
+                });
+        }
+
+        private void ClearSpaceForNewEntry()
+        {
+            if (_cache.Count >= Size)
+            {
+                LinkedListNode<TKey> entry = _ranking.Last;
+
+                _cache = _cache.Remove(entry.Value);
+                _ranking.Remove(entry);
             }
+        }
+
+        private void StartExpiredEntryDetectionCycle()
+        {
+            if (SlidingExpirartion > TimeSpan.Zero)
+            {
+                _dispose = new CancellationTokenSource();
+                _expiredEntryDetectionCycle = Task.Run(async () =>
+                {
+                    while (!_dispose.Token.IsCancellationRequested)
+                    {
+                        DateTimeOffset removeAfter = DateTimeOffset.UtcNow
+                            .Subtract(SlidingExpirartion);
+
+                        if (_ranking.Last != null &&
+                            _cache.TryGetValue(_ranking.Last.Value,
+                                out CacheEntry entry) &&
+                            removeAfter > entry.LastTouched)
+                        {
+                            Remove(entry.Key);
+                        }
+                        else
+                        {
+                            await Task.Delay(10).ConfigureAwait(false);
+                        }
+                    }
+                });
+            }
+        }
+
+        private class CacheEntry
+        {
+            public CacheEntry(TKey key, Task<Result<TValue>> value)
+            {
+                Key = key;
+                LastTouched = DateTimeOffset.UtcNow;
+                Rank = new LinkedListNode<TKey>(key);
+                Value = value;
+            }
+
+            public TKey Key { get; }
+
+            public DateTimeOffset LastTouched { get; set; }
+
+            public LinkedListNode<TKey> Rank { get; }
+
+            public Task<Result<TValue>> Value { get; }
         }
 
         #region IDisposable
@@ -126,9 +186,10 @@ namespace GreenDonut
                 if (disposing)
                 {
                     Clear();
+                    _dispose?.Cancel();
+                    _expiredEntryDetectionCycle?.Dispose();
+                    _dispose?.Dispose();
                 }
-
-                _map = null;
 
                 _disposed = true;
             }
