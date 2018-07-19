@@ -8,7 +8,7 @@ namespace GreenDonut
     {
         #region Constructor
 
-        [Fact(DisplayName = "Constructor: Should not throw an argument null exception for fetch")]
+        [Fact(DisplayName = "Constructor: Should throw an argument null exception for fetch")]
         public void ConstructorFetchNull()
         {
             // arrange
@@ -20,7 +20,7 @@ namespace GreenDonut
                 fetch);
 
             // assert
-            Assert.Null(Record.Exception(verify));
+            Assert.Throws<ArgumentNullException>("fetch", verify);
         }
 
         [Fact(DisplayName = "Constructor: Should throw an argument null exception for options")]
@@ -28,7 +28,8 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0]);
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
             DataLoaderOptions<string> options = null;
 
             // act
@@ -44,7 +45,8 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0]);
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
 
             // act
@@ -64,7 +66,8 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0]);
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             string key = null;
@@ -78,11 +81,12 @@ namespace GreenDonut
         }
 
         [Fact(DisplayName = "Set: Should throw an argument null exception for value")]
-        public void ConstructorValueNull()
+        public void SetValueNull()
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0]);
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             var key = "Foo";
@@ -100,7 +104,8 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0]);
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             var key = "Foo";
@@ -111,6 +116,29 @@ namespace GreenDonut
 
             // assert
             Assert.Null(Record.Exception(verify));
+        }
+
+        [Fact(DisplayName = "Set: Should result in a new cache entry")]
+        public async Task SetNewCacheEntry()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>();
+            var loader = new DataLoader<string, string>(options, fetch);
+            var key = "Foo";
+            var value = Task.FromResult(Result<string>.Resolve("Bar"));
+
+            // act
+            loader.Set(key, value);
+
+            // assert
+            Result<string> result = await loader.LoadAsync(key)
+                .ConfigureAwait(false);
+
+            Assert.NotNull(result);
+            Assert.Equal(result.Value, value.Result.Value);
         }
 
         #endregion

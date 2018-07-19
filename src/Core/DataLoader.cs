@@ -14,6 +14,9 @@ namespace GreenDonut
     /// caution when used in long-lived applications or those which serve many
     /// users with different access permissions and consider creating a new
     /// instance per web request. -- facebook
+    ///
+    /// A default <c>DataLoader</c> implementation which supports automatic and
+    /// manual batch dispatching.
     /// </summary>
     /// <typeparam name="TKey">A key type</typeparam>
     /// <typeparam name="TValue">A value type</typeparam>
@@ -26,49 +29,20 @@ namespace GreenDonut
         /// Initializes a new instance of the
         /// <see cref="DataLoader{TKey, TValue}"/> class.
         /// </summary>
-        /// <remarks>
-        /// When using this ctor the <see cref="Fetch(IReadOnlyList{TKey})"/>
-        /// has to be overwritten.
-        /// </remarks>
-        /// <param name="options">
-        /// An options object to configure the behavior of this particular
-        /// <see cref="DataLoader{TKey, TValue}"/>.
-        /// </param>
-        public DataLoader(DataLoaderOptions<TKey> options)
-            : this(options, null)
-        { }
-
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="DataLoader{TKey, TValue}"/> class.
-        /// </summary>
         /// <param name="options">
         /// An options object to configure the behavior of this particular
         /// <see cref="DataLoader{TKey, TValue}"/>.
         /// </param>
         /// <param name="fetch">
-        /// An optional delegate to fetch data batches which will be invoked
-        /// every time when trying to setup a new batch request.
+        /// A delegate to fetch data batches which will be invoked every time
+        /// when trying to setup a new batch request.
         /// </param>
         public DataLoader(
             DataLoaderOptions<TKey> options,
             FetchDataDelegate<TKey, TValue> fetch)
                 : base(options)
         {
-            _fetch = fetch;
-
-            StartAsyncBackgroundDispatching();
-        }
-
-        /// <summary>
-        /// Dispatches one or more batch requests.
-        /// </summary>
-        public async Task DispatchAsync()
-        {
-            if (!Options.AutoDispatching)
-            {
-                await DispatchBatchAsync().ConfigureAwait(false);
-            }
+            _fetch = fetch ?? throw new ArgumentNullException(nameof(fetch));
         }
 
         /// <inheritdoc />

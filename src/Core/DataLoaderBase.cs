@@ -17,7 +17,7 @@ namespace GreenDonut
     /// users with different access permissions and consider creating a new
     /// instance per web request. -- facebook
     ///
-    /// This is an abstraction for <c>DataLoaders</c>.
+    /// This is an abstraction for all kind of <c>DataLoaders</c>.
     /// </summary>
     /// <typeparam name="TKey">A key type</typeparam>
     /// <typeparam name="TValue">A value type</typeparam>
@@ -31,6 +31,7 @@ namespace GreenDonut
         private TaskCompletionBuffer<TKey, TValue> _buffer;
         private TaskCache<TKey, TValue> _cache;
         private readonly Func<TKey, TKey> _cacheKeyResolver;
+        private DataLoaderOptions<TKey> _options;
         private CancellationTokenSource _stopBatching;
 
         /// <summary>
@@ -41,18 +42,40 @@ namespace GreenDonut
         /// options.</param>
         protected DataLoaderBase(DataLoaderOptions<TKey> options)
         {
-            Options = options ??
+            _options = options ??
                 throw new ArgumentNullException(nameof(options));
             _buffer = new TaskCompletionBuffer<TKey, TValue>();
             _cache = new TaskCache<TKey, TValue>(
-                Options.CacheSize,
-                Options.SlidingExpiration);
-            _cacheKeyResolver = (Options.CacheKeyResolver == null)
+                _options.CacheSize,
+                _options.SlidingExpiration);
+            _cacheKeyResolver = (_options.CacheKeyResolver == null)
                 ? (TKey key) => key
-                : Options.CacheKeyResolver;
+                : _options.CacheKeyResolver;
+
+            StartAsyncBackgroundDispatching();
         }
 
-        protected DataLoaderOptions<TKey> Options { get; }
+        /// <summary>
+        /// Empties the complete cache.
+        /// </summary>
+        /// <returns>Itself for chaining support.</returns>
+        public IDataLoader<TKey, TValue> Clear()
+        {
+            _cache.Clear();
+
+            return this;
+        }
+
+        /// <summary>
+        /// Dispatches one or more batch requests.
+        /// </summary>
+        public async Task DispatchAsync()
+        {
+            if (!_options.AutoDispatching && _options.Batching)
+            {
+                await DispatchBatchAsync().ConfigureAwait(false);
+            }
+        }
 
         /// <summary>
         /// Gets a delegate used for data fetching. The results will be stored
@@ -61,13 +84,6 @@ namespace GreenDonut
         /// </summary>
         protected abstract Task<IReadOnlyList<Result<TValue>>> Fetch(
             IReadOnlyList<TKey> keys);
-
-        public IDataLoader<TKey, TValue> Clear()
-        {
-            _cache.Clear();
-
-            return this;
-        }
 
         public Task<Result<TValue>> LoadAsync(TKey key)
         {
@@ -78,7 +94,7 @@ namespace GreenDonut
 
             TKey resolvedKey = _cacheKeyResolver(key);
 
-            if (Options.Caching)
+            if (_options.Caching)
             {
                 Task<Result<TValue>> cachedValue = _cache.Get(resolvedKey);
 
@@ -90,7 +106,7 @@ namespace GreenDonut
 
             var promise = new TaskCompletionSource<Result<TValue>>();
 
-            if (Options.Batching)
+            if (_options.Batching)
             {
                 _buffer.TryAdd(resolvedKey, promise);
             }
@@ -100,7 +116,7 @@ namespace GreenDonut
                 Task.Run(() => DispatchAsync(resolvedKey, promise));
             }
 
-            if (Options.Caching)
+            if (_options.Caching)
             {
                 _cache.Set(resolvedKey, promise.Task);
             }
@@ -122,9 +138,15 @@ namespace GreenDonut
                     "There must be at least one key");
             }
 
-            return await Task.WhenAll(keys.Select(LoadAsync));
+            return await Task.WhenAll(keys.Select(LoadAsync))
+                .ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Removes a single entry from the cache.
+        /// </summary>
+        /// <param name="key">A cache entry key.</param>
+        /// <returns>Itself for chaining support.</returns>
         public IDataLoader<TKey, TValue> Remove(TKey key)
         {
             if (key == null)
@@ -139,6 +161,12 @@ namespace GreenDonut
             return this;
         }
 
+        /// <summary>
+        /// Adds a new entry to the cache if not already exists.
+        /// </summary>
+        /// <param name="key">A cache entry key.</param>
+        /// <param name="value">A cache entry value.</param>
+        /// <returns>Itself for chaining support.</returns>
         public IDataLoader<TKey, TValue> Set(
             TKey key,
             Task<Result<TValue>> value)
@@ -183,48 +211,42 @@ namespace GreenDonut
             promise.SetResult(values.First());
         }
 
-        /// <summary>
-        /// Dispatches one or more batch requests.
-        /// </summary>
-        protected async Task DispatchBatchAsync()
+        private Task DispatchBatchAsync()
         {
-            if (Options.Batching)
-            {
-                await _sync.Lock(
-                    () => !_buffer.IsEmpty,
-                    async () =>
+            return _sync.Lock(
+                () => !_buffer.IsEmpty,
+                async () =>
+                {
+                    TaskCompletionBuffer<TKey, TValue> copy =
+                        CopyAndClearBuffer();
+                    TKey[] resolvedKeys = copy.Keys.ToArray();
+
+                    if (_options.MaxBatchSize > 0 &&
+                        copy.Count > _options.MaxBatchSize)
                     {
-                        TaskCompletionBuffer<TKey, TValue> copy =
-                            CopyAndClearBuffer();
-                        TKey[] resolvedKeys = copy.Keys.ToArray();
+                        int count = (int)Math.Ceiling(
+                            (decimal)copy.Count / _options.MaxBatchSize);
 
-                        if (Options.MaxBatchSize > 0 &&
-                            copy.Count > Options.MaxBatchSize)
+                        for (int i = 0; i < count; i++)
                         {
-                            int count = (int)Math.Ceiling(
-                                (decimal)copy.Count / Options.MaxBatchSize);
-
-                            for (int i = 0; i < count; i++)
-                            {
-                                TKey[] keysBatch = resolvedKeys
-                                    .Skip(i * Options.MaxBatchSize)
-                                    .Take(Options.MaxBatchSize)
-                                    .ToArray();
-                                IReadOnlyList<Result<TValue>> values =
-                                    await Fetch(keysBatch).ConfigureAwait(false);
-
-                                SetBatchResults(copy, keysBatch, values);
-                            }
-                        }
-                        else
-                        {
+                            TKey[] keysBatch = resolvedKeys
+                                .Skip(i * _options.MaxBatchSize)
+                                .Take(_options.MaxBatchSize)
+                                .ToArray();
                             IReadOnlyList<Result<TValue>> values =
-                                await Fetch(resolvedKeys).ConfigureAwait(false);
+                                await Fetch(keysBatch).ConfigureAwait(false);
 
-                            SetBatchResults(copy, resolvedKeys, values);
+                            SetBatchResults(copy, keysBatch, values);
                         }
-                    });
-            }
+                    }
+                    else
+                    {
+                        IReadOnlyList<Result<TValue>> values =
+                            await Fetch(resolvedKeys).ConfigureAwait(false);
+
+                        SetBatchResults(copy, resolvedKeys, values);
+                    }
+                });
         }
 
         private void SetBatchResults(
@@ -238,14 +260,9 @@ namespace GreenDonut
             }
         }
 
-        /// <summary>
-        /// Starts automatic dispatching in a background thread which one by
-        /// one invokes batch requests. Invoke this method on initializtion if
-        /// you do not want to trigger dispatching manually.
-        /// </summary>
-        protected void StartAsyncBackgroundDispatching()
+        private void StartAsyncBackgroundDispatching()
         {
-            if (Options.AutoDispatching && Options.Batching)
+            if (_options.AutoDispatching && _options.Batching)
             {
                 _sync.Lock(
                     () => _batchDispatcher == null,
@@ -256,10 +273,10 @@ namespace GreenDonut
                         {
                             while (!_stopBatching.IsCancellationRequested)
                             {
-                                if (Options.BatchRequestDelay > TimeSpan.Zero ||
+                                if (_options.BatchRequestDelay > TimeSpan.Zero ||
                                     _buffer.Count == 0)
                                 {
-                                    await Task.Delay(Options.BatchRequestDelay)
+                                    await Task.Delay(_options.BatchRequestDelay)
                                         .ConfigureAwait(false);
                                 }
                                 else
@@ -296,6 +313,7 @@ namespace GreenDonut
                 _batchDispatcher = null;
                 _buffer = null;
                 _cache = null;
+                _options = null;
                 _stopBatching = null;
 
                 _disposed = true;
