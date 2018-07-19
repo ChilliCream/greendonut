@@ -17,7 +17,7 @@ namespace GreenDonut
     /// users with different access permissions and consider creating a new
     /// instance per web request. -- facebook
     ///
-    /// This is an abstraction for <c>DataLoaders</c>.
+    /// This is an abstraction for all kind of <c>DataLoaders</c>.
     /// </summary>
     /// <typeparam name="TKey">A key type</typeparam>
     /// <typeparam name="TValue">A value type</typeparam>
@@ -51,6 +51,30 @@ namespace GreenDonut
             _cacheKeyResolver = (_options.CacheKeyResolver == null)
                 ? (TKey key) => key
                 : _options.CacheKeyResolver;
+
+            StartAsyncBackgroundDispatching();
+        }
+
+        /// <summary>
+        /// Empties the complete cache.
+        /// </summary>
+        /// <returns>Itself for chaining support.</returns>
+        public IDataLoader<TKey, TValue> Clear()
+        {
+            _cache.Clear();
+
+            return this;
+        }
+
+        /// <summary>
+        /// Dispatches one or more batch requests.
+        /// </summary>
+        public async Task DispatchAsync()
+        {
+            if (!_options.AutoDispatching && _options.Batching)
+            {
+                await DispatchBatchAsync().ConfigureAwait(false);
+            }
         }
 
         /// <summary>
@@ -61,13 +85,6 @@ namespace GreenDonut
         protected abstract Task<IReadOnlyList<Result<TValue>>> Fetch(
             IReadOnlyList<TKey> keys);
 
-        public IDataLoader<TKey, TValue> Clear()
-        {
-            _cache.Clear();
-
-            return this;
-        }
-
         public Task<Result<TValue>> LoadAsync(TKey key)
         {
             if (key == null)
@@ -77,7 +94,7 @@ namespace GreenDonut
 
             TKey resolvedKey = _cacheKeyResolver(key);
 
-            if (!_options.DisableCaching)
+            if (_options.Caching)
             {
                 Task<Result<TValue>> cachedValue = _cache.Get(resolvedKey);
 
@@ -89,17 +106,17 @@ namespace GreenDonut
 
             var promise = new TaskCompletionSource<Result<TValue>>();
 
-            if (_options.DisableBatching)
+            if (_options.Batching)
+            {
+                _buffer.TryAdd(resolvedKey, promise);
+            }
+            else
             {
                 // note: must run in the background; do not await here.
                 Task.Run(() => DispatchAsync(resolvedKey, promise));
             }
-            else
-            {
-                _buffer.TryAdd(resolvedKey, promise);
-            }
 
-            if (!_options.DisableCaching)
+            if (_options.Caching)
             {
                 _cache.Set(resolvedKey, promise.Task);
             }
@@ -121,9 +138,15 @@ namespace GreenDonut
                     "There must be at least one key");
             }
 
-            return await Task.WhenAll(keys.Select(LoadAsync));
+            return await Task.WhenAll(keys.Select(LoadAsync))
+                .ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Removes a single entry from the cache.
+        /// </summary>
+        /// <param name="key">A cache entry key.</param>
+        /// <returns>Itself for chaining support.</returns>
         public IDataLoader<TKey, TValue> Remove(TKey key)
         {
             if (key == null)
@@ -138,6 +161,12 @@ namespace GreenDonut
             return this;
         }
 
+        /// <summary>
+        /// Adds a new entry to the cache if not already exists.
+        /// </summary>
+        /// <param name="key">A cache entry key.</param>
+        /// <param name="value">A cache entry value.</param>
+        /// <returns>Itself for chaining support.</returns>
         public IDataLoader<TKey, TValue> Set(
             TKey key,
             Task<Result<TValue>> value)
@@ -182,10 +211,7 @@ namespace GreenDonut
             promise.SetResult(values.First());
         }
 
-        /// <summary>
-        /// Dispatches one or more batch requests.
-        /// </summary>
-        protected Task DispatchBatchAsync()
+        private Task DispatchBatchAsync()
         {
             return _sync.Lock(
                 () => !_buffer.IsEmpty,
@@ -234,36 +260,34 @@ namespace GreenDonut
             }
         }
 
-        /// <summary>
-        /// Starts automatic dispatching in a background thread which one by
-        /// one invokes batch requests. Invoke this method on initializtion if
-        /// you do not want to trigger dispatching manually.
-        /// </summary>
-        protected void StartAsyncBatchDispatching()
+        private void StartAsyncBackgroundDispatching()
         {
-            _sync.Lock(
-                () => !_options.DisableBatching && _batchDispatcher == null,
-                () =>
-                {
-                    _stopBatching = new CancellationTokenSource();
-                    _batchDispatcher = Task.Run(async () =>
+            if (_options.AutoDispatching && _options.Batching)
+            {
+                _sync.Lock(
+                    () => _batchDispatcher == null,
+                    () =>
                     {
-                        while (!_stopBatching.IsCancellationRequested)
+                        _stopBatching = new CancellationTokenSource();
+                        _batchDispatcher = Task.Run(async () =>
                         {
-                            if (_options.BatchRequestDelay > TimeSpan.Zero ||
-                                _buffer.Count == 0)
+                            while (!_stopBatching.IsCancellationRequested)
                             {
-                                await Task.Delay(_options.BatchRequestDelay)
-                                    .ConfigureAwait(false);
+                                if (_options.BatchRequestDelay > TimeSpan.Zero ||
+                                    _buffer.Count == 0)
+                                {
+                                    await Task.Delay(_options.BatchRequestDelay)
+                                        .ConfigureAwait(false);
+                                }
+                                else
+                                {
+                                    await DispatchBatchAsync()
+                                        .ConfigureAwait(false);
+                                }
                             }
-                            else
-                            {
-                                await DispatchBatchAsync()
-                                    .ConfigureAwait(false);
-                            }
-                        }
+                        });
                     });
-                });
+            }
         }
 
         #region IDisposable

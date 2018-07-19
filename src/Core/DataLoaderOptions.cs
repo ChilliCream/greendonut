@@ -15,28 +15,31 @@ namespace GreenDonut
         /// <param name="cacheKeyResolver"></param>
         public DataLoaderOptions()
         {
+            Batching = true;
             BatchRequestDelay = TimeSpan.Zero;
             CacheSize = 1000;
+            Caching = true;
             SlidingExpiration = TimeSpan.Zero;
         }
+
+        public bool AutoDispatching { get; set; }
+
+        public bool Batching { get; set; }
 
         /// <summary>
         /// Gets or sets the time period to wait if the
         /// <see cref="TaskCompletionBuffer{TKey, TValue}"/> is empty before
         /// trying to setup another batch request. This property takes only
-        /// effect if <see cref="DisableBatching"/> is set to <c>false</c>.
-        /// The default is <see cref="TimeSpan.Zero"/> which means no delay at
-        /// all.
+        /// effect if <see cref="Batching"/> is set to <c>true</c>. The default
+        /// is <see cref="TimeSpan.Zero"/> which means no delay at all.
         /// </summary>
         public TimeSpan BatchRequestDelay { get; set; }
 
-        public Func<TKey, TKey> CacheKeyResolver { get; private set; }
+        public Func<TKey, TKey> CacheKeyResolver { get; set; }
 
         public int CacheSize { get; set; }
 
-        public bool DisableBatching { get; set; }
-
-        public bool DisableCaching { get; set; }
+        public bool Caching { get; set; }
 
         public int MaxBatchSize { get; set; }
 

@@ -15,13 +15,12 @@ namespace GreenDonut
     /// users with different access permissions and consider creating a new
     /// instance per web request. -- facebook
     ///
-    /// This <see cref="DataLoader{TKey, TValue}"/> in specific runs a single
-    /// background thread which one by one fires batch requests if the buffer
-    /// is filled.
+    /// A default <c>DataLoader</c> implementation which supports automatic and
+    /// manual batch dispatching.
     /// </summary>
     /// <typeparam name="TKey">A key type</typeparam>
     /// <typeparam name="TValue">A value type</typeparam>
-    public class DataLoader<TKey, TValue>
+    public sealed class DataLoader<TKey, TValue>
         : DataLoaderBase<TKey, TValue>
     {
         private readonly FetchDataDelegate<TKey, TValue> _fetch;
@@ -30,22 +29,20 @@ namespace GreenDonut
         /// Initializes a new instance of the
         /// <see cref="DataLoader{TKey, TValue}"/> class.
         /// </summary>
-        /// <param name="fetch">
-        /// A delegate to fetch data batches which will be invoked every time
-        /// when trying to setup a new batch request.
-        /// </param>
         /// <param name="options">
         /// An options object to configure the behavior of this particular
         /// <see cref="DataLoader{TKey, TValue}"/>.
         /// </param>
+        /// <param name="fetch">
+        /// A delegate to fetch data batches which will be invoked every time
+        /// when trying to setup a new batch request.
+        /// </param>
         public DataLoader(
-            FetchDataDelegate<TKey, TValue> fetch,
-            DataLoaderOptions<TKey> options)
+            DataLoaderOptions<TKey> options,
+            FetchDataDelegate<TKey, TValue> fetch)
                 : base(options)
         {
             _fetch = fetch ?? throw new ArgumentNullException(nameof(fetch));
-
-            StartAsyncBatchDispatching();
         }
 
         /// <inheritdoc />
