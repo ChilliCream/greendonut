@@ -20,7 +20,7 @@ namespace GreenDonut
     /// </summary>
     /// <typeparam name="TKey">A key type</typeparam>
     /// <typeparam name="TValue">A value type</typeparam>
-    public class DataLoader<TKey, TValue>
+    public sealed class DataLoader<TKey, TValue>
         : DataLoaderBase<TKey, TValue>
     {
         private readonly FetchDataDelegate<TKey, TValue> _fetch;

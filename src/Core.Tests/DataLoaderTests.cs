@@ -141,6 +141,31 @@ namespace GreenDonut
             Assert.Equal(result.Value, value.Result.Value);
         }
 
+        [Fact(DisplayName = "Set: Should result in 'Bar'")]
+        public async Task SetTwice()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>();
+            var loader = new DataLoader<string, string>(options, fetch);
+            var key = "Foo";
+            var first = Task.FromResult(Result<string>.Resolve("Bar"));
+            var second = Task.FromResult(Result<string>.Resolve("Baz"));
+
+            // act
+            loader.Set(key, first);
+            loader.Set(key, second);
+
+            // assert
+            Result<string> result = await loader.LoadAsync(key)
+                .ConfigureAwait(false);
+
+            Assert.NotNull(result);
+            Assert.Equal(result.Value, first.Result.Value);
+        }
+
         #endregion
     }
 }
