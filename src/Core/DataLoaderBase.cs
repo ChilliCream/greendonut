@@ -31,7 +31,6 @@ namespace GreenDonut
         private TaskCompletionBuffer<TKey, TValue> _buffer;
         private TaskCache<TKey, TValue> _cache;
         private readonly Func<TKey, TKey> _cacheKeyResolver;
-        private DataLoaderOptions<TKey> _options;
         private CancellationTokenSource _stopBatching;
 
         /// <summary>
@@ -42,16 +41,18 @@ namespace GreenDonut
         /// options.</param>
         protected DataLoaderBase(DataLoaderOptions<TKey> options)
         {
-            _options = options ??
+            Options = options ??
                 throw new ArgumentNullException(nameof(options));
             _buffer = new TaskCompletionBuffer<TKey, TValue>();
             _cache = new TaskCache<TKey, TValue>(
-                _options.CacheSize,
-                _options.SlidingExpiration);
-            _cacheKeyResolver = (_options.CacheKeyResolver == null)
+                Options.CacheSize,
+                Options.SlidingExpiration);
+            _cacheKeyResolver = (Options.CacheKeyResolver == null)
                 ? (TKey key) => key
-                : _options.CacheKeyResolver;
+                : Options.CacheKeyResolver;
         }
+
+        protected DataLoaderOptions<TKey> Options { get; }
 
         /// <summary>
         /// Gets a delegate used for data fetching. The results will be stored
@@ -77,7 +78,7 @@ namespace GreenDonut
 
             TKey resolvedKey = _cacheKeyResolver(key);
 
-            if (!_options.DisableCaching)
+            if (Options.Caching)
             {
                 Task<Result<TValue>> cachedValue = _cache.Get(resolvedKey);
 
@@ -89,17 +90,17 @@ namespace GreenDonut
 
             var promise = new TaskCompletionSource<Result<TValue>>();
 
-            if (_options.DisableBatching)
+            if (Options.Batching)
+            {
+                _buffer.TryAdd(resolvedKey, promise);
+            }
+            else
             {
                 // note: must run in the background; do not await here.
                 Task.Run(() => DispatchAsync(resolvedKey, promise));
             }
-            else
-            {
-                _buffer.TryAdd(resolvedKey, promise);
-            }
 
-            if (!_options.DisableCaching)
+            if (Options.Caching)
             {
                 _cache.Set(resolvedKey, promise.Task);
             }
@@ -185,42 +186,45 @@ namespace GreenDonut
         /// <summary>
         /// Dispatches one or more batch requests.
         /// </summary>
-        protected Task DispatchBatchAsync()
+        protected async Task DispatchBatchAsync()
         {
-            return _sync.Lock(
-                () => !_buffer.IsEmpty,
-                async () =>
-                {
-                    TaskCompletionBuffer<TKey, TValue> copy =
-                        CopyAndClearBuffer();
-                    TKey[] resolvedKeys = copy.Keys.ToArray();
-
-                    if (_options.MaxBatchSize > 0 &&
-                        copy.Count > _options.MaxBatchSize)
+            if (Options.Batching)
+            {
+                await _sync.Lock(
+                    () => !_buffer.IsEmpty,
+                    async () =>
                     {
-                        int count = (int)Math.Ceiling(
-                            (decimal)copy.Count / _options.MaxBatchSize);
+                        TaskCompletionBuffer<TKey, TValue> copy =
+                            CopyAndClearBuffer();
+                        TKey[] resolvedKeys = copy.Keys.ToArray();
 
-                        for (int i = 0; i < count; i++)
+                        if (Options.MaxBatchSize > 0 &&
+                            copy.Count > Options.MaxBatchSize)
                         {
-                            TKey[] keysBatch = resolvedKeys
-                                .Skip(i * _options.MaxBatchSize)
-                                .Take(_options.MaxBatchSize)
-                                .ToArray();
-                            IReadOnlyList<Result<TValue>> values =
-                                await Fetch(keysBatch).ConfigureAwait(false);
+                            int count = (int)Math.Ceiling(
+                                (decimal)copy.Count / Options.MaxBatchSize);
 
-                            SetBatchResults(copy, keysBatch, values);
+                            for (int i = 0; i < count; i++)
+                            {
+                                TKey[] keysBatch = resolvedKeys
+                                    .Skip(i * Options.MaxBatchSize)
+                                    .Take(Options.MaxBatchSize)
+                                    .ToArray();
+                                IReadOnlyList<Result<TValue>> values =
+                                    await Fetch(keysBatch).ConfigureAwait(false);
+
+                                SetBatchResults(copy, keysBatch, values);
+                            }
                         }
-                    }
-                    else
-                    {
-                        IReadOnlyList<Result<TValue>> values =
-                            await Fetch(resolvedKeys).ConfigureAwait(false);
+                        else
+                        {
+                            IReadOnlyList<Result<TValue>> values =
+                                await Fetch(resolvedKeys).ConfigureAwait(false);
 
-                        SetBatchResults(copy, resolvedKeys, values);
-                    }
-                });
+                            SetBatchResults(copy, resolvedKeys, values);
+                        }
+                    });
+            }
         }
 
         private void SetBatchResults(
@@ -239,31 +243,34 @@ namespace GreenDonut
         /// one invokes batch requests. Invoke this method on initializtion if
         /// you do not want to trigger dispatching manually.
         /// </summary>
-        protected void StartAsyncBatchDispatching()
+        protected void StartAsyncBackgroundDispatching()
         {
-            _sync.Lock(
-                () => !_options.DisableBatching && _batchDispatcher == null,
-                () =>
-                {
-                    _stopBatching = new CancellationTokenSource();
-                    _batchDispatcher = Task.Run(async () =>
+            if (Options.AutoDispatching && Options.Batching)
+            {
+                _sync.Lock(
+                    () => _batchDispatcher == null,
+                    () =>
                     {
-                        while (!_stopBatching.IsCancellationRequested)
+                        _stopBatching = new CancellationTokenSource();
+                        _batchDispatcher = Task.Run(async () =>
                         {
-                            if (_options.BatchRequestDelay > TimeSpan.Zero ||
-                                _buffer.Count == 0)
+                            while (!_stopBatching.IsCancellationRequested)
                             {
-                                await Task.Delay(_options.BatchRequestDelay)
-                                    .ConfigureAwait(false);
+                                if (Options.BatchRequestDelay > TimeSpan.Zero ||
+                                    _buffer.Count == 0)
+                                {
+                                    await Task.Delay(Options.BatchRequestDelay)
+                                        .ConfigureAwait(false);
+                                }
+                                else
+                                {
+                                    await DispatchBatchAsync()
+                                        .ConfigureAwait(false);
+                                }
                             }
-                            else
-                            {
-                                await DispatchBatchAsync()
-                                    .ConfigureAwait(false);
-                            }
-                        }
+                        });
                     });
-                });
+            }
         }
 
         #region IDisposable
@@ -289,7 +296,6 @@ namespace GreenDonut
                 _batchDispatcher = null;
                 _buffer = null;
                 _cache = null;
-                _options = null;
                 _stopBatching = null;
 
                 _disposed = true;

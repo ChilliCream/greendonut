@@ -8,7 +8,7 @@ namespace GreenDonut
     {
         #region Constructor
 
-        [Fact(DisplayName = "Constructor: Should throw an argument null exception for fetch")]
+        [Fact(DisplayName = "Constructor: Should not throw an argument null exception for fetch")]
         public void ConstructorFetchNull()
         {
             // arrange
@@ -16,24 +16,24 @@ namespace GreenDonut
             var options = new DataLoaderOptions<string>();
 
             // act
-            Action verify = () => new DataLoader<string, string>(fetch,
-                options);
+            Action verify = () => new DataLoader<string, string>(options,
+                fetch);
 
             // assert
-            Assert.Throws<ArgumentNullException>("fetch", verify);
+            Assert.Null(Record.Exception(verify));
         }
 
         [Fact(DisplayName = "Constructor: Should throw an argument null exception for options")]
         public void ConstructorOptionsNull()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch =
-                async keys => await Task.FromResult(new Result<string>[0]);
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0]);
             DataLoaderOptions<string> options = null;
 
             // act
-            Action verify = () => new DataLoader<string, string>(fetch,
-                options);
+            Action verify = () => new DataLoader<string, string>(options,
+                fetch);
 
             // assert
             Assert.Throws<ArgumentNullException>("options", verify);
@@ -43,13 +43,13 @@ namespace GreenDonut
         public void ConstructorNoException()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch =
-                async keys => await Task.FromResult(new Result<string>[0]);
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0]);
             var options = new DataLoaderOptions<string>();
 
             // act
-            Action verify = () => new DataLoader<string, string>(fetch,
-                options);
+            Action verify = () => new DataLoader<string, string>(options,
+                fetch);
 
             // assert
             Assert.Null(Record.Exception(verify));
@@ -63,10 +63,10 @@ namespace GreenDonut
         public void SetKeyNull()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch =
-                async keys => await Task.FromResult(new Result<string>[0]);
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0]);
             var options = new DataLoaderOptions<string>();
-            var loader = new DataLoader<string, string>(fetch, options);
+            var loader = new DataLoader<string, string>(options, fetch);
             string key = null;
             var value = Task.FromResult(Result<string>.Resolve("Foo"));
 
@@ -81,10 +81,10 @@ namespace GreenDonut
         public void ConstructorValueNull()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch =
-                async keys => await Task.FromResult(new Result<string>[0]);
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0]);
             var options = new DataLoaderOptions<string>();
-            var loader = new DataLoader<string, string>(fetch, options);
+            var loader = new DataLoader<string, string>(options, fetch);
             var key = "Foo";
             Task<Result<string>> value = null;
 
@@ -99,10 +99,10 @@ namespace GreenDonut
         public void SetNoException()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch =
-                async keys => await Task.FromResult(new Result<string>[0]);
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0]);
             var options = new DataLoaderOptions<string>();
-            var loader = new DataLoader<string, string>(fetch, options);
+            var loader = new DataLoader<string, string>(options, fetch);
             var key = "Foo";
             var value = Task.FromResult(Result<string>.Resolve("Bar"));
 
