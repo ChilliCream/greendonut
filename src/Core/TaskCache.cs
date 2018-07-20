@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 namespace GreenDonut
 {
     internal class TaskCache<TKey, TValue>
-        : IDisposable
+        : ITaskCache<TKey, TValue>
+        , IDisposable
     {
         private ImmutableDictionary<TKey, CacheEntry> _cache =
             ImmutableDictionary<TKey, CacheEntry>.Empty;
@@ -31,6 +32,31 @@ namespace GreenDonut
         public TimeSpan SlidingExpirartion { get; }
 
         public int Usage => _cache.Count;
+
+        public void Add(TKey key, Task<Result<TValue>> value)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            _sync.Lock(
+                () => !_cache.ContainsKey(key),
+                () =>
+                {
+                    CacheEntry entry = new CacheEntry(key, value);
+
+                    ClearSpaceForNewEntry();
+                    _ranking.AddFirst(entry.Rank);
+                    _cache = _cache.Add(entry.Key, entry);
+                    _first = entry.Rank;
+                });
+        }
 
         public void Clear()
         {
@@ -73,31 +99,6 @@ namespace GreenDonut
                     _ranking.Remove(_cache[key].Rank);
                     _cache = _cache.Remove(key);
                     _first = _ranking.First;
-                });
-        }
-
-        public void Set(TKey key, Task<Result<TValue>> value)
-        {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-
-            _sync.Lock(
-                () => !_cache.ContainsKey(key),
-                () =>
-                {
-                    CacheEntry entry = new CacheEntry(key, value);
-
-                    ClearSpaceForNewEntry();
-                    _ranking.AddFirst(entry.Rank);
-                    _cache = _cache.Add(entry.Key, entry);
-                    _first = entry.Rank;
                 });
         }
 

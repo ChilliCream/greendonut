@@ -29,17 +29,18 @@ namespace GreenDonut
         private bool _disposed;
         private Task _batchDispatcher;
         private TaskCompletionBuffer<TKey, TValue> _buffer;
-        private TaskCache<TKey, TValue> _cache;
+        private ITaskCache<TKey, TValue> _cache;
         private readonly Func<TKey, TKey> _cacheKeyResolver;
         private DataLoaderOptions<TKey> _options;
         private CancellationTokenSource _stopBatching;
 
         /// <summary>
         /// Initializes a new instance of the
-        /// <see cref="DataLoader{TKey, TValue}"/> class.
+        /// <see cref="DataLoaderBase{TKey, TValue}"/> class.
         /// </summary>
-        /// <param name="options"><see cref="DataLoader{TKey, TValue}"/>
-        /// options.</param>
+        /// <param name="options">
+        /// A configuration for <c>DataLoaders</c>.
+        /// </param>
         protected DataLoaderBase(DataLoaderOptions<TKey> options)
         {
             _options = options ??
@@ -48,9 +49,34 @@ namespace GreenDonut
             _cache = new TaskCache<TKey, TValue>(
                 _options.CacheSize,
                 _options.SlidingExpiration);
-            _cacheKeyResolver = (_options.CacheKeyResolver == null)
-                ? (TKey key) => key
-                : _options.CacheKeyResolver;
+            _cacheKeyResolver = _options.CacheKeyResolver ??
+                ((TKey key) => key);
+;
+
+            StartAsyncBackgroundDispatching();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="DataLoaderBase{TKey, TValue}"/> class.
+        /// </summary>
+        /// <param name="options">
+        /// A configuration for <c>DataLoaders</c>.
+        /// </param>
+        /// <param name="cache">
+        /// A cache instance for <c>Tasks</c>.
+        /// </param>
+        protected DataLoaderBase(DataLoaderOptions<TKey> options,
+            ITaskCache<TKey, TValue> cache)
+        {
+            _options = options ??
+                throw new ArgumentNullException(nameof(options));
+            _buffer = new TaskCompletionBuffer<TKey, TValue>();
+            _cache = cache ??
+                throw new ArgumentNullException(nameof(cache));
+            _cacheKeyResolver = _options.CacheKeyResolver ??
+                ((TKey key) => key);
+;
 
             StartAsyncBackgroundDispatching();
         }
@@ -116,7 +142,7 @@ namespace GreenDonut
 
             if (_options.Caching)
             {
-                _cache.Set(resolvedKey, promise.Task);
+                _cache.Add(resolvedKey, promise.Task);
             }
 
             return promise.Task;
@@ -194,7 +220,7 @@ namespace GreenDonut
 
             if (_cache.Get(resolvedKey) == null)
             {
-                _cache.Set(resolvedKey, value);
+                _cache.Add(resolvedKey, value);
             }
 
             return this;
@@ -233,10 +259,10 @@ namespace GreenDonut
                     if (_options.MaxBatchSize > 0 &&
                         copy.Count > _options.MaxBatchSize)
                     {
-                        int count = (int)Math.Ceiling(
+                        var count = (int)Math.Ceiling(
                             (decimal)copy.Count / _options.MaxBatchSize);
 
-                        for (int i = 0; i < count; i++)
+                        for (var i = 0; i < count; i++)
                         {
                             TKey[] keysBatch = resolvedKeys
                                 .Skip(i * _options.MaxBatchSize)
@@ -263,7 +289,7 @@ namespace GreenDonut
             IReadOnlyList<TKey> keys,
             IReadOnlyList<Result<TValue>> values)
         {
-            for (int i = 0; i < buffer.Count; i++)
+            for (var i = 0; i < buffer.Count; i++)
             {
                 buffer[keys[i]].SetResult(values[i]);
             }
@@ -315,7 +341,7 @@ namespace GreenDonut
                     Clear();
                     _stopBatching?.Cancel();
                     _batchDispatcher?.Dispose();
-                    _cache?.Dispose();
+                    (_cache as IDisposable)?.Dispose();
                     _stopBatching?.Dispose();
                 }
 
