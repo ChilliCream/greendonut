@@ -55,10 +55,7 @@ namespace GreenDonut
             StartAsyncBackgroundDispatching();
         }
 
-        /// <summary>
-        /// Empties the complete cache.
-        /// </summary>
-        /// <returns>Itself for chaining support.</returns>
+        /// <inheritdoc />
         public IDataLoader<TKey, TValue> Clear()
         {
             _cache.Clear();
@@ -85,6 +82,7 @@ namespace GreenDonut
         protected abstract Task<IReadOnlyList<Result<TValue>>> Fetch(
             IReadOnlyList<TKey> keys);
 
+        /// <inheritdoc />
         public Task<Result<TValue>> LoadAsync(TKey key)
         {
             if (key == null)
@@ -124,15 +122,16 @@ namespace GreenDonut
             return promise.Task;
         }
 
-        public async Task<IReadOnlyCollection<Result<TValue>>> LoadAsync(
-            IReadOnlyCollection<TKey> keys)
+        /// <inheritdoc />
+        public async Task<IReadOnlyList<Result<TValue>>> LoadAsync(
+            params TKey[] keys)
         {
             if (keys == null)
             {
                 throw new ArgumentNullException(nameof(keys));
             }
 
-            if (keys.Count == 0)
+            if (keys.Length == 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(keys),
                     "There must be at least one key");
@@ -142,11 +141,26 @@ namespace GreenDonut
                 .ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Removes a single entry from the cache.
-        /// </summary>
-        /// <param name="key">A cache entry key.</param>
-        /// <returns>Itself for chaining support.</returns>
+        /// <inheritdoc />
+        public async Task<IReadOnlyList<Result<TValue>>> LoadAsync(
+            IEnumerable<TKey> keys)
+        {
+            if (keys == null)
+            {
+                throw new ArgumentNullException(nameof(keys));
+            }
+
+            if (keys.Count() == 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(keys),
+                    "There must be at least one key");
+            }
+
+            return await Task.WhenAll(keys.Select(LoadAsync))
+                .ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
         public IDataLoader<TKey, TValue> Remove(TKey key)
         {
             if (key == null)
@@ -161,12 +175,7 @@ namespace GreenDonut
             return this;
         }
 
-        /// <summary>
-        /// Adds a new entry to the cache if not already exists.
-        /// </summary>
-        /// <param name="key">A cache entry key.</param>
-        /// <param name="value">A cache entry value.</param>
-        /// <returns>Itself for chaining support.</returns>
+        /// <inheritdoc />
         public IDataLoader<TKey, TValue> Set(
             TKey key,
             Task<Result<TValue>> value)
