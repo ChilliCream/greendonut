@@ -59,10 +59,10 @@ namespace GreenDonut
 
         #endregion
 
-        #region Set
+        #region Add
 
-        [Fact(DisplayName = "Set: Should throw an argument null exception for key")]
-        public void SetKeyNull()
+        [Fact(DisplayName = "Add: Should throw an argument null exception for key")]
+        public void AddKeyNull()
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
@@ -80,8 +80,8 @@ namespace GreenDonut
             Assert.Throws<ArgumentNullException>("key", verify);
         }
 
-        [Fact(DisplayName = "Set: Should throw an argument null exception for value")]
-        public void SetValueNull()
+        [Fact(DisplayName = "Add: Should throw an argument null exception for value")]
+        public void AddValueNull()
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
@@ -99,8 +99,8 @@ namespace GreenDonut
             Assert.Throws<ArgumentNullException>("value", verify);
         }
 
-        [Fact(DisplayName = "Set: Should not throw any exception")]
-        public void SetNoException()
+        [Fact(DisplayName = "Add: Should not throw any exception")]
+        public void AddNoException()
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
@@ -118,8 +118,8 @@ namespace GreenDonut
             Assert.Null(Record.Exception(verify));
         }
 
-        [Fact(DisplayName = "Set: Should result in a new cache entry")]
-        public async Task SetNewCacheEntry()
+        [Fact(DisplayName = "Add: Should result in a new cache entry")]
+        public async Task AddNewCacheEntry()
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
@@ -141,8 +141,8 @@ namespace GreenDonut
             Assert.Equal(result.Value, value.Result.Value);
         }
 
-        [Fact(DisplayName = "Set: Should result in 'Bar'")]
-        public async Task SetTwice()
+        [Fact(DisplayName = "Add: Should result in 'Bar'")]
+        public async Task AddTwice()
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
