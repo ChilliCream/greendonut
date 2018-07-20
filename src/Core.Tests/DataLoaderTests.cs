@@ -59,10 +59,79 @@ namespace GreenDonut
 
         #endregion
 
-        #region Add
+        #region Remove
 
-        [Fact(DisplayName = "Add: Should throw an argument null exception for key")]
-        public void AddKeyNull()
+        [Fact(DisplayName = "Remove: Should throw an argument null exception for key")]
+        public void RemoveKeyNull()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>();
+            var loader = new DataLoader<string, string>(options, fetch);
+            string key = null;
+
+            loader.Set("Foo", Task.FromResult(Result<string>.Resolve("Foo")));
+
+            // act
+            Action verify = () => loader.Remove(key);
+
+            // assert
+            Assert.Throws<ArgumentNullException>("key", verify);
+        }
+
+        [Fact(DisplayName = "Remove: Should not throw any exception")]
+        public void RemoveNoException()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>();
+            var loader = new DataLoader<string, string>(options, fetch);
+            var key = "Foo";
+
+            // act
+            Action verify = () => loader.Remove(key);
+
+            // assert
+            Assert.Null(Record.Exception(verify));
+        }
+
+        [Fact(DisplayName = "Remove: Should remove an existing entry")]
+        public async Task RemoveEntry()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>
+            {
+                Batching = false
+            };
+            var loader = new DataLoader<string, string>(options, fetch);
+            var key = "Foo";
+
+            loader.Set(key, Task.FromResult(Result<string>.Resolve("Bar")));
+
+            // act
+            IDataLoader<string, string> result = loader.Remove(key);
+
+            // assert
+            Result<string> loadResult = await loader.LoadAsync(key)
+                .ConfigureAwait(false);
+
+            Assert.Equal(loader, result);
+            Assert.NotNull(loadResult);
+        }
+
+        #endregion
+
+        #region Set
+
+        [Fact(DisplayName = "Set: Should throw an argument null exception for key")]
+        public void SetKeyNull()
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
@@ -80,8 +149,8 @@ namespace GreenDonut
             Assert.Throws<ArgumentNullException>("key", verify);
         }
 
-        [Fact(DisplayName = "Add: Should throw an argument null exception for value")]
-        public void AddValueNull()
+        [Fact(DisplayName = "Set: Should throw an argument null exception for value")]
+        public void SetValueNull()
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
@@ -99,8 +168,8 @@ namespace GreenDonut
             Assert.Throws<ArgumentNullException>("value", verify);
         }
 
-        [Fact(DisplayName = "Add: Should not throw any exception")]
-        public void AddNoException()
+        [Fact(DisplayName = "Set: Should not throw any exception")]
+        public void SetNoException()
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
@@ -118,8 +187,8 @@ namespace GreenDonut
             Assert.Null(Record.Exception(verify));
         }
 
-        [Fact(DisplayName = "Add: Should result in a new cache entry")]
-        public async Task AddNewCacheEntry()
+        [Fact(DisplayName = "Set: Should result in a new cache entry")]
+        public async Task SetNewCacheEntry()
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
@@ -131,18 +200,19 @@ namespace GreenDonut
             var value = Task.FromResult(Result<string>.Resolve("Bar"));
 
             // act
-            loader.Set(key, value);
+            IDataLoader<string, string> result = loader.Set(key, value);
 
             // assert
-            Result<string> result = await loader.LoadAsync(key)
+            Result<string> loadResult = await loader.LoadAsync(key)
                 .ConfigureAwait(false);
 
-            Assert.NotNull(result);
-            Assert.Equal(result.Value, value.Result.Value);
+            Assert.Equal(loader, result);
+            Assert.NotNull(loadResult);
+            Assert.Equal(loadResult.Value, value.Result.Value);
         }
 
-        [Fact(DisplayName = "Add: Should result in 'Bar'")]
-        public async Task AddTwice()
+        [Fact(DisplayName = "Set: Should result in 'Bar'")]
+        public async Task SetTwice()
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
@@ -159,11 +229,11 @@ namespace GreenDonut
             loader.Set(key, second);
 
             // assert
-            Result<string> result = await loader.LoadAsync(key)
+            Result<string> loadResult = await loader.LoadAsync(key)
                 .ConfigureAwait(false);
 
-            Assert.NotNull(result);
-            Assert.Equal(result.Value, first.Result.Value);
+            Assert.NotNull(loadResult);
+            Assert.Equal(loadResult.Value, first.Result.Value);
         }
 
         #endregion

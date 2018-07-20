@@ -26,7 +26,7 @@ namespace GreenDonut
         int Usage { get; }
 
         /// <summary>
-        /// Adds a single entry to the cache if not exists already.
+        /// Adds a single entry to the cache if it is not already there.
         /// </summary>
         /// <param name="key">A cache entry key.</param>
         /// <param name="value">A cache entry value.</param>
