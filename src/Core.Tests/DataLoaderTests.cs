@@ -111,6 +111,261 @@ namespace GreenDonut
 
         #endregion
 
+        #region LoadAsync(string key)
+
+        [Fact(DisplayName = "LoadAsync: Should throw an argument null exception for key")]
+        public async Task LoadSingleKeyNull()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>();
+            var loader = new DataLoader<string, string>(options, fetch);
+            string key = null;
+
+            // act
+            Func<Task<Result<string>>> verify = () => loader.LoadAsync(key);
+
+            // assert
+            await Assert.ThrowsAsync<ArgumentNullException>("key", verify)
+                .ConfigureAwait(false);
+        }
+
+        [Fact(DisplayName = "LoadAsync: Should not throw any exception")]
+        public async Task LoadSingleNoException()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>()
+            {
+                Batching = false
+            };
+            var loader = new DataLoader<string, string>(options, fetch);
+            var key = "Foo";
+
+            // act
+            Func<Task<Result<string>>> verify = () => loader.LoadAsync(key);
+
+            // assert
+            Assert.Null(await Record.ExceptionAsync(verify)
+                .ConfigureAwait(false));
+        }
+
+        [Fact(DisplayName = "LoadAsync: Should return one result")]
+        public async Task LoadSingleResult()
+        {
+            // arrange
+            Result<string> expectedResult = Result<string>.Resolve("Bar");
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new[] { expectedResult })
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>
+            {
+                Batching = false
+            };
+            var loader = new DataLoader<string, string>(options, fetch);
+            var key = "Foo";
+
+            // act
+            Result<string> loadResult = await loader.LoadAsync(key)
+                .ConfigureAwait(false);
+
+            // assert
+            Assert.NotNull(loadResult);
+            Assert.Equal(expectedResult.Value, loadResult.Value);
+        }
+
+        #endregion
+
+        #region LoadAsync(params string[] keys)
+
+        [Fact(DisplayName = "LoadAsync: Should throw an argument null exception for keys")]
+        public async Task LoadParamsKeysNull()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async k =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>();
+            var loader = new DataLoader<string, string>(options, fetch);
+            string[] keys = null;
+
+            // act
+            Func<Task<IReadOnlyList<Result<string>>>> verify = () =>
+                loader.LoadAsync(keys);
+
+            // assert
+            await Assert.ThrowsAsync<ArgumentNullException>("keys", verify)
+                .ConfigureAwait(false);
+        }
+
+        [Fact(DisplayName = "LoadAsync: Should throw an argument out of range exception for keys")]
+        public async Task LoadParamsZeroKeys()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async k =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>();
+            var loader = new DataLoader<string, string>(options, fetch);
+            string[] keys = new string[0];
+
+            // act
+            Func<Task<IReadOnlyList<Result<string>>>> verify = () =>
+                loader.LoadAsync(keys);
+
+            // assert
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>("keys",
+                verify).ConfigureAwait(false);
+        }
+
+        [Fact(DisplayName = "LoadAsync: Should not throw any exception")]
+        public async Task LoadParamsNoException()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async k =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>()
+            {
+                Batching = false
+            };
+            var loader = new DataLoader<string, string>(options, fetch);
+            var keys = new string[] { "Foo" };
+
+            // act
+            Func<Task<IReadOnlyList<Result<string>>>> verify = () =>
+                loader.LoadAsync(keys);
+
+            // assert
+            Assert.Null(await Record.ExceptionAsync(verify)
+                .ConfigureAwait(false));
+        }
+
+        [Fact(DisplayName = "LoadAsync: Should return one result")]
+        public async Task LoadParamsResult()
+        {
+            // arrange
+            Result<string> expectedResult = Result<string>.Resolve("Bar");
+            FetchDataDelegate<string, string> fetch = async k =>
+                await Task.FromResult(new[] { expectedResult })
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>
+            {
+                Batching = false
+            };
+            var loader = new DataLoader<string, string>(options, fetch);
+            var keys = new string[] { "Foo" };
+
+            // act
+            IReadOnlyList<Result<string>> loadResult = await loader
+                .LoadAsync(keys)
+                .ConfigureAwait(false);
+
+            // assert
+            Assert.NotNull(loadResult);
+            Assert.Collection(loadResult,
+                r => Assert.Equal(expectedResult.Value, r.Value));
+        }
+
+        #endregion
+
+        #region LoadAsync(IReadOnlyCollection<string> keys)
+
+        [Fact(DisplayName = "LoadAsync: Should throw an argument null exception for keys")]
+        public async Task LoadCollectionKeysNull()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async k =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>();
+            var loader = new DataLoader<string, string>(options, fetch);
+            IReadOnlyCollection<string> keys = null;
+
+            // act
+            Func<Task<IReadOnlyList<Result<string>>>> verify = () =>
+                loader.LoadAsync(keys);
+
+            // assert
+            await Assert.ThrowsAsync<ArgumentNullException>("keys", verify)
+                .ConfigureAwait(false);
+        }
+
+        [Fact(DisplayName = "LoadAsync: Should throw an argument out of range exception for keys")]
+        public async Task LoadCollectionZeroKeys()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async k =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>();
+            var loader = new DataLoader<string, string>(options, fetch);
+            IReadOnlyCollection<string> keys = new string[0];
+
+            // act
+            Func<Task<IReadOnlyList<Result<string>>>> verify = () =>
+                loader.LoadAsync(keys);
+
+            // assert
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>("keys",
+                verify).ConfigureAwait(false);
+        }
+
+        [Fact(DisplayName = "LoadAsync: Should not throw any exception")]
+        public async Task LoadCollectionNoException()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async k =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>()
+            {
+                Batching = false
+            };
+            var loader = new DataLoader<string, string>(options, fetch);
+            IReadOnlyCollection<string> keys = new string[] { "Foo" };
+
+            // act
+            Func<Task<IReadOnlyList<Result<string>>>> verify = () =>
+                loader.LoadAsync(keys);
+
+            // assert
+            Assert.Null(await Record.ExceptionAsync(verify)
+                .ConfigureAwait(false));
+        }
+
+        [Fact(DisplayName = "LoadAsync: Should return one result")]
+        public async Task LoadCollectionResult()
+        {
+            // arrange
+            Result<string> expectedResult = Result<string>.Resolve("Bar");
+            FetchDataDelegate<string, string> fetch = async k =>
+                await Task.FromResult(new[] { expectedResult })
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>
+            {
+                Batching = false
+            };
+            var loader = new DataLoader<string, string>(options, fetch);
+            IReadOnlyCollection<string> keys = new string[] { "Foo" };
+
+            // act
+            IReadOnlyList<Result<string>> loadResult = await loader
+                .LoadAsync(keys)
+                .ConfigureAwait(false);
+
+            // assert
+            Assert.NotNull(loadResult);
+            Assert.Collection(loadResult,
+                r => Assert.Equal(expectedResult.Value, r.Value));
+        }
+
+        #endregion
+
         #region Remove
 
         [Fact(DisplayName = "Remove: Should throw an argument null exception for key")]

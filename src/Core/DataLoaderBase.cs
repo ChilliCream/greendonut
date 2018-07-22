@@ -169,14 +169,14 @@ namespace GreenDonut
 
         /// <inheritdoc />
         public async Task<IReadOnlyList<Result<TValue>>> LoadAsync(
-            IEnumerable<TKey> keys)
+            IReadOnlyCollection<TKey> keys)
         {
             if (keys == null)
             {
                 throw new ArgumentNullException(nameof(keys));
             }
 
-            if (keys.Count() < 1)
+            if (keys.Count < 1)
             {
                 throw new ArgumentOutOfRangeException(nameof(keys),
                     "There must be at least one key");
