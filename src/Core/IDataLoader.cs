@@ -57,7 +57,8 @@ namespace GreenDonut
         /// A list of results which may contain values and information about
         /// the errors which may occurred during the call.
         /// </returns>
-        Task<IReadOnlyList<Result<TValue>>> LoadAsync(IEnumerable<TKey> keys);
+        Task<IReadOnlyList<Result<TValue>>> LoadAsync(
+            IReadOnlyCollection<TKey> keys);
 
         /// <summary>
         /// Removes a single entry from the cache.

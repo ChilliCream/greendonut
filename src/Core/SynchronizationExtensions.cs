@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace GreenDonut
 {
@@ -21,10 +22,10 @@ namespace GreenDonut
             }
         }
 
-        public static TResult Lock<TResult>(
+        public static Task LockAsync(
             this object sync,
             Func<bool> predicate,
-            Func<TResult> execute)
+            Func<Task> execute)
         {
             if (predicate())
             {
@@ -37,7 +38,7 @@ namespace GreenDonut
                 }
             }
 
-            return default;
+            return Task.CompletedTask;
         }
     }
 }

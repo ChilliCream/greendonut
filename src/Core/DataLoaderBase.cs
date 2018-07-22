@@ -157,7 +157,7 @@ namespace GreenDonut
                 throw new ArgumentNullException(nameof(keys));
             }
 
-            if (keys.Length == 0)
+            if (keys.Length < 1)
             {
                 throw new ArgumentOutOfRangeException(nameof(keys),
                     "There must be at least one key");
@@ -169,14 +169,14 @@ namespace GreenDonut
 
         /// <inheritdoc />
         public async Task<IReadOnlyList<Result<TValue>>> LoadAsync(
-            IEnumerable<TKey> keys)
+            IReadOnlyCollection<TKey> keys)
         {
             if (keys == null)
             {
                 throw new ArgumentNullException(nameof(keys));
             }
 
-            if (keys.Count() == 0)
+            if (keys.Count < 1)
             {
                 throw new ArgumentOutOfRangeException(nameof(keys),
                     "There must be at least one key");
@@ -243,12 +243,22 @@ namespace GreenDonut
             IReadOnlyCollection<Result<TValue>> values = await Fetch(keys)
                 .ConfigureAwait(false);
 
-            promise.SetResult(values.First());
+            if (values.Count == 1)
+            {
+                promise.SetResult(values.First());
+            }
+            else
+            {
+                var error = "Fetch should have returned exactly one result " +
+                    $"but instead returned \"{values.Count}\" results.";
+
+                promise.SetResult(Result<TValue>.Reject(error));
+            }
         }
 
         private Task DispatchBatchAsync()
         {
-            return _sync.Lock(
+            return _sync.LockAsync(
                 () => !_buffer.IsEmpty,
                 async () =>
                 {
@@ -289,9 +299,24 @@ namespace GreenDonut
             IReadOnlyList<TKey> keys,
             IReadOnlyList<Result<TValue>> values)
         {
-            for (var i = 0; i < buffer.Count; i++)
+            if (keys.Count == values.Count)
             {
-                buffer[keys[i]].SetResult(values[i]);
+                for (var i = 0; i < buffer.Count; i++)
+                {
+                    buffer[keys[i]].SetResult(values[i]);
+                }
+            }
+            else
+            {
+                var error = "Fetch should have returned exactly " +
+                    $"\"{keys.Count}\" result(s) but instead returned " +
+                    $"\"{values.Count}\" result(s).";
+                var result = Result<TValue>.Reject(error);
+
+                for (var i = 0; i < buffer.Count; i++)
+                {
+                    buffer[keys[i]].SetResult(result);
+                }
             }
         }
 
@@ -308,11 +333,12 @@ namespace GreenDonut
                         {
                             while (!_stopBatching.IsCancellationRequested)
                             {
-                                if (_options.BatchRequestDelay > TimeSpan.Zero ||
-                                    _buffer.Count == 0)
+                                if (_buffer.Count == 0 &&
+                                    _options.BatchRequestDelay > TimeSpan.Zero)
                                 {
-                                    await Task.Delay(_options.BatchRequestDelay)
-                                        .ConfigureAwait(false);
+                                    await Task.Delay(
+                                        _options.BatchRequestDelay)
+                                            .ConfigureAwait(false);
                                 }
                                 else
                                 {
