@@ -157,7 +157,7 @@ namespace GreenDonut
                 throw new ArgumentNullException(nameof(keys));
             }
 
-            if (keys.Length == 0)
+            if (keys.Length < 1)
             {
                 throw new ArgumentOutOfRangeException(nameof(keys),
                     "There must be at least one key");
@@ -176,7 +176,7 @@ namespace GreenDonut
                 throw new ArgumentNullException(nameof(keys));
             }
 
-            if (keys.Count() == 0)
+            if (keys.Count() < 1)
             {
                 throw new ArgumentOutOfRangeException(nameof(keys),
                     "There must be at least one key");

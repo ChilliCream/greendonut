@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -55,6 +56,57 @@ namespace GreenDonut
 
             // assert
             Assert.Null(Record.Exception(verify));
+        }
+
+        #endregion
+
+        #region Clear
+
+        [Fact(DisplayName = "Clear: Should not throw any exception")]
+        public void ClearNoException()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>();
+            var loader = new DataLoader<string, string>(options, fetch);
+
+            // act
+            Action verify = () => loader.Clear();
+
+            // assert
+            Assert.Null(Record.Exception(verify));
+        }
+
+        [Fact(DisplayName = "Clear: Should remove anll entries from the cache")]
+        public async Task ClearAllEntries()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>
+            {
+                Batching = false
+            };
+            var loader = new DataLoader<string, string>(options, fetch);
+
+            loader.Set("Foo", Task.FromResult(Result<string>.Resolve("Bar")));
+            loader.Set("Bar", Task.FromResult(Result<string>.Resolve("Baz")));
+
+            // act
+            IDataLoader<string, string> result = loader.Clear();
+
+            // assert
+            IReadOnlyList<Result<string>> loadResult = await loader
+                .LoadAsync("Foo", "Bar")
+                .ConfigureAwait(false);
+
+            Assert.Equal(loader, result);
+            Assert.Collection(loadResult,
+                v => Assert.True(v.IsError),
+                v => Assert.True(v.IsError));
         }
 
         #endregion
