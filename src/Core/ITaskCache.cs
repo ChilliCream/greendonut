@@ -42,7 +42,7 @@ namespace GreenDonut
         /// </summary>
         /// <param name="key">A cache entry key.</param>
         /// <returns>A single cache entry value.</returns>
-        Task<Result<TValue>> Get(TKey key);
+        Task<Result<TValue>> GetAsync(TKey key);
 
         /// <summary>
         /// Removes a specific entry from the cache.
