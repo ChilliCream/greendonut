@@ -7,10 +7,42 @@ namespace GreenDonut
 {
     public class DataLoaderTests
     {
-        #region Constructor
+        #region Constructor(fetch)
 
         [Fact(DisplayName = "Constructor: Should throw an argument null exception for fetch")]
-        public void ConstructorFetchNull()
+        public void ConstructorAFetchNull()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = null;
+
+            // act
+            Action verify = () => new DataLoader<string, string>(fetch);
+
+            // assert
+            Assert.Throws<ArgumentNullException>("fetch", verify);
+        }
+
+        [Fact(DisplayName = "Constructor: Should not throw any exception")]
+        public void ConstructorANoException()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+
+            // act
+            Action verify = () => new DataLoader<string, string>(fetch);
+
+            // assert
+            Assert.Null(Record.Exception(verify));
+        }
+
+        #endregion
+
+        #region Constructor(fetch, options)
+
+        [Fact(DisplayName = "Constructor: Should throw an argument null exception for fetch")]
+        public void ConstructorBFetchNull()
         {
             // arrange
             FetchDataDelegate<string, string> fetch = null;
@@ -25,7 +57,7 @@ namespace GreenDonut
         }
 
         [Fact(DisplayName = "Constructor: Should throw an argument null exception for options")]
-        public void ConstructorOptionsNull()
+        public void ConstructorBOptionsNull()
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
@@ -42,7 +74,7 @@ namespace GreenDonut
         }
 
         [Fact(DisplayName = "Constructor: Should not throw any exception")]
-        public void ConstructorNoException()
+        public void ConstructorBNoException()
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
@@ -79,7 +111,7 @@ namespace GreenDonut
             Assert.Null(Record.Exception(verify));
         }
 
-        [Fact(DisplayName = "Clear: Should remove anll entries from the cache")]
+        [Fact(DisplayName = "Clear: Should remove all entries from the cache")]
         public async Task ClearAllEntries()
         {
             // arrange
@@ -107,6 +139,53 @@ namespace GreenDonut
             Assert.Collection(loadResult,
                 v => Assert.True(v.IsError),
                 v => Assert.True(v.IsError));
+        }
+
+        #endregion
+
+        #region InterruptDelay
+
+        [Fact(DisplayName = "InterruptDelay: Should not throw any exception")]
+        public async Task InterruptDelayNoException()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>();
+            var loader = new DataLoader<string, string>(options, fetch);
+
+            // act
+            Action verify = () => loader.InterruptDelay();
+
+            // assert
+            Assert.Null(Record.Exception(verify));
+        }
+
+        [Fact(DisplayName = "InterruptDelay: Should interrupt the 10 minutes delay")]
+        public async Task InterruptDelay()
+        {
+            // arrange
+            Result<string> expectedResult = Result<string>.Resolve("Bar");
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new[] { expectedResult })
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>
+            {
+                BatchRequestDelay = TimeSpan.FromMinutes(10)
+            };
+            var loader = new DataLoader<string, string>(options, fetch);
+
+            await Task.Delay(10);
+
+            Task<Result<string>> loadResult = loader.LoadAsync("Foo");
+
+            // act
+            loader.InterruptDelay();
+
+            // assert
+            Assert.Equal(expectedResult.Value,
+                (await loadResult.ConfigureAwait(false)).Value);
         }
 
         #endregion
@@ -174,8 +253,7 @@ namespace GreenDonut
                 .ConfigureAwait(false);
 
             // assert
-            Assert.NotNull(loadResult);
-            Assert.Equal(expectedResult.Value, loadResult.Value);
+            Assert.Equal(expectedResult.Value, loadResult?.Value);
         }
 
         #endregion
@@ -211,7 +289,7 @@ namespace GreenDonut
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
-            string[] keys = new string[0];
+            var keys = new string[0];
 
             // act
             Func<Task<IReadOnlyList<Result<string>>>> verify = () =>
@@ -266,7 +344,6 @@ namespace GreenDonut
                 .ConfigureAwait(false);
 
             // assert
-            Assert.NotNull(loadResult);
             Assert.Collection(loadResult,
                 r => Assert.Equal(expectedResult.Value, r.Value));
         }
@@ -284,7 +361,7 @@ namespace GreenDonut
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
-            IReadOnlyCollection<string> keys = null;
+            string[] keys = null;
 
             // act
             Func<Task<IReadOnlyList<Result<string>>>> verify = () =>
@@ -304,7 +381,7 @@ namespace GreenDonut
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
-            IReadOnlyCollection<string> keys = new string[0];
+            var keys = new string[0];
 
             // act
             Func<Task<IReadOnlyList<Result<string>>>> verify = () =>
@@ -327,7 +404,7 @@ namespace GreenDonut
                 Batching = false
             };
             var loader = new DataLoader<string, string>(options, fetch);
-            IReadOnlyCollection<string> keys = new string[] { "Foo" };
+            var keys = new string[] { "Foo" };
 
             // act
             Func<Task<IReadOnlyList<Result<string>>>> verify = () =>
@@ -351,7 +428,7 @@ namespace GreenDonut
                 Batching = false
             };
             var loader = new DataLoader<string, string>(options, fetch);
-            IReadOnlyCollection<string> keys = new string[] { "Foo" };
+            var keys = new string[] { "Foo" };
 
             // act
             IReadOnlyList<Result<string>> loadResult = await loader
@@ -359,9 +436,56 @@ namespace GreenDonut
                 .ConfigureAwait(false);
 
             // assert
-            Assert.NotNull(loadResult);
             Assert.Collection(loadResult,
                 r => Assert.Equal(expectedResult.Value, r.Value));
+        }
+
+        [Fact(DisplayName = "LoadAsync: Should return results over time by using auto dispatching")]
+        public async Task LoadAutoDispatching()
+        {
+            // arrange
+            Result<string> expectedResult = Result<string>.Resolve("Bar");
+            var repository = new Dictionary<string, string>
+            {
+                { "Foo", "Bar" },
+                { "Bar", "Baz" },
+                { "Baz", "Foo" }
+            };
+            FetchDataDelegate<string, string> fetch = async k =>
+            {
+                var values = new List<Result<string>>();
+
+                foreach (var key in k)
+                {
+                    if (repository.ContainsKey(key))
+                    {
+                        values.Add(Result<string>.Resolve(repository[key]));
+                    }
+                    else
+                    {
+                        values.Add(Result<string>
+                            .Reject($"Value for key \"{key}\" not found"));
+                    }
+                }
+
+                return await Task.FromResult(values).ConfigureAwait(false);
+            };
+            var options = new DataLoaderOptions<string>();
+            var loader = new DataLoader<string, string>(options, fetch);
+            var keys = new string[] { "Foo", "Bar", "Baz", "Qux" };
+
+            // act
+            IReadOnlyList<Result<string>> loadResult = await loader
+                .LoadAsync(keys)
+                .ConfigureAwait(false);
+
+            // assert
+            Assert.Collection(loadResult,
+                r => Assert.Equal("Bar", r.Value),
+                r => Assert.Equal("Baz", r.Value),
+                r => Assert.Equal("Foo", r.Value),
+                r => Assert.Equal("Value for key \"Qux\" not found",
+                    r.ErrorMessage));
         }
 
         #endregion
@@ -430,7 +554,7 @@ namespace GreenDonut
                 .ConfigureAwait(false);
 
             Assert.Equal(loader, result);
-            Assert.NotNull(loadResult);
+            Assert.True(loadResult?.IsError);
         }
 
         #endregion
@@ -514,8 +638,7 @@ namespace GreenDonut
                 .ConfigureAwait(false);
 
             Assert.Equal(loader, result);
-            Assert.NotNull(loadResult);
-            Assert.Equal(loadResult.Value, value.Result.Value);
+            Assert.Equal(value.Result.Value, loadResult?.Value);
         }
 
         [Fact(DisplayName = "Set: Should result in 'Bar'")]
@@ -538,9 +661,8 @@ namespace GreenDonut
             // assert
             Result<string> loadResult = await loader.LoadAsync(key)
                 .ConfigureAwait(false);
-
-            Assert.NotNull(loadResult);
-            Assert.Equal(loadResult.Value, first.Result.Value);
+            
+            Assert.Equal(first.Result.Value, loadResult.Value);
         }
 
         #endregion

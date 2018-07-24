@@ -31,6 +31,7 @@ namespace GreenDonut
         private TaskCompletionBuffer<TKey, TValue> _buffer;
         private ITaskCache<TKey, TValue> _cache;
         private readonly Func<TKey, TKey> _cacheKeyResolver;
+        private AutoResetEvent _delaySignal;
         private DataLoaderOptions<TKey> _options;
         private CancellationTokenSource _stopBatching;
 
@@ -51,7 +52,6 @@ namespace GreenDonut
                 _options.SlidingExpiration);
             _cacheKeyResolver = _options.CacheKeyResolver ??
                 ((TKey key) => key);
-;
 
             StartAsyncBackgroundDispatching();
         }
@@ -76,7 +76,6 @@ namespace GreenDonut
                 throw new ArgumentNullException(nameof(cache));
             _cacheKeyResolver = _options.CacheKeyResolver ??
                 ((TKey key) => key);
-;
 
             StartAsyncBackgroundDispatching();
         }
@@ -108,6 +107,17 @@ namespace GreenDonut
         protected abstract Task<IReadOnlyList<Result<TValue>>> Fetch(
             IReadOnlyList<TKey> keys);
 
+        /// <summary>
+        /// Interrupts the wait delay for batching.
+        /// </summary>
+        public void InterruptDelay()
+        {
+            if (_options.AutoDispatching && _options.Batching)
+            {
+                _delaySignal?.Set();
+            }
+        }
+
         /// <inheritdoc />
         public Task<Result<TValue>> LoadAsync(TKey key)
         {
@@ -120,9 +130,9 @@ namespace GreenDonut
 
             if (_options.Caching)
             {
-                Task<Result<TValue>> cachedValue = _cache.Get(resolvedKey);
+                Task<Result<TValue>> cachedValue = _cache.GetAsync(resolvedKey);
 
-                if (cachedValue != null)
+                if (cachedValue?.Result != null)
                 {
                     return cachedValue;
                 }
@@ -218,7 +228,7 @@ namespace GreenDonut
 
             TKey resolvedKey = _cacheKeyResolver(key);
 
-            if (_cache.Get(resolvedKey) == null)
+            if (_cache.GetAsync(resolvedKey)?.Result == null)
             {
                 _cache.Add(resolvedKey, value);
             }
@@ -328,23 +338,16 @@ namespace GreenDonut
                     () => _batchDispatcher == null,
                     () =>
                     {
+                        _delaySignal = new AutoResetEvent(true);
                         _stopBatching = new CancellationTokenSource();
                         _batchDispatcher = Task.Run(async () =>
                         {
                             while (!_stopBatching.IsCancellationRequested)
                             {
-                                if (_buffer.Count == 0 &&
-                                    _options.BatchRequestDelay > TimeSpan.Zero)
-                                {
-                                    await Task.Delay(
-                                        _options.BatchRequestDelay)
-                                            .ConfigureAwait(false);
-                                }
-                                else
-                                {
-                                    await DispatchBatchAsync()
-                                        .ConfigureAwait(false);
-                                }
+                                _delaySignal
+                                    .WaitOne(_options.BatchRequestDelay);
+                                await DispatchBatchAsync()
+                                    .ConfigureAwait(false);
                             }
                         });
                     });
@@ -366,14 +369,17 @@ namespace GreenDonut
                 {
                     Clear();
                     _stopBatching?.Cancel();
+                    _delaySignal?.Set();
                     _batchDispatcher?.Dispose();
                     (_cache as IDisposable)?.Dispose();
                     _stopBatching?.Dispose();
+                    _delaySignal?.Dispose();
                 }
 
                 _batchDispatcher = null;
                 _buffer = null;
                 _cache = null;
+                _delaySignal = null;
                 _options = null;
                 _stopBatching = null;
 

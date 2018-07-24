@@ -29,6 +29,18 @@ namespace GreenDonut
         /// Initializes a new instance of the
         /// <see cref="DataLoader{TKey, TValue}"/> class.
         /// </summary>
+        /// <param name="fetch">
+        /// A delegate to fetch data batches which will be invoked every time
+        /// when trying to setup a new batch request.
+        /// </param>
+        public DataLoader(FetchDataDelegate<TKey, TValue> fetch)
+            : this(new DataLoaderOptions<TKey>(), fetch)
+        { }
+
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="DataLoader{TKey, TValue}"/> class.
+        /// </summary>
         /// <param name="options">
         /// An options object to configure the behavior of this particular
         /// <see cref="DataLoader{TKey, TValue}"/>.

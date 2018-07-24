@@ -15,34 +15,69 @@ namespace GreenDonut
         /// <param name="cacheKeyResolver"></param>
         public DataLoaderOptions()
         {
+            AutoDispatching = true;
             Batching = true;
-            BatchRequestDelay = TimeSpan.Zero;
+            BatchRequestDelay = TimeSpan.FromMilliseconds(50);
             CacheSize = 1000;
             Caching = true;
             SlidingExpiration = TimeSpan.Zero;
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether auto dispatching is
+        /// enabled. The default value is <c>true</c>.
+        /// </summary>
         public bool AutoDispatching { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether batching is enabled. The
+        /// default value is <c>true</c>.
+        /// </summary>
         public bool Batching { get; set; }
 
         /// <summary>
-        /// Gets or sets the time period to wait if the
-        /// <see cref="TaskCompletionBuffer{TKey, TValue}"/> is empty before
-        /// trying to setup another batch request. This property takes only
-        /// effect if <see cref="Batching"/> is set to <c>true</c>. The default
-        /// is <see cref="TimeSpan.Zero"/> which means no delay at all.
+        /// Gets or sets the time period to wait before trying to setup another
+        /// batch request. This property takes only effect if
+        /// <see cref="Batching"/> is set to <c>true</c>. The default value is
+        /// set to <c>50</c> milliseconds.
         /// </summary>
         public TimeSpan BatchRequestDelay { get; set; }
 
+        /// <summary>
+        /// Gets or sets a func which resolves the cache key which might differ
+        /// from the business key. The default value is set to <c>null</c>.
+        /// </summary>
         public Func<TKey, TKey> CacheKeyResolver { get; set; }
 
+        /// <summary>
+        /// Gets or sets the cache size. If set to <c>10</c> for example, it
+        /// says only <c>10</c> cache entries can live inside the cache. Whan
+        /// adding an additional entry the least recently used entry will be
+        /// removed. The default value is set to <c>1000</c>.
+        /// </summary>
         public int CacheSize { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether caching is enabled. The
+        /// default value is <c>true</c>.
+        /// </summary>
         public bool Caching { get; set; }
 
+        /// <summary>
+        /// Gets or sets the maximum batch size per request. If set to
+        /// <c>0</c>, the request will be not cut into smaller batches. The
+        /// default value is set to <c>0</c>.
+        /// </summary>
         public int MaxBatchSize { get; set; }
 
+        /// <summary>
+        /// Gets or sets the sliding cache expiration. If a cahce entry expires
+        /// the entry will be removed from the cache. If set to
+        /// <see cref="TimeSpan.Zero"/> the sliding expiration is disabled.
+        /// This means an entry could live forever if the
+        /// <see cref="CacheSize"/> is not exceeded. The default value is set
+        /// to <see cref="TimeSpan.Zero"/>.
+        /// </summary>
         public TimeSpan SlidingExpiration { get; set; }
     }
 }

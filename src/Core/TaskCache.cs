@@ -70,7 +70,7 @@ namespace GreenDonut
                 });
         }
 
-        public Task<Result<TValue>> Get(TKey key)
+        public Task<Result<TValue>> GetAsync(TKey key)
         {
             if (key == null)
             {
@@ -82,7 +82,7 @@ namespace GreenDonut
                 TouchEntry(entry);
             }
 
-            return entry?.Value;
+            return entry?.Value ?? Task.FromResult<Result<TValue>>(null);
         }
 
         public void Remove(TKey key)
@@ -147,7 +147,8 @@ namespace GreenDonut
                         }
                         else
                         {
-                            await Task.Delay(10).ConfigureAwait(false);
+                            await Task.Delay(10, _dispose.Token)
+                                .ConfigureAwait(false);
                         }
                     }
                 });
