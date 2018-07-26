@@ -143,10 +143,10 @@ namespace GreenDonut
 
         #endregion
 
-        #region InterruptDelay
+        #region DispatchAsync
 
-        [Fact(DisplayName = "InterruptDelay: Should not throw any exception")]
-        public async Task InterruptDelayNoException()
+        [Fact(DisplayName = "DispatchAsync: Should not throw any exception")]
+        public async Task DispatchAsyncNoException()
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
@@ -156,14 +156,64 @@ namespace GreenDonut
             var loader = new DataLoader<string, string>(options, fetch);
 
             // act
-            Action verify = () => loader.InterruptDelay();
+            Func<Task> verify = () => loader.DispatchAsync();
 
             // assert
-            Assert.Null(Record.Exception(verify));
+            Assert.Null(await Record.ExceptionAsync(verify)
+                .ConfigureAwait(false));
         }
 
-        [Fact(DisplayName = "InterruptDelay: Should interrupt the 10 minutes delay")]
-        public async Task InterruptDelay()
+        [Fact(DisplayName = "DispatchAsync: Should do nothing if batching is disabled")]
+        public async Task DispatchAsyncNoBatching()
+        {
+            // arrange
+            Result<string> expectedResult = Result<string>.Resolve("Bar");
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new[] { expectedResult })
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>
+            {
+                Batching = false
+            };
+            var loader = new DataLoader<string, string>(options, fetch);
+
+            // this would block if batching would be enabled
+            Result<string> loadResult = await loader.LoadAsync("Foo")
+                .ConfigureAwait(false);
+
+            // act
+            await loader.DispatchAsync().ConfigureAwait(false);
+
+            // assert
+            Assert.Equal(expectedResult.Value, loadResult.Value);
+        }
+
+        [Fact(DisplayName = "DispatchAsync: Should do a manual dispatch if auto dispatching is disabled")]
+        public async Task DispatchAsyncManual()
+        {
+            // arrange
+            Result<string> expectedResult = Result<string>.Resolve("Bar");
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new[] { expectedResult })
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>
+            {
+                AutoDispatching = false
+            };
+            var loader = new DataLoader<string, string>(options, fetch);
+
+            Task<Result<string>> loadResult = loader.LoadAsync("Foo");
+
+            // act
+            await loader.DispatchAsync().ConfigureAwait(false);
+
+            // assert
+            Assert.Equal(expectedResult.Value,
+                (await loadResult.ConfigureAwait(false)).Value);
+        }
+
+        [Fact(DisplayName = "DispatchAsync: Should interrupt the 10 minutes delay if auto dispatching is enabled")]
+        public async Task DispatchAsyncAuto()
         {
             // arrange
             Result<string> expectedResult = Result<string>.Resolve("Bar");
@@ -181,7 +231,7 @@ namespace GreenDonut
             Task<Result<string>> loadResult = loader.LoadAsync("Foo");
 
             // act
-            loader.InterruptDelay();
+            await loader.DispatchAsync().ConfigureAwait(false);
 
             // assert
             Assert.Equal(expectedResult.Value,

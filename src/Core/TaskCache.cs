@@ -131,7 +131,7 @@ namespace GreenDonut
             if (SlidingExpirartion > TimeSpan.Zero)
             {
                 _dispose = new CancellationTokenSource();
-                _expiredEntryDetectionCycle = Task.Run(async () =>
+                _expiredEntryDetectionCycle = Task.Factory.StartNew(async () =>
                 {
                     while (!_dispose.Token.IsCancellationRequested)
                     {
@@ -151,7 +151,7 @@ namespace GreenDonut
                                 .ConfigureAwait(false);
                         }
                     }
-                });
+                }, TaskCreationOptions.LongRunning);
             }
         }
 
