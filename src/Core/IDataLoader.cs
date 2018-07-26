@@ -25,7 +25,7 @@ namespace GreenDonut
         IDataLoader<TKey, TValue> Clear();
 
         /// <summary>
-        /// Loads a single value by key. This call my be return a cached value
+        /// Loads a single value by key. This call may return a cached value
         /// or enqueues this single request for bacthing if enabled.
         /// </summary>
         /// <param name="key">A unique key.</param>
@@ -36,7 +36,7 @@ namespace GreenDonut
         Task<Result<TValue>> LoadAsync(TKey key);
 
         /// <summary>
-        /// Loads multiple values by keys. This call my be return a cached
+        /// Loads multiple values by keys. This call may return a cached
         /// values and enqueues requests which were not cached for bacthing if
         /// enabled.
         /// </summary>
@@ -48,7 +48,7 @@ namespace GreenDonut
         Task<IReadOnlyList<Result<TValue>>> LoadAsync(params TKey[] keys);
 
         /// <summary>
-        /// Loads multiple values by keys. This call my be return a cached
+        /// Loads multiple values by keys. This call may return a cached
         /// values and enqueues requests which were not cached for bacthing if
         /// enabled.
         /// </summary>
