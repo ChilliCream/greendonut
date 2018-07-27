@@ -33,7 +33,7 @@ namespace GreenDonut
         /// A single result which may contain a value or information about the
         /// error which may occurred during the call.
         /// </returns>
-        Task<Result<TValue>> LoadAsync(TKey key);
+        Task<TValue> LoadAsync(TKey key);
 
         /// <summary>
         /// Loads multiple values by keys. This call may return a cached
@@ -45,7 +45,7 @@ namespace GreenDonut
         /// A list of results which may contain values and information about
         /// the errors which may occurred during the call.
         /// </returns>
-        Task<IReadOnlyList<Result<TValue>>> LoadAsync(params TKey[] keys);
+        Task<IReadOnlyList<TValue>> LoadAsync(params TKey[] keys);
 
         /// <summary>
         /// Loads multiple values by keys. This call may return a cached
@@ -57,8 +57,7 @@ namespace GreenDonut
         /// A list of results which may contain values and information about
         /// the errors which may occurred during the call.
         /// </returns>
-        Task<IReadOnlyList<Result<TValue>>> LoadAsync(
-            IReadOnlyCollection<TKey> keys);
+        Task<IReadOnlyList<TValue>> LoadAsync(IReadOnlyCollection<TKey> keys);
 
         /// <summary>
         /// Removes a single entry from the cache.
@@ -73,6 +72,6 @@ namespace GreenDonut
         /// <param name="key">A cache entry key.</param>
         /// <param name="value">A cache entry value.</param>
         /// <returns>Itself for chaining support.</returns>
-        IDataLoader<TKey, TValue> Set(TKey key, Task<Result<TValue>> value);
+        IDataLoader<TKey, TValue> Set(TKey key, Task<TValue> value);
     }
 }

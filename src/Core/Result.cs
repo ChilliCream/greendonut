@@ -12,9 +12,9 @@ namespace GreenDonut
         private Result() { }
 
         /// <summary>
-        /// Gets an error message if it is an error; otherwise null.
+        /// Gets an error if it is an error; otherwise null.
         /// </summary>
-        public string ErrorMessage { get; private set; }
+        public Exception Error { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether the result is an error.
@@ -29,18 +29,18 @@ namespace GreenDonut
         /// <summary>
         /// Creates a new error result.
         /// </summary>
-        /// <param name="errorMessage">An arbitrary error message.</param>
+        /// <param name="error">An arbitrary error.</param>
         /// <returns>An error result.</returns>
-        public static Result<TValue> Reject(string errorMessage)
+        public static Result<TValue> Reject(Exception error)
         {
-            if (string.IsNullOrWhiteSpace(errorMessage))
+            if (error == null)
             {
-                throw new ArgumentNullException(nameof(errorMessage));
+                throw new ArgumentNullException(nameof(error));
             }
 
             var result = new Result<TValue>();
 
-            result.ErrorMessage = errorMessage;
+            result.Error = error;
             result.IsError = true;
 
             return result;

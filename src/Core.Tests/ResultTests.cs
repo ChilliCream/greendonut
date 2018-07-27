@@ -7,27 +7,28 @@ namespace GreenDonut
     {
         #region Reject
 
-        [Fact(DisplayName = "Reject: Should throw an argument null exception for errorMessage")]
+        [Fact(DisplayName = "Reject: Should throw an argument null exception for error")]
         public void RejectErrorMessageNull()
         {
             // arrange
-            string errorMessage = null;
+            Exception error = null;
 
             // act
-            Action verify = () => Result<object>.Reject(errorMessage);
+            Action verify = () => Result<object>.Reject(error);
 
             // assert
-            Assert.Throws<ArgumentNullException>("errorMessage", verify);
+            Assert.Throws<ArgumentNullException>("error", verify);
         }
 
         [Fact(DisplayName = "Reject: Should not throw any exception")]
         public void RejectErrorMessageNotNull()
         {
             // arrange
-            string errorMessage = "Foo";
+            var errorMessage = "Foo";
+            var error = new Exception(errorMessage);
 
             // act
-            Action verify = () => Result<object>.Reject(errorMessage);
+            Action verify = () => Result<object>.Reject(error);
 
             // assert
             Assert.Null(Record.Exception(verify));
@@ -37,15 +38,16 @@ namespace GreenDonut
         public void Reject()
         {
             // arrange
-            string errorMessage = "Foo";
+            var errorMessage = "Foo";
+            var error = new Exception(errorMessage);
 
             // act
-            Result<string> result = Result<string>.Reject(errorMessage);
+            Result<string> result = Result<string>.Reject(error);
 
             // assert
             Assert.NotNull(result);
-            Assert.Equal("Foo", result.ErrorMessage);
             Assert.True(result.IsError);
+            Assert.Equal("Foo", result.Error?.Message);
             Assert.Null(result.Value);
         }
 
@@ -90,7 +92,7 @@ namespace GreenDonut
 
             // assert
             Assert.NotNull(result);
-            Assert.Null(result.ErrorMessage);
+            Assert.Null(result.Error);
             Assert.False(result.IsError);
             Assert.Equal("Foo", result.Value);
         }

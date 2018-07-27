@@ -4,6 +4,6 @@ using System.Threading.Tasks;
 namespace GreenDonut
 {
     internal class TaskCompletionBuffer<TKey, TValue>
-        : ConcurrentDictionary<TKey, TaskCompletionSource<Result<TValue>>>
+        : ConcurrentDictionary<TKey, TaskCompletionSource<TValue>>
     { }
 }

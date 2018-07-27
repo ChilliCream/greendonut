@@ -124,21 +124,17 @@ namespace GreenDonut
             };
             var loader = new DataLoader<string, string>(options, fetch);
 
-            loader.Set("Foo", Task.FromResult(Result<string>.Resolve("Bar")));
-            loader.Set("Bar", Task.FromResult(Result<string>.Resolve("Baz")));
+            loader.Set("Foo", Task.FromResult("Bar"));
+            loader.Set("Bar", Task.FromResult("Baz"));
 
             // act
             IDataLoader<string, string> result = loader.Clear();
 
             // assert
-            IReadOnlyList<Result<string>> loadResult = await loader
-                .LoadAsync("Foo", "Bar")
-                .ConfigureAwait(false);
+            Func<Task> verify = () => loader.LoadAsync("Foo", "Bar");
 
             Assert.Equal(loader, result);
-            Assert.Collection(loadResult,
-                v => Assert.True(v.IsError),
-                v => Assert.True(v.IsError));
+            await Assert.ThrowsAsync<Exception>(verify).ConfigureAwait(false);
         }
 
         #endregion
@@ -178,14 +174,14 @@ namespace GreenDonut
             var loader = new DataLoader<string, string>(options, fetch);
 
             // this would block if batching would be enabled
-            Result<string> loadResult = await loader.LoadAsync("Foo")
+            string loadResult = await loader.LoadAsync("Foo")
                 .ConfigureAwait(false);
 
             // act
             await loader.DispatchAsync().ConfigureAwait(false);
 
             // assert
-            Assert.Equal(expectedResult.Value, loadResult.Value);
+            Assert.Equal(expectedResult.Value, loadResult);
         }
 
         [Fact(DisplayName = "DispatchAsync: Should do a manual dispatch if auto dispatching is disabled")]
@@ -202,14 +198,14 @@ namespace GreenDonut
             };
             var loader = new DataLoader<string, string>(options, fetch);
 
-            Task<Result<string>> loadResult = loader.LoadAsync("Foo");
+            Task<string> loadResult = loader.LoadAsync("Foo");
 
             // act
             await loader.DispatchAsync().ConfigureAwait(false);
 
             // assert
             Assert.Equal(expectedResult.Value,
-                (await loadResult.ConfigureAwait(false)).Value);
+                await loadResult.ConfigureAwait(false));
         }
 
         [Fact(DisplayName = "DispatchAsync: Should interrupt the 10 minutes delay if auto dispatching is enabled")]
@@ -228,14 +224,35 @@ namespace GreenDonut
 
             await Task.Delay(10);
 
-            Task<Result<string>> loadResult = loader.LoadAsync("Foo");
+            Task<string> loadResult = loader.LoadAsync("Foo");
 
             // act
             await loader.DispatchAsync().ConfigureAwait(false);
 
             // assert
             Assert.Equal(expectedResult.Value,
-                (await loadResult.ConfigureAwait(false)).Value);
+                await loadResult.ConfigureAwait(false));
+        }
+
+        #endregion
+
+        #region Dispose
+
+        [Fact(DisplayName = "Dispose: Should dispose and not throw any exception")]
+        public void DisposeNoException()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>();
+            var loader = new DataLoader<string, string>(options, fetch);
+
+            // act
+            Action verify = () => loader.Dispose();
+
+            // assert
+            Assert.Null(Record.Exception(verify));
         }
 
         #endregion
@@ -254,7 +271,7 @@ namespace GreenDonut
             string key = null;
 
             // act
-            Func<Task<Result<string>>> verify = () => loader.LoadAsync(key);
+            Func<Task<string>> verify = () => loader.LoadAsync(key);
 
             // assert
             await Assert.ThrowsAsync<ArgumentNullException>("key", verify)
@@ -266,7 +283,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
+                await Task.FromResult(new[] { Result<string>.Resolve("Bar") })
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>()
             {
@@ -276,7 +293,7 @@ namespace GreenDonut
             var key = "Foo";
 
             // act
-            Func<Task<Result<string>>> verify = () => loader.LoadAsync(key);
+            Func<Task<string>> verify = () => loader.LoadAsync(key);
 
             // assert
             Assert.Null(await Record.ExceptionAsync(verify)
@@ -299,11 +316,11 @@ namespace GreenDonut
             var key = "Foo";
 
             // act
-            Result<string> loadResult = await loader.LoadAsync(key)
+            string loadResult = await loader.LoadAsync(key)
                 .ConfigureAwait(false);
 
             // assert
-            Assert.Equal(expectedResult.Value, loadResult?.Value);
+            Assert.Equal(expectedResult.Value, loadResult);
         }
 
         #endregion
@@ -322,7 +339,7 @@ namespace GreenDonut
             string[] keys = null;
 
             // act
-            Func<Task<IReadOnlyList<Result<string>>>> verify = () =>
+            Func<Task<IReadOnlyList<string>>> verify = () =>
                 loader.LoadAsync(keys);
 
             // assert
@@ -342,7 +359,7 @@ namespace GreenDonut
             var keys = new string[0];
 
             // act
-            Func<Task<IReadOnlyList<Result<string>>>> verify = () =>
+            Func<Task<IReadOnlyList<string>>> verify = () =>
                 loader.LoadAsync(keys);
 
             // assert
@@ -355,7 +372,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new Result<string>[0])
+                await Task.FromResult(new[] { Result<string>.Resolve("Bar") })
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>()
             {
@@ -365,7 +382,7 @@ namespace GreenDonut
             var keys = new string[] { "Foo" };
 
             // act
-            Func<Task<IReadOnlyList<Result<string>>>> verify = () =>
+            Func<Task<IReadOnlyList<string>>> verify = () =>
                 loader.LoadAsync(keys);
 
             // assert
@@ -389,13 +406,13 @@ namespace GreenDonut
             var keys = new string[] { "Foo" };
 
             // act
-            IReadOnlyList<Result<string>> loadResult = await loader
+            IReadOnlyList<string> loadResult = await loader
                 .LoadAsync(keys)
                 .ConfigureAwait(false);
 
             // assert
             Assert.Collection(loadResult,
-                r => Assert.Equal(expectedResult.Value, r.Value));
+                r => Assert.Equal(expectedResult.Value, r));
         }
 
         #endregion
@@ -411,10 +428,10 @@ namespace GreenDonut
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
-            string[] keys = null;
+            List<string> keys = null;
 
             // act
-            Func<Task<IReadOnlyList<Result<string>>>> verify = () =>
+            Func<Task<IReadOnlyList<string>>> verify = () =>
                 loader.LoadAsync(keys);
 
             // assert
@@ -431,10 +448,10 @@ namespace GreenDonut
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
-            var keys = new string[0];
+            var keys = new List<string>();
 
             // act
-            Func<Task<IReadOnlyList<Result<string>>>> verify = () =>
+            Func<Task<IReadOnlyList<string>>> verify = () =>
                 loader.LoadAsync(keys);
 
             // assert
@@ -447,17 +464,17 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new Result<string>[0])
+                await Task.FromResult(new[] { Result<string>.Resolve("Bar") })
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>()
             {
                 Batching = false
             };
             var loader = new DataLoader<string, string>(options, fetch);
-            var keys = new string[] { "Foo" };
+            var keys = new List<string> { "Foo" };
 
             // act
-            Func<Task<IReadOnlyList<Result<string>>>> verify = () =>
+            Func<Task<IReadOnlyList<string>>> verify = () =>
                 loader.LoadAsync(keys);
 
             // assert
@@ -478,19 +495,19 @@ namespace GreenDonut
                 Batching = false
             };
             var loader = new DataLoader<string, string>(options, fetch);
-            var keys = new string[] { "Foo" };
+            var keys = new List<string> { "Foo" };
 
             // act
-            IReadOnlyList<Result<string>> loadResult = await loader
+            IReadOnlyList<string> loadResult = await loader
                 .LoadAsync(keys)
                 .ConfigureAwait(false);
 
             // assert
             Assert.Collection(loadResult,
-                r => Assert.Equal(expectedResult.Value, r.Value));
+                v => Assert.Equal(expectedResult.Value, v));
         }
 
-        [Fact(DisplayName = "LoadAsync: Should return results over time by using auto dispatching")]
+        [Fact(DisplayName = "LoadAsync: Should throw one exception for not existing value regarding key 'Qux'")]
         public async Task LoadAutoDispatching()
         {
             // arrange
@@ -513,8 +530,10 @@ namespace GreenDonut
                     }
                     else
                     {
-                        values.Add(Result<string>
-                            .Reject($"Value for key \"{key}\" not found"));
+                        var error = new Exception($"Value for key \"{key}\" " +
+                            "not found");
+
+                        values.Add(Result<string>.Reject(error));
                     }
                 }
 
@@ -522,20 +541,13 @@ namespace GreenDonut
             };
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
-            var keys = new string[] { "Foo", "Bar", "Baz", "Qux" };
+            var keys = new List<string> { "Foo", "Bar", "Baz", "Qux" };
 
             // act
-            IReadOnlyList<Result<string>> loadResult = await loader
-                .LoadAsync(keys)
-                .ConfigureAwait(false);
+            Func<Task> verify = () => loader.LoadAsync(keys);
 
             // assert
-            Assert.Collection(loadResult,
-                r => Assert.Equal("Bar", r.Value),
-                r => Assert.Equal("Baz", r.Value),
-                r => Assert.Equal("Foo", r.Value),
-                r => Assert.Equal("Value for key \"Qux\" not found",
-                    r.ErrorMessage));
+            await Assert.ThrowsAsync<Exception>(verify).ConfigureAwait(false);
         }
 
         #endregion
@@ -553,7 +565,7 @@ namespace GreenDonut
             var loader = new DataLoader<string, string>(options, fetch);
             string key = null;
 
-            loader.Set("Foo", Task.FromResult(Result<string>.Resolve("Foo")));
+            loader.Set("Foo", Task.FromResult("Bar"));
 
             // act
             Action verify = () => loader.Remove(key);
@@ -594,17 +606,16 @@ namespace GreenDonut
             var loader = new DataLoader<string, string>(options, fetch);
             var key = "Foo";
 
-            loader.Set(key, Task.FromResult(Result<string>.Resolve("Bar")));
+            loader.Set(key, Task.FromResult("Bar"));
 
             // act
             IDataLoader<string, string> result = loader.Remove(key);
 
             // assert
-            Result<string> loadResult = await loader.LoadAsync(key)
-                .ConfigureAwait(false);
+            Task<string> loadResult = loader.LoadAsync(key);
 
             Assert.Equal(loader, result);
-            Assert.True(loadResult?.IsError);
+            Assert.NotNull(loadResult.Exception);
         }
 
         #endregion
@@ -621,7 +632,7 @@ namespace GreenDonut
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             string key = null;
-            var value = Task.FromResult(Result<string>.Resolve("Foo"));
+            var value = Task.FromResult("Foo");
 
             // act
             Action verify = () => loader.Set(key, value);
@@ -640,7 +651,7 @@ namespace GreenDonut
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             var key = "Foo";
-            Task<Result<string>> value = null;
+            Task<string> value = null;
 
             // act
             Action verify = () => loader.Set(key, value);
@@ -659,7 +670,7 @@ namespace GreenDonut
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             var key = "Foo";
-            var value = Task.FromResult(Result<string>.Resolve("Bar"));
+            var value = Task.FromResult("Bar");
 
             // act
             Action verify = () => loader.Set(key, value);
@@ -678,17 +689,17 @@ namespace GreenDonut
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             var key = "Foo";
-            var value = Task.FromResult(Result<string>.Resolve("Bar"));
+            var value = Task.FromResult("Bar");
 
             // act
             IDataLoader<string, string> result = loader.Set(key, value);
 
             // assert
-            Result<string> loadResult = await loader.LoadAsync(key)
+            string loadResult = await loader.LoadAsync(key)
                 .ConfigureAwait(false);
 
             Assert.Equal(loader, result);
-            Assert.Equal(value.Result.Value, loadResult?.Value);
+            Assert.Equal(value.Result, loadResult);
         }
 
         [Fact(DisplayName = "Set: Should result in 'Bar'")]
@@ -701,18 +712,18 @@ namespace GreenDonut
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             var key = "Foo";
-            var first = Task.FromResult(Result<string>.Resolve("Bar"));
-            var second = Task.FromResult(Result<string>.Resolve("Baz"));
+            var first = Task.FromResult("Bar");
+            var second = Task.FromResult("Baz");
 
             // act
             loader.Set(key, first);
             loader.Set(key, second);
 
             // assert
-            Result<string> loadResult = await loader.LoadAsync(key)
+            string loadResult = await loader.LoadAsync(key)
                 .ConfigureAwait(false);
             
-            Assert.Equal(first.Result.Value, loadResult.Value);
+            Assert.Equal(first.Result, loadResult);
         }
 
         #endregion
