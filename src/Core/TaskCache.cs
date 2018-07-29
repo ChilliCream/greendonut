@@ -14,7 +14,6 @@ namespace GreenDonut
             ImmutableDictionary<TKey, CacheEntry>.Empty;
         private CancellationTokenSource _dispose;
         private bool _disposed;
-        private Task _expiredEntryDetectionCycle;
         private LinkedListNode<TKey> _first;
         private readonly LinkedList<TKey> _ranking = new LinkedList<TKey>();
         private readonly object _sync = new object();
@@ -33,31 +32,6 @@ namespace GreenDonut
 
         public int Usage => _cache.Count;
 
-        public void Add(TKey key, Task<TValue> value)
-        {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-
-            _sync.Lock(
-                () => !_cache.ContainsKey(key),
-                () =>
-                {
-                    CacheEntry entry = new CacheEntry(key, value);
-
-                    ClearSpaceForNewEntry();
-                    _ranking.AddFirst(entry.Rank);
-                    _cache = _cache.Add(entry.Key, entry);
-                    _first = entry.Rank;
-                });
-        }
-
         public void Clear()
         {
             _sync.Lock(
@@ -68,23 +42,6 @@ namespace GreenDonut
                     _cache = _cache.Clear();
                     _first = null;
                 });
-        }
-
-        public Task<TValue> GetAsync(TKey key)
-        {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
-            if (_cache.TryGetValue(key, out CacheEntry entry))
-            {
-                TouchEntry(entry);
-
-                return entry.Value;
-            }
-
-            return null;
         }
 
         public void Remove(TKey key)
@@ -102,6 +59,56 @@ namespace GreenDonut
                     _cache = _cache.Remove(key);
                     _first = _ranking.First;
                 });
+        }
+
+        public bool TryAdd(TKey key, Task<TValue> value)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            var added = false;
+
+            _sync.Lock(
+                () => !_cache.ContainsKey(key),
+                () =>
+                {
+                    var entry = new CacheEntry(key, value);
+
+                    ClearSpaceForNewEntry();
+                    _ranking.AddFirst(entry.Rank);
+                    _cache = _cache.Add(entry.Key, entry);
+                    _first = entry.Rank;
+                    added = true;
+                });
+
+            return added;
+        }
+
+        public bool TryGetValue(TKey key, out Task<TValue> value)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            if (_cache.TryGetValue(key, out CacheEntry entry))
+            {
+                TouchEntry(entry);
+                value = entry.Value;
+
+                return true;
+            }
+
+            value = null;
+
+            return false;
         }
 
         private void TouchEntry(CacheEntry entry)
@@ -133,7 +140,7 @@ namespace GreenDonut
             if (SlidingExpirartion > TimeSpan.Zero)
             {
                 _dispose = new CancellationTokenSource();
-                _expiredEntryDetectionCycle = Task.Factory.StartNew(async () =>
+                Task.Factory.StartNew(async () =>
                 {
                     while (!_dispose.Token.IsCancellationRequested)
                     {
@@ -181,6 +188,7 @@ namespace GreenDonut
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -191,7 +199,6 @@ namespace GreenDonut
                 {
                     Clear();
                     _dispose?.Cancel();
-                    _expiredEntryDetectionCycle?.Dispose();
                     _dispose?.Dispose();
                 }
 

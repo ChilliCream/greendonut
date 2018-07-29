@@ -12,7 +12,7 @@ namespace GreenDonut
         public void ConstructorNoException()
         {
             // arrange
-            int cacheSize = 10;
+            var cacheSize = 10;
             TimeSpan slidingExpiration = TimeSpan.Zero;
 
             // act
@@ -62,8 +62,8 @@ namespace GreenDonut
             int expectedExpirationInMilliseconds)
         {
             // arrange
-            int cacheSize = 10;
-            TimeSpan slidingExpiration = TimeSpan
+            var cacheSize = 10;
+            var slidingExpiration = TimeSpan
                 .FromMilliseconds(expirationInMilliseconds);
             var cache = new TaskCache<string, string>(cacheSize,
                 slidingExpiration);
@@ -89,14 +89,14 @@ namespace GreenDonut
         public void Usage(string[] values, int expectedUsage)
         {
             // arrange
-            int cacheSize = 10;
+            var cacheSize = 10;
             TimeSpan slidingExpiration = TimeSpan.Zero;
             var cache = new TaskCache<string, string>(cacheSize,
                 slidingExpiration);
 
             foreach (var value in values)
             {
-                cache.Add($"Key:{value}", Task.FromResult(value));
+                cache.TryAdd($"Key:{value}", Task.FromResult(value));
             }
 
             // act
@@ -108,116 +108,13 @@ namespace GreenDonut
 
         #endregion
 
-        #region Add
-
-        [Fact(DisplayName = "Add: Should throw an argument null exception for key")]
-        public void AddKeyNull()
-        {
-            // arrange
-            int cacheSize = 10;
-            TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
-                slidingExpiration);
-            string key = null;
-            var value = Task.FromResult("Foo");
-
-            // act
-            Action verify = () => cache.Add(key, value);
-
-            // assert
-            Assert.Throws<ArgumentNullException>("key", verify);
-        }
-
-        [Fact(DisplayName = "Add: Should throw an argument null exception for value")]
-        public void AddValueNull()
-        {
-            // arrange
-            int cacheSize = 10;
-            TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
-                slidingExpiration);
-            var key = "Foo";
-            Task<string> value = null;
-
-            // act
-            Action verify = () => cache.Add(key, value);
-
-            // assert
-            Assert.Throws<ArgumentNullException>("value", verify);
-        }
-
-        [Fact(DisplayName = "Add: Should not throw any exception")]
-        public void AddNoException()
-        {
-            // arrange
-            int cacheSize = 10;
-            TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
-                slidingExpiration);
-            var key = "Foo";
-            var value = Task.FromResult("Bar");
-
-            // act
-            Action verify = () => cache.Add(key, value);
-
-            // assert
-            Assert.Null(Record.Exception(verify));
-        }
-
-        [Fact(DisplayName = "Add: Should result in a new cache entry")]
-        public async Task AddNewCacheEntry()
-        {
-            // arrange
-            int cacheSize = 10;
-            TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
-                slidingExpiration);
-            var key = "Foo";
-            var value = Task.FromResult("Bar");
-
-            // act
-            cache.Add(key, value);
-
-            // assert
-            string expected = await value.ConfigureAwait(false);
-            string actual = await cache.GetAsync(key).ConfigureAwait(false);
-
-            Assert.Equal(expected, actual);
-        }
-
-        [Fact(DisplayName = "Add: Should result in 'Bar'")]
-        public async Task AddTwice()
-        {
-            // arrange
-            int cacheSize = 10;
-            TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
-                slidingExpiration);
-            var key = "Foo";
-            var first = Task.FromResult("Bar");
-            var second = Task.FromResult("Baz");
-
-            // act
-            cache.Add(key, first);
-            cache.Add(key, second);
-            cache.Add("Bar", second);
-
-            // assert
-            string expected = await first.ConfigureAwait(false);
-            string actual = await cache.GetAsync(key).ConfigureAwait(false);
-
-            Assert.Equal(expected, actual);
-        }
-
-        #endregion
-
         #region Clear
 
         [Fact(DisplayName = "Clear: Should not throw any exception")]
         public void ClearNoException()
         {
             // arrange
-            int cacheSize = 10;
+            var cacheSize = 10;
             TimeSpan slidingExpiration = TimeSpan.Zero;
             var cache = new TaskCache<string, string>(cacheSize,
                 slidingExpiration);
@@ -233,7 +130,7 @@ namespace GreenDonut
         public void ClearEmptyCache()
         {
             // arrange
-            int cacheSize = 10;
+            var cacheSize = 10;
             TimeSpan slidingExpiration = TimeSpan.Zero;
             var cache = new TaskCache<string, string>(cacheSize,
                 slidingExpiration);
@@ -249,13 +146,13 @@ namespace GreenDonut
         public void ClearAllEntries()
         {
             // arrange
-            int cacheSize = 10;
+            var cacheSize = 10;
             TimeSpan slidingExpiration = TimeSpan.Zero;
             var cache = new TaskCache<string, string>(cacheSize,
                 slidingExpiration);
 
-            cache.Add("Foo", Task.FromResult("Bar"));
-            cache.Add("Bar", Task.FromResult("Baz"));
+            cache.TryAdd("Foo", Task.FromResult("Bar"));
+            cache.TryAdd("Bar", Task.FromResult("Baz"));
 
             // act
             cache.Clear();
@@ -266,75 +163,13 @@ namespace GreenDonut
 
         #endregion
 
-        #region GetAsync
-
-        [Fact(DisplayName = "GetAsync: Should throw an argument null exception for key")]
-        public async Task GetAsyncKeyNull()
-        {
-            // arrange
-            int cacheSize = 10;
-            TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
-                slidingExpiration);
-            string key = null;
-
-            // act
-            Func<Task<string>> verify = () => cache.GetAsync(key);
-
-            // assert
-            await Assert.ThrowsAsync<ArgumentNullException>("key", verify)
-                .ConfigureAwait(false);
-        }
-
-        [Fact(DisplayName = "GetAsync: Should return null")]
-        public void GetAsyncNullResult()
-        {
-            // arrange
-            int cacheSize = 10;
-            TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
-                slidingExpiration);
-            var key = "Foo";
-
-            // act
-            Task<string> result = cache.GetAsync(key);
-
-            // assert
-            Assert.Null(result);
-        }
-
-        [Fact(DisplayName = "GetAsync: Should return one result")]
-        public async Task GetAsyncResult()
-        {
-            // arrange
-            int cacheSize = 10;
-            TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
-                slidingExpiration);
-            var key = "Foo";
-            var value = Task.FromResult("Bar");
-
-            cache.Add(key, value);
-
-            // act
-            string actual = await cache.GetAsync(key)
-                .ConfigureAwait(false);
-
-            // assert
-            string expected = await value.ConfigureAwait(false);
-
-            Assert.Equal(expected, actual);
-        }
-
-        #endregion
-
         #region Remove
 
         [Fact(DisplayName = "Remove: Should throw an argument null exception for key")]
         public void RemoveKeyNull()
         {
             // arrange
-            int cacheSize = 10;
+            var cacheSize = 10;
             TimeSpan slidingExpiration = TimeSpan.Zero;
             var cache = new TaskCache<string, string>(cacheSize,
                 slidingExpiration);
@@ -351,7 +186,7 @@ namespace GreenDonut
         public void RemoveNoException()
         {
             // arrange
-            int cacheSize = 10;
+            var cacheSize = 10;
             TimeSpan slidingExpiration = TimeSpan.Zero;
             var cache = new TaskCache<string, string>(cacheSize,
                 slidingExpiration);
@@ -368,21 +203,190 @@ namespace GreenDonut
         public void RemoveEntry()
         {
             // arrange
-            int cacheSize = 10;
+            var cacheSize = 10;
             TimeSpan slidingExpiration = TimeSpan.Zero;
             var cache = new TaskCache<string, string>(cacheSize,
                 slidingExpiration);
             var key = "Foo";
 
-            cache.Add(key, Task.FromResult("Bar"));
+            cache.TryAdd(key, Task.FromResult("Bar"));
 
             // act
             cache.Remove(key);
 
             // assert
-            Task<string> actual = cache.GetAsync(key);
-            
+            var exists = cache.TryGetValue(key, out Task<string> actual);
+
+            Assert.False(exists);
             Assert.Null(actual);
+        }
+
+        #endregion
+
+        #region TryAdd
+
+        [Fact(DisplayName = "TryAdd: Should throw an argument null exception for key")]
+        public void TryAddKeyNull()
+        {
+            // arrange
+            var cacheSize = 10;
+            TimeSpan slidingExpiration = TimeSpan.Zero;
+            var cache = new TaskCache<string, string>(cacheSize,
+                slidingExpiration);
+            string key = null;
+            var value = Task.FromResult("Foo");
+
+            // act
+            Action verify = () => cache.TryAdd(key, value);
+
+            // assert
+            Assert.Throws<ArgumentNullException>("key", verify);
+        }
+
+        [Fact(DisplayName = "TryAdd: Should throw an argument null exception for value")]
+        public void TryAddValueNull()
+        {
+            // arrange
+            var cacheSize = 10;
+            TimeSpan slidingExpiration = TimeSpan.Zero;
+            var cache = new TaskCache<string, string>(cacheSize,
+                slidingExpiration);
+            var key = "Foo";
+            Task<string> value = null;
+
+            // act
+            Action verify = () => cache.TryAdd(key, value);
+
+            // assert
+            Assert.Throws<ArgumentNullException>("value", verify);
+        }
+
+        [Fact(DisplayName = "TryAdd: Should not throw any exception")]
+        public void TryAddNoException()
+        {
+            // arrange
+            var cacheSize = 10;
+            TimeSpan slidingExpiration = TimeSpan.Zero;
+            var cache = new TaskCache<string, string>(cacheSize,
+                slidingExpiration);
+            var key = "Foo";
+            var value = Task.FromResult("Bar");
+
+            // act
+            Action verify = () => cache.TryAdd(key, value);
+
+            // assert
+            Assert.Null(Record.Exception(verify));
+        }
+
+        [Fact(DisplayName = "TryAdd: Should result in a new cache entry")]
+        public async Task TryAddNewCacheEntry()
+        {
+            // arrange
+            var cacheSize = 10;
+            TimeSpan slidingExpiration = TimeSpan.Zero;
+            var cache = new TaskCache<string, string>(cacheSize,
+                slidingExpiration);
+            var key = "Foo";
+            var expected = Task.FromResult("Bar");
+
+            // act
+            var added = cache.TryAdd(key, expected);
+
+            // assert
+            var exists = cache.TryGetValue(key, out Task<string> actual);
+
+            Assert.True(added);
+            Assert.True(exists);
+            Assert.Equal(await expected.ConfigureAwait(false),
+                await actual.ConfigureAwait(false));
+        }
+
+        [Fact(DisplayName = "TryAdd: Should result in 'Bar'")]
+        public async Task TryAddTwice()
+        {
+            // arrange
+            var cacheSize = 10;
+            TimeSpan slidingExpiration = TimeSpan.Zero;
+            var cache = new TaskCache<string, string>(cacheSize,
+                slidingExpiration);
+            var key = "Foo";
+            var expected = Task.FromResult("Bar");
+            var another = Task.FromResult("Baz");
+
+            // act
+            var addedFirst = cache.TryAdd(key, expected);
+            var addedSecond = cache.TryAdd(key, another);
+
+            // assert
+            var exists = cache.TryGetValue(key, out Task<string> actual);
+
+            Assert.True(addedFirst);
+            Assert.False(addedSecond);
+            Assert.True(exists);
+            Assert.Equal(await expected.ConfigureAwait(false),
+                await actual.ConfigureAwait(false));
+        }
+
+        #endregion
+
+        #region TryGetValue
+
+        [Fact(DisplayName = "TryGetValue: Should throw an argument null exception for key")]
+        public void TryGetValueKeyNull()
+        {
+            // arrange
+            var cacheSize = 10;
+            TimeSpan slidingExpiration = TimeSpan.Zero;
+            var cache = new TaskCache<string, string>(cacheSize,
+                slidingExpiration);
+            string key = null;
+
+            // act
+            Action verify = () => cache.TryGetValue(key,
+                out Task<string> value);
+
+            // assert
+            Assert.Throws<ArgumentNullException>("key", verify);
+        }
+
+        [Fact(DisplayName = "TryGetValue: Should return false")]
+        public void TryGetValueNullResult()
+        {
+            // arrange
+            var cacheSize = 10;
+            TimeSpan slidingExpiration = TimeSpan.Zero;
+            var cache = new TaskCache<string, string>(cacheSize,
+                slidingExpiration);
+            var key = "Foo";
+
+            // act
+            var result = cache.TryGetValue(key, out Task<string> value);
+
+            // assert
+            Assert.False(result);
+        }
+
+        [Fact(DisplayName = "TryGetValue: Should return one result")]
+        public async Task TryGetValueResult()
+        {
+            // arrange
+            var cacheSize = 10;
+            TimeSpan slidingExpiration = TimeSpan.Zero;
+            var cache = new TaskCache<string, string>(cacheSize,
+                slidingExpiration);
+            var key = "Foo";
+            var expected = Task.FromResult("Bar");
+
+            cache.TryAdd(key, expected);
+
+            // act
+            var result = cache.TryGetValue(key, out Task<string> actual);
+
+            // assert
+            Assert.True(result);
+            Assert.Equal(await expected.ConfigureAwait(false),
+                await actual.ConfigureAwait(false));
         }
 
         #endregion

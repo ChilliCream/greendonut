@@ -26,28 +26,35 @@ namespace GreenDonut
         int Usage { get; }
 
         /// <summary>
-        /// Adds a single entry to the cache if it is not already there.
-        /// </summary>
-        /// <param name="key">A cache entry key.</param>
-        /// <param name="value">A cache entry value.</param>
-        void Add(TKey key, Task<TValue> value);
-
-        /// <summary>
         /// Clears the complete cache.
         /// </summary>
         void Clear();
-
-        /// <summary>
-        /// Gets a single entry from the cache.
-        /// </summary>
-        /// <param name="key">A cache entry key.</param>
-        /// <returns>A single cache entry value.</returns>
-        Task<TValue> GetAsync(TKey key);
 
         /// <summary>
         /// Removes a specific entry from the cache.
         /// </summary>
         /// <param name="key">A cache entry key.</param>
         void Remove(TKey key);
+
+        /// <summary>
+        /// Tries to add a single entry to the cache. It does nothing if the
+        /// cache entry exists already.
+        /// </summary>
+        /// <param name="key">A cache entry key.</param>
+        /// <param name="value">A cache entry value.</param>
+        /// <returns>
+        /// A value indicating whether the add was successful.
+        /// </returns>
+        bool TryAdd(TKey key, Task<TValue> value);
+
+        /// <summary>
+        /// Tries to gets a single entry from the cache.
+        /// </summary>
+        /// <param name="key">A cache entry key.</param>
+        /// <param name="value">A single cache entry value.</param>
+        /// <returns>
+        /// A value indicating whether the get request returned a entry.
+        /// </returns>
+        bool TryGetValue(TKey key, out Task<TValue> value);
     }
 }
