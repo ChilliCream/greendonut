@@ -28,7 +28,6 @@ namespace GreenDonut
     {
         private readonly object _sync = new object();
         private bool _disposed;
-        private Task _batchDispatcher;
         private TaskCompletionBuffer<TKey, TValue> _buffer;
         private ITaskCache<TKey, TValue> _cache;
         private readonly Func<TKey, TKey> _cacheKeyResolver;
@@ -380,7 +379,7 @@ namespace GreenDonut
                 // function is called once within the constructor.
                 _delaySignal = new AutoResetEvent(true);
                 _stopBatching = new CancellationTokenSource();
-                _batchDispatcher = Task.Factory.StartNew(async () =>
+                Task.Factory.StartNew(async () =>
                 {
                     while (!_stopBatching.IsCancellationRequested)
                     {
@@ -410,16 +409,11 @@ namespace GreenDonut
                     Clear();
                     _stopBatching?.Cancel();
                     _delaySignal?.Set();
-                    // todo: fix "A task may only be disposed if it is in a
-                    //       completion state (RanToCompletion, Faulted or
-                    //       Canceled)."
-                    //_batchDispatcher?.Dispose();
                     (_cache as IDisposable)?.Dispose();
                     _stopBatching?.Dispose();
                     _delaySignal?.Dispose();
                 }
-
-                _batchDispatcher = null;
+                
                 _buffer = null;
                 _cache = null;
                 _delaySignal = null;

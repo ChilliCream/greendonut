@@ -14,7 +14,6 @@ namespace GreenDonut
             ImmutableDictionary<TKey, CacheEntry>.Empty;
         private CancellationTokenSource _dispose;
         private bool _disposed;
-        private Task _expiredEntryDetectionCycle;
         private LinkedListNode<TKey> _first;
         private readonly LinkedList<TKey> _ranking = new LinkedList<TKey>();
         private readonly object _sync = new object();
@@ -141,7 +140,7 @@ namespace GreenDonut
             if (SlidingExpirartion > TimeSpan.Zero)
             {
                 _dispose = new CancellationTokenSource();
-                _expiredEntryDetectionCycle = Task.Factory.StartNew(async () =>
+                Task.Factory.StartNew(async () =>
                 {
                     while (!_dispose.Token.IsCancellationRequested)
                     {
@@ -200,7 +199,6 @@ namespace GreenDonut
                 {
                     Clear();
                     _dispose?.Cancel();
-                    _expiredEntryDetectionCycle?.Dispose();
                     _dispose?.Dispose();
                 }
 
