@@ -96,8 +96,7 @@ namespace GreenDonut
 
             foreach (var value in values)
             {
-                cache.Add($"Key:{value}",
-                    Task.FromResult(Result<string>.Resolve(value)));
+                cache.Add($"Key:{value}", Task.FromResult(value));
             }
 
             // act
@@ -120,7 +119,7 @@ namespace GreenDonut
             var cache = new TaskCache<string, string>(cacheSize,
                 slidingExpiration);
             string key = null;
-            var value = Task.FromResult(Result<string>.Resolve("Foo"));
+            var value = Task.FromResult("Foo");
 
             // act
             Action verify = () => cache.Add(key, value);
@@ -138,7 +137,7 @@ namespace GreenDonut
             var cache = new TaskCache<string, string>(cacheSize,
                 slidingExpiration);
             var key = "Foo";
-            Task<Result<string>> value = null;
+            Task<string> value = null;
 
             // act
             Action verify = () => cache.Add(key, value);
@@ -156,7 +155,7 @@ namespace GreenDonut
             var cache = new TaskCache<string, string>(cacheSize,
                 slidingExpiration);
             var key = "Foo";
-            var value = Task.FromResult(Result<string>.Resolve("Bar"));
+            var value = Task.FromResult("Bar");
 
             // act
             Action verify = () => cache.Add(key, value);
@@ -174,17 +173,16 @@ namespace GreenDonut
             var cache = new TaskCache<string, string>(cacheSize,
                 slidingExpiration);
             var key = "Foo";
-            var value = Task.FromResult(Result<string>.Resolve("Bar"));
+            var value = Task.FromResult("Bar");
 
             // act
             cache.Add(key, value);
 
             // assert
-            Result<string> expected = await value.ConfigureAwait(false);
-            Result<string> actual = await cache.GetAsync(key)
-                .ConfigureAwait(false);
+            string expected = await value.ConfigureAwait(false);
+            string actual = await cache.GetAsync(key).ConfigureAwait(false);
 
-            Assert.Equal(expected.Value, actual.Value);
+            Assert.Equal(expected, actual);
         }
 
         [Fact(DisplayName = "Add: Should result in 'Bar'")]
@@ -196,8 +194,8 @@ namespace GreenDonut
             var cache = new TaskCache<string, string>(cacheSize,
                 slidingExpiration);
             var key = "Foo";
-            var first = Task.FromResult(Result<string>.Resolve("Bar"));
-            var second = Task.FromResult(Result<string>.Resolve("Baz"));
+            var first = Task.FromResult("Bar");
+            var second = Task.FromResult("Baz");
 
             // act
             cache.Add(key, first);
@@ -205,11 +203,10 @@ namespace GreenDonut
             cache.Add("Bar", second);
 
             // assert
-            Result<string> expected = await first.ConfigureAwait(false);
-            Result<string> actual = await cache.GetAsync(key)
-                .ConfigureAwait(false);
+            string expected = await first.ConfigureAwait(false);
+            string actual = await cache.GetAsync(key).ConfigureAwait(false);
 
-            Assert.Equal(expected.Value, actual.Value);
+            Assert.Equal(expected, actual);
         }
 
         #endregion
@@ -257,8 +254,8 @@ namespace GreenDonut
             var cache = new TaskCache<string, string>(cacheSize,
                 slidingExpiration);
 
-            cache.Add("Foo", Task.FromResult(Result<string>.Resolve("Bar")));
-            cache.Add("Bar", Task.FromResult(Result<string>.Resolve("Baz")));
+            cache.Add("Foo", Task.FromResult("Bar"));
+            cache.Add("Bar", Task.FromResult("Baz"));
 
             // act
             cache.Clear();
@@ -282,15 +279,15 @@ namespace GreenDonut
             string key = null;
 
             // act
-            Func<Task<Result<string>>> verify = () => cache.GetAsync(key);
+            Func<Task<string>> verify = () => cache.GetAsync(key);
 
             // assert
             await Assert.ThrowsAsync<ArgumentNullException>("key", verify)
                 .ConfigureAwait(false);
         }
 
-        [Fact(DisplayName = "GetAsync: Should not throw any exception")]
-        public async Task GetAsyncNoException()
+        [Fact(DisplayName = "GetAsync: Should return null")]
+        public void GetAsyncNullResult()
         {
             // arrange
             int cacheSize = 10;
@@ -300,11 +297,10 @@ namespace GreenDonut
             var key = "Foo";
 
             // act
-            Func<Task<Result<string>>> verify = () => cache.GetAsync(key);
+            Task<string> result = cache.GetAsync(key);
 
             // assert
-            Assert.Null(await Record.ExceptionAsync(verify)
-                .ConfigureAwait(false));
+            Assert.Null(result);
         }
 
         [Fact(DisplayName = "GetAsync: Should return one result")]
@@ -316,37 +312,18 @@ namespace GreenDonut
             var cache = new TaskCache<string, string>(cacheSize,
                 slidingExpiration);
             var key = "Foo";
-            var value = Task.FromResult(Result<string>.Resolve("Bar"));
+            var value = Task.FromResult("Bar");
 
             cache.Add(key, value);
 
             // act
-            Result<string> actual = await cache.GetAsync(key)
+            string actual = await cache.GetAsync(key)
                 .ConfigureAwait(false);
 
             // assert
-            Result<string> expected = await value.ConfigureAwait(false);
+            string expected = await value.ConfigureAwait(false);
 
-            Assert.Equal(expected.Value, actual.Value);
-        }
-
-        [Fact(DisplayName = "GetAsync: Should return null")]
-        public async Task GetAsyncNull()
-        {
-            // arrange
-            int cacheSize = 10;
-            TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
-                slidingExpiration);
-            var key = "Foo";
-            var value = Task.FromResult(Result<string>.Resolve("Bar"));
-
-            // act
-            Result<string> actual = await cache.GetAsync(key)
-                .ConfigureAwait(false);
-
-            // assert
-            Assert.Null(actual);
+            Assert.Equal(expected, actual);
         }
 
         #endregion
@@ -388,7 +365,7 @@ namespace GreenDonut
         }
 
         [Fact(DisplayName = "Remove: Should remove an existing entry")]
-        public async Task RemoveEntry()
+        public void RemoveEntry()
         {
             // arrange
             int cacheSize = 10;
@@ -397,14 +374,13 @@ namespace GreenDonut
                 slidingExpiration);
             var key = "Foo";
 
-            cache.Add(key, Task.FromResult(Result<string>.Resolve("Bar")));
+            cache.Add(key, Task.FromResult("Bar"));
 
             // act
             cache.Remove(key);
 
             // assert
-            Result<string> actual = await cache.GetAsync(key)
-                .ConfigureAwait(false);
+            Task<string> actual = cache.GetAsync(key);
             
             Assert.Null(actual);
         }

@@ -33,7 +33,7 @@ namespace GreenDonut
 
         public int Usage => _cache.Count;
 
-        public void Add(TKey key, Task<Result<TValue>> value)
+        public void Add(TKey key, Task<TValue> value)
         {
             if (key == null)
             {
@@ -70,7 +70,7 @@ namespace GreenDonut
                 });
         }
 
-        public Task<Result<TValue>> GetAsync(TKey key)
+        public Task<TValue> GetAsync(TKey key)
         {
             if (key == null)
             {
@@ -80,9 +80,11 @@ namespace GreenDonut
             if (_cache.TryGetValue(key, out CacheEntry entry))
             {
                 TouchEntry(entry);
+
+                return entry.Value;
             }
 
-            return entry?.Value ?? Task.FromResult<Result<TValue>>(null);
+            return null;
         }
 
         public void Remove(TKey key)
@@ -157,7 +159,7 @@ namespace GreenDonut
 
         private class CacheEntry
         {
-            public CacheEntry(TKey key, Task<Result<TValue>> value)
+            public CacheEntry(TKey key, Task<TValue> value)
             {
                 Key = key;
                 LastTouched = DateTimeOffset.UtcNow;
@@ -171,7 +173,7 @@ namespace GreenDonut
 
             public LinkedListNode<TKey> Rank { get; }
 
-            public Task<Result<TValue>> Value { get; }
+            public Task<TValue> Value { get; }
         }
 
         #region IDisposable

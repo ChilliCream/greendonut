@@ -130,7 +130,7 @@ namespace GreenDonut
             IReadOnlyList<TKey> keys);
 
         /// <inheritdoc />
-        public Task<Result<TValue>> LoadAsync(TKey key)
+        public Task<TValue> LoadAsync(TKey key)
         {
             if (key == null)
             {
@@ -141,15 +141,15 @@ namespace GreenDonut
 
             if (_options.Caching)
             {
-                Task<Result<TValue>> cachedValue = _cache.GetAsync(resolvedKey);
+                Task<TValue> cachedValue = _cache.GetAsync(resolvedKey);
 
-                if (cachedValue?.Result != null)
+                if (cachedValue != null)
                 {
                     return cachedValue;
                 }
             }
 
-            var promise = new TaskCompletionSource<Result<TValue>>();
+            var promise = new TaskCompletionSource<TValue>();
 
             if (_options.Batching)
             {
@@ -171,7 +171,7 @@ namespace GreenDonut
         }
 
         /// <inheritdoc />
-        public async Task<IReadOnlyList<Result<TValue>>> LoadAsync(
+        public async Task<IReadOnlyList<TValue>> LoadAsync(
             params TKey[] keys)
         {
             if (keys == null)
@@ -190,7 +190,7 @@ namespace GreenDonut
         }
 
         /// <inheritdoc />
-        public async Task<IReadOnlyList<Result<TValue>>> LoadAsync(
+        public async Task<IReadOnlyList<TValue>> LoadAsync(
             IReadOnlyCollection<TKey> keys)
         {
             if (keys == null)
@@ -204,8 +204,23 @@ namespace GreenDonut
                     "There must be at least one key");
             }
 
-            return await Task.WhenAll(keys.Select(LoadAsync))
-                .ConfigureAwait(false);
+            var tasks = new Task<TValue>[keys.Count];
+            var index = 0;
+
+            foreach (TKey key in keys)
+            {
+                tasks[index++] = LoadAsync(key);
+            }
+
+            for (var i = 0; i < tasks.Length; i++)
+            {
+                if (tasks[i] is IAsyncResult result)
+                {
+                    result.AsyncWaitHandle.WaitOne();
+                }
+            }
+
+            return await Task.WhenAll(tasks).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -226,7 +241,7 @@ namespace GreenDonut
         /// <inheritdoc />
         public IDataLoader<TKey, TValue> Set(
             TKey key,
-            Task<Result<TValue>> value)
+            Task<TValue> value)
         {
             if (key == null)
             {
@@ -240,7 +255,7 @@ namespace GreenDonut
 
             TKey resolvedKey = _cacheKeyResolver(key);
 
-            if (_cache.GetAsync(resolvedKey)?.Result == null)
+            if (_cache.GetAsync(resolvedKey) == null)
             {
                 _cache.Add(resolvedKey, value);
             }
@@ -259,22 +274,20 @@ namespace GreenDonut
 
         private async Task DispatchAsync(
             TKey resolvedKey,
-            TaskCompletionSource<Result<TValue>> promise)
+            TaskCompletionSource<TValue> promise)
         {
             var keys = new TKey[] { resolvedKey };
-            IReadOnlyCollection<Result<TValue>> values = await Fetch(keys)
+            IReadOnlyCollection<Result<TValue>> results = await Fetch(keys)
                 .ConfigureAwait(false);
 
-            if (values.Count == 1)
+            if (results.Count == 1)
             {
-                promise.SetResult(values.First());
+                SetBatchResult(promise, keys.First(), results.First());
             }
             else
             {
-                var error = "Fetch should have returned exactly one result " +
-                    $"but instead returned \"{values.Count}\" results.";
-
-                promise.SetResult(Result<TValue>.Reject(error));
+                promise.SetException(
+                    Errors.CreateMustHaveOneResult(results.Count));
             }
         }
 
@@ -316,28 +329,41 @@ namespace GreenDonut
                 });
         }
 
+        private void SetBatchResult(
+            TaskCompletionSource<TValue> promise,
+            TKey key,
+            Result<TValue> result)
+        {
+            if (result.IsError)
+            {
+                promise.SetException(result.Error);
+            }
+            else
+            {
+                promise.SetResult(result.Value);
+            }
+        }
+
         private void SetBatchResults(
             TaskCompletionBuffer<TKey, TValue> buffer,
             IReadOnlyList<TKey> keys,
-            IReadOnlyList<Result<TValue>> values)
+            IReadOnlyList<Result<TValue>> results)
         {
-            if (keys.Count == values.Count)
+            if (keys.Count == results.Count)
             {
                 for (var i = 0; i < buffer.Count; i++)
                 {
-                    buffer[keys[i]].SetResult(values[i]);
+                    SetBatchResult(buffer[keys[i]], keys[i], results[i]);
                 }
             }
             else
             {
-                var error = "Fetch should have returned exactly " +
-                    $"\"{keys.Count}\" result(s) but instead returned " +
-                    $"\"{values.Count}\" result(s).";
-                var result = Result<TValue>.Reject(error);
+                Exception error = Errors.CreateEveryKeyMustHaveAValue(
+                    keys.Count, results.Count);
 
                 for (var i = 0; i < buffer.Count; i++)
                 {
-                    buffer[keys[i]].SetResult(result);
+                    buffer[keys[i]].SetException(error);
                 }
             }
         }
@@ -379,7 +405,10 @@ namespace GreenDonut
                     Clear();
                     _stopBatching?.Cancel();
                     _delaySignal?.Set();
-                    _batchDispatcher?.Dispose();
+                    // todo: fix "A task may only be disposed if it is in a
+                    //       completion state (RanToCompletion, Faulted or
+                    //       Canceled)."
+                    //_batchDispatcher?.Dispose();
                     (_cache as IDisposable)?.Dispose();
                     _stopBatching?.Dispose();
                     _delaySignal?.Dispose();

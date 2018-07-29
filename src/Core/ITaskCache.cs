@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace GreenDonut
 {
     /// <summary>
-    /// A cache which stores <see cref="Task{Result{TValue}}"/>.
+    /// A cache which stores <see cref="Task{TValue}"/>.
     /// </summary>
     /// <typeparam name="TKey">A key type</typeparam>
     /// <typeparam name="TValue">A value type</typeparam>
@@ -30,7 +30,7 @@ namespace GreenDonut
         /// </summary>
         /// <param name="key">A cache entry key.</param>
         /// <param name="value">A cache entry value.</param>
-        void Add(TKey key, Task<Result<TValue>> value);
+        void Add(TKey key, Task<TValue> value);
 
         /// <summary>
         /// Clears the complete cache.
@@ -42,7 +42,7 @@ namespace GreenDonut
         /// </summary>
         /// <param name="key">A cache entry key.</param>
         /// <returns>A single cache entry value.</returns>
-        Task<Result<TValue>> GetAsync(TKey key);
+        Task<TValue> GetAsync(TKey key);
 
         /// <summary>
         /// Removes a specific entry from the cache.
