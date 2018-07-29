@@ -139,13 +139,10 @@ namespace GreenDonut
 
             TKey resolvedKey = _cacheKeyResolver(key);
 
-            if (_options.Caching)
+            if (_options.Caching && _cache.TryGetValue(resolvedKey,
+                out Task<TValue> cachedValue))
             {
-                if (_cache.TryGetValue(resolvedKey,
-                    out Task<TValue> cachedValue))
-                {
-                    return cachedValue;
-                }
+                return cachedValue;
             }
 
             var promise = new TaskCompletionSource<TValue>();
@@ -157,7 +154,8 @@ namespace GreenDonut
             else
             {
                 // note: must run in the background; do not await here.
-                Task.Factory.StartNew(() => DispatchAsync(resolvedKey, promise),
+                Task.Factory.StartNew(
+                    () => DispatchAsync(resolvedKey, promise),
                     TaskCreationOptions.DenyChildAttach);
             }
 

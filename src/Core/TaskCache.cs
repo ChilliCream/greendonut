@@ -62,7 +62,7 @@ namespace GreenDonut
                 });
         }
 
-        public void TryAdd(TKey key, Task<TValue> value)
+        public bool TryAdd(TKey key, Task<TValue> value)
         {
             if (key == null)
             {
@@ -74,6 +74,8 @@ namespace GreenDonut
                 throw new ArgumentNullException(nameof(value));
             }
 
+            var added = false;
+
             _sync.Lock(
                 () => !_cache.ContainsKey(key),
                 () =>
@@ -84,7 +86,10 @@ namespace GreenDonut
                     _ranking.AddFirst(entry.Rank);
                     _cache = _cache.Add(entry.Key, entry);
                     _first = entry.Rank;
+                    added = true;
                 });
+
+            return added;
         }
 
         public bool TryGetValue(TKey key, out Task<TValue> value)

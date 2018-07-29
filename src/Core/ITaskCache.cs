@@ -42,7 +42,7 @@ namespace GreenDonut
         /// </summary>
         /// <param name="key">A cache entry key.</param>
         /// <param name="value">A cache entry value.</param>
-        void TryAdd(TKey key, Task<TValue> value);
+        bool TryAdd(TKey key, Task<TValue> value);
 
         /// <summary>
         /// Tries to gets a single entry from the cache.

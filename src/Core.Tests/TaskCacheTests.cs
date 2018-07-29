@@ -291,11 +291,12 @@ namespace GreenDonut
             var expected = Task.FromResult("Bar");
 
             // act
-            cache.TryAdd(key, expected);
+            var added = cache.TryAdd(key, expected);
 
             // assert
             var exists = cache.TryGetValue(key, out Task<string> actual);
 
+            Assert.True(added);
             Assert.True(exists);
             Assert.Equal(await expected.ConfigureAwait(false),
                 await actual.ConfigureAwait(false));
@@ -314,13 +315,14 @@ namespace GreenDonut
             var another = Task.FromResult("Baz");
 
             // act
-            cache.TryAdd(key, expected);
-            cache.TryAdd(key, another);
-            cache.TryAdd("Bar", another);
+            var addedFirst = cache.TryAdd(key, expected);
+            var addedSecond = cache.TryAdd(key, another);
 
             // assert
             var exists = cache.TryGetValue(key, out Task<string> actual);
 
+            Assert.True(addedFirst);
+            Assert.False(addedSecond);
             Assert.True(exists);
             Assert.Equal(await expected.ConfigureAwait(false),
                 await actual.ConfigureAwait(false));
