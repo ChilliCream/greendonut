@@ -286,11 +286,8 @@ namespace GreenDonut
             }
             else
             {
-                var error = new Exception("Fetch should have returned " +
-                    "exactly one result but instead returned " +
-                    $"\"{results.Count}\" results.");
-
-                promise.SetException(error);
+                promise.SetException(
+                    Errors.CreateMustHaveOneResult(results.Count));
             }
         }
 
@@ -361,9 +358,8 @@ namespace GreenDonut
             }
             else
             {
-                var error = new Exception("Fetch should have returned " +
-                    $"exactly \"{keys.Count}\" result(s) but instead " +
-                    $"returned \"{results.Count}\" result(s).");
+                Exception error = Errors.CreateEveryKeyMustHaveAValue(
+                    keys.Count, results.Count);
 
                 for (var i = 0; i < buffer.Count; i++)
                 {
