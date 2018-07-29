@@ -278,7 +278,7 @@ namespace GreenDonut
 
             if (results.Count == 1)
             {
-                SetBatchResult(promise, keys.First(), results.First());
+                SetSingleResult(promise, results.First());
             }
             else
             {
@@ -325,21 +325,6 @@ namespace GreenDonut
                 });
         }
 
-        private void SetBatchResult(
-            TaskCompletionSource<TValue> promise,
-            TKey key,
-            Result<TValue> result)
-        {
-            if (result.IsError)
-            {
-                promise.SetException(result.Error);
-            }
-            else
-            {
-                promise.SetResult(result.Value);
-            }
-        }
-
         private void SetBatchResults(
             TaskCompletionBuffer<TKey, TValue> buffer,
             IReadOnlyList<TKey> keys,
@@ -349,7 +334,7 @@ namespace GreenDonut
             {
                 for (var i = 0; i < buffer.Count; i++)
                 {
-                    SetBatchResult(buffer[keys[i]], keys[i], results[i]);
+                    SetSingleResult(buffer[keys[i]], results[i]);
                 }
             }
             else
@@ -361,6 +346,20 @@ namespace GreenDonut
                 {
                     buffer[keys[i]].SetException(error);
                 }
+            }
+        }
+
+        private void SetSingleResult(
+            TaskCompletionSource<TValue> promise,
+            Result<TValue> result)
+        {
+            if (result.IsError)
+            {
+                promise.SetException(result.Error);
+            }
+            else
+            {
+                promise.SetResult(result.Value);
             }
         }
 
