@@ -593,7 +593,7 @@ namespace GreenDonut
         }
 
         [Fact(DisplayName = "Remove: Should remove an existing entry")]
-        public async Task RemoveEntry()
+        public void RemoveEntry()
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
