@@ -42,6 +42,9 @@ namespace GreenDonut
         /// </summary>
         /// <param name="key">A cache entry key.</param>
         /// <param name="value">A cache entry value.</param>
+        /// <returns>
+        /// A value indicating whether the add was successful.
+        /// </returns>
         bool TryAdd(TKey key, Task<TValue> value);
 
         /// <summary>
