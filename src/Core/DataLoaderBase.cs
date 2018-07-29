@@ -168,8 +168,7 @@ namespace GreenDonut
         }
 
         /// <inheritdoc />
-        public async Task<IReadOnlyList<TValue>> LoadAsync(
-            params TKey[] keys)
+        public Task<IReadOnlyList<TValue>> LoadAsync(params TKey[] keys)
         {
             if (keys == null)
             {
@@ -182,12 +181,11 @@ namespace GreenDonut
                     "There must be at least one key");
             }
 
-            return await Task.WhenAll(keys.Select(LoadAsync))
-                .ConfigureAwait(false);
+            return LoadInternalAsync(keys);
         }
 
         /// <inheritdoc />
-        public async Task<IReadOnlyList<TValue>> LoadAsync(
+        public Task<IReadOnlyList<TValue>> LoadAsync(
             IReadOnlyCollection<TKey> keys)
         {
             if (keys == null)
@@ -201,23 +199,7 @@ namespace GreenDonut
                     "There must be at least one key");
             }
 
-            var tasks = new Task<TValue>[keys.Count];
-            var index = 0;
-
-            foreach (TKey key in keys)
-            {
-                tasks[index++] = LoadAsync(key);
-            }
-
-            for (var i = 0; i < tasks.Length; i++)
-            {
-                if (tasks[i] is IAsyncResult result)
-                {
-                    result.AsyncWaitHandle.WaitOne();
-                }
-            }
-
-            return await Task.WhenAll(tasks).ConfigureAwait(false);
+            return LoadInternalAsync(keys);
         }
 
         /// <inheritdoc />
@@ -281,7 +263,7 @@ namespace GreenDonut
             else
             {
                 promise.SetException(
-                    Errors.CreateMustHaveOneResult(results.Count));
+                    Errors.CreateKeysAndValusMustMatch(1, results.Count));
             }
         }
 
@@ -323,6 +305,35 @@ namespace GreenDonut
                 });
         }
 
+        private async Task<IReadOnlyList<TValue>> LoadInternalAsync(
+            TKey[] keys)
+        {
+            return await Task.WhenAll(keys.Select(LoadAsync))
+                .ConfigureAwait(false);
+        }
+
+        private async Task<IReadOnlyList<TValue>> LoadInternalAsync(
+            IReadOnlyCollection<TKey> keys)
+        {
+            var tasks = new Task<TValue>[keys.Count];
+            var index = 0;
+
+            foreach (TKey key in keys)
+            {
+                tasks[index++] = LoadAsync(key);
+            }
+
+            for (var i = 0; i < tasks.Length; i++)
+            {
+                if (tasks[i] is IAsyncResult result)
+                {
+                    result.AsyncWaitHandle.WaitOne();
+                }
+            }
+
+            return await Task.WhenAll(tasks).ConfigureAwait(false);
+        }
+
         private void SetBatchResults(
             TaskCompletionBuffer<TKey, TValue> buffer,
             IReadOnlyList<TKey> keys,
@@ -337,7 +348,7 @@ namespace GreenDonut
             }
             else
             {
-                Exception error = Errors.CreateEveryKeyMustHaveAValue(
+                Exception error = Errors.CreateKeysAndValusMustMatch(
                     keys.Count, results.Count);
 
                 for (var i = 0; i < buffer.Count; i++)

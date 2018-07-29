@@ -2,23 +2,14 @@ using System;
 
 namespace GreenDonut
 {
-    internal class Errors
+    internal static class Errors
     {
-        public static Exception CreateMustHaveOneResult(int resultsCount)
+        public static Exception CreateKeysAndValusMustMatch(int keysCount,
+            int valuesCount)
         {
             var error = new Exception("Fetch should have returned exactly " +
-                $"one result but instead returned \"{resultsCount}\" " +
-                "results.");
-
-            return error;
-        }
-
-        public static Exception CreateEveryKeyMustHaveAValue(int keysCount,
-            int resultsCount)
-        {
-            var error = new Exception("Fetch should have returned exactly " +
-                $"\"{keysCount}\" result(s) but instead returned " +
-                $"\"{resultsCount}\" result(s).");
+                $"\"{keysCount}\" value(s) but instead returned " +
+                $"\"{valuesCount}\" value(s).");
 
             return error;
         }
