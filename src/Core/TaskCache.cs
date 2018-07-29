@@ -33,31 +33,6 @@ namespace GreenDonut
 
         public int Usage => _cache.Count;
 
-        public void Add(TKey key, Task<TValue> value)
-        {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-
-            _sync.Lock(
-                () => !_cache.ContainsKey(key),
-                () =>
-                {
-                    CacheEntry entry = new CacheEntry(key, value);
-
-                    ClearSpaceForNewEntry();
-                    _ranking.AddFirst(entry.Rank);
-                    _cache = _cache.Add(entry.Key, entry);
-                    _first = entry.Rank;
-                });
-        }
-
         public void Clear()
         {
             _sync.Lock(
@@ -68,23 +43,6 @@ namespace GreenDonut
                     _cache = _cache.Clear();
                     _first = null;
                 });
-        }
-
-        public Task<TValue> GetAsync(TKey key)
-        {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
-            if (_cache.TryGetValue(key, out CacheEntry entry))
-            {
-                TouchEntry(entry);
-
-                return entry.Value;
-            }
-
-            return null;
         }
 
         public void Remove(TKey key)
@@ -102,6 +60,51 @@ namespace GreenDonut
                     _cache = _cache.Remove(key);
                     _first = _ranking.First;
                 });
+        }
+
+        public void TryAdd(TKey key, Task<TValue> value)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            _sync.Lock(
+                () => !_cache.ContainsKey(key),
+                () =>
+                {
+                    var entry = new CacheEntry(key, value);
+
+                    ClearSpaceForNewEntry();
+                    _ranking.AddFirst(entry.Rank);
+                    _cache = _cache.Add(entry.Key, entry);
+                    _first = entry.Rank;
+                });
+        }
+
+        public bool TryGetValue(TKey key, out Task<TValue> value)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            if (_cache.TryGetValue(key, out CacheEntry entry))
+            {
+                TouchEntry(entry);
+                value = entry.Value;
+
+                return true;
+            }
+
+            value = null;
+
+            return false;
         }
 
         private void TouchEntry(CacheEntry entry)

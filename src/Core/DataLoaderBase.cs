@@ -141,9 +141,8 @@ namespace GreenDonut
 
             if (_options.Caching)
             {
-                Task<TValue> cachedValue = _cache.GetAsync(resolvedKey);
-
-                if (cachedValue != null)
+                if (_cache.TryGetValue(resolvedKey,
+                    out Task<TValue> cachedValue))
                 {
                     return cachedValue;
                 }
@@ -164,7 +163,7 @@ namespace GreenDonut
 
             if (_options.Caching)
             {
-                _cache.Add(resolvedKey, promise.Task);
+                _cache.TryAdd(resolvedKey, promise.Task);
             }
 
             return promise.Task;
@@ -255,10 +254,7 @@ namespace GreenDonut
 
             TKey resolvedKey = _cacheKeyResolver(key);
 
-            if (_cache.GetAsync(resolvedKey) == null)
-            {
-                _cache.Add(resolvedKey, value);
-            }
+            _cache.TryAdd(resolvedKey, value);
 
             return this;
         }
@@ -304,7 +300,7 @@ namespace GreenDonut
                     if (_options.MaxBatchSize > 0 &&
                         copy.Count > _options.MaxBatchSize)
                     {
-                        int chunkSize = (int)Math.Ceiling(
+                        var chunkSize = (int)Math.Ceiling(
                             (decimal)copy.Count / _options.MaxBatchSize);
 
                         for (var i = 0; i < chunkSize; i++)
