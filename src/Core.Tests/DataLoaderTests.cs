@@ -614,6 +614,11 @@ namespace GreenDonut
             // assert
             Task<string> loadResult = loader.LoadAsync(key);
 
+            if (loadResult is IAsyncResult asyncResult)
+            {
+                asyncResult.AsyncWaitHandle.WaitOne();
+            }
+
             Assert.Equal(loader, result);
             Assert.NotNull(loadResult.Exception);
         }
