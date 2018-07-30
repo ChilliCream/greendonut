@@ -113,15 +113,17 @@ namespace GreenDonut
 
         private void TouchEntry(CacheEntry entry)
         {
-            _sync.Lock(
-                () => _first != entry.Rank,
-                () =>
+            lock (_sync)
+            {
+                entry.LastTouched = DateTimeOffset.UtcNow;
+
+                if (_first != entry.Rank)
                 {
-                    entry.LastTouched = DateTimeOffset.UtcNow;
                     _ranking.Remove(entry.Rank);
                     _ranking.AddFirst(entry.Rank);
                     _first = entry.Rank;
-                });
+                }
+            }
         }
 
         private void ClearSpaceForNewEntry()
