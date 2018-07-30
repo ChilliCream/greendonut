@@ -390,5 +390,48 @@ namespace GreenDonut
         }
 
         #endregion
+
+        #region Expiration
+
+        [Fact(DisplayName = "VerifyExpirationFalse: Should return false if expired")]
+        public async Task VerifyExpirationFalse()
+        {
+            // arrange
+            var cacheSize = 10;
+            TimeSpan slidingExpiration = TimeSpan.FromMilliseconds(200);
+            var cache = new TaskCache<string, string>(cacheSize,
+                slidingExpiration);
+            var key = "Foo";
+
+            cache.TryAdd(key, Task.FromResult("Bar"));
+            await Task.Delay(300).ConfigureAwait(false);
+
+            // act
+            var exists = cache.TryGetValue(key, out Task<string> actual);
+
+            // assert
+            Assert.False(exists);
+        }
+
+        [Fact(DisplayName = "VerifyExpirationTrue: Should return true if not expired")]
+        public void VerifyExpirationTrue()
+        {
+            // arrange
+            var cacheSize = 10;
+            TimeSpan slidingExpiration = TimeSpan.FromMilliseconds(500);
+            var cache = new TaskCache<string, string>(cacheSize,
+                slidingExpiration);
+            var key = "Foo";
+
+            cache.TryAdd(key, Task.FromResult("Bar"));
+
+            // act
+            var exists = cache.TryGetValue(key, out Task<string> actual);
+
+            // assert
+            Assert.True(exists);
+        }
+
+        #endregion
     }
 }
