@@ -38,16 +38,25 @@ else {
 if ($EnableSonar) {
     dotnet tool install --global dotnet-sonarscanner
 
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to install sonar scanner."
+    }
+
+
     if ($PR) {
-      dotnet sonarscanner begin /k:$sonarTitle /d:sonar.organization="chillicream" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="$sonarLogin" /d:sonar.cs.vstest.reportsPaths="$testResults\*.trx" /d:sonar.cs.opencover.reportsPaths="$PSScriptRoot\coverage.xml" /d:sonar.pullrequest.branch="$prName" /d:sonar.pullrequest.key="$prKey"
+        dotnet sonarscanner begin /k:"$sonarTitle" /d:sonar.organization="chillicream" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="$sonarLogin" /d:sonar.cs.vstest.reportsPaths="$testResults\*.trx" /d:sonar.cs.opencover.reportsPaths="$PSScriptRoot\coverage.xml" /d:sonar.pullrequest.branch="$prName" /d:sonar.pullrequest.key="$prKey"
     }
     else {
-      dotnet sonarscanner begin /k:$sonarTitle /d:sonar.organization="chillicream" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="$sonarLogin" /v:"$version" /d:sonar.cs.vstest.reportsPaths="$testResults\*.trx" /d:sonar.cs.opencover.reportsPaths="$PSScriptRoot\coverage.xml"
+        dotnet sonarscanner begin /k:"$sonarTitle" /d:sonar.organization="chillicream" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="$sonarLogin" /v:"$version" /d:sonar.cs.vstest.reportsPaths="$testResults\*.trx" /d:sonar.cs.opencover.reportsPaths="$PSScriptRoot\coverage.xml"
     }
 }
 
 if ($DisableBuild -eq $false) {
     dotnet build src
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "There are compilation errors."
+    }
 }
 
 if ($RunTests -or $EnableCoverage) {
@@ -80,8 +89,16 @@ if ($RunTests -or $EnableCoverage) {
             $coveralls = Resolve-Path $coveralls
 
             & $openCover -register:user -target:"$runTestsCmd" -searchdirs:"$serachDirs" -oldstyle -output:coverage.xml -skipautoprops -returntargetcode -filter:"+[GreenDonut*]*"
-            if($PR -eq $false) {
-              & $coveralls --opencover coverage.xml
+
+            Get-ChildItem $RootDirectory *.trx -Recurse | ForEach-Object {
+                $report = [xml](Get-Content $_.FullName)
+                if ($report.TestRun.ResultSummary.Counters.executed -ne $report.TestRun.ResultSummary.Counters.passed) {
+                    throw "Some tests failed."
+                }
+            }
+
+            if ($PR -eq $false) {
+                & $coveralls --opencover coverage.xml
             }
         }
         else {
@@ -93,6 +110,10 @@ if ($RunTests -or $EnableCoverage) {
 
 if ($EnableSonar) {
     dotnet sonarscanner end /d:sonar.login="$sonarLogin"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Could not submit the sonar scanner result to sonar.io."
+    }
 }
 
 if ($Pack) {
@@ -103,5 +124,9 @@ if ($Pack) {
     }
     else {
         dotnet pack ./src -c Release -o $dropRootDirectory /p:PackageVersion=$env:Version /p:VersionPrefix=$env:VersionPrefix --include-source --include-symbols
+    }
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to created some or all packages."
     }
 }
