@@ -154,6 +154,7 @@ namespace GreenDonut
                         _buffer.TryGetValue(resolvedKey,
                             out TaskCompletionSource<TValue> value))
                     {
+                        promise.TrySetCanceled();
                         promise = value;
                     }
                 }
