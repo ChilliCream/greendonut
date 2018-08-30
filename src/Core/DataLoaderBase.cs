@@ -239,12 +239,9 @@ namespace GreenDonut
                 throw new ArgumentNullException(nameof(value));
             }
 
-            lock (_sync)
-            {
-                TKey resolvedKey = _cacheKeyResolver(key);
+            TKey resolvedKey = _cacheKeyResolver(key);
 
-                _cache.TryAdd(resolvedKey, value);
-            }
+            _cache.TryAdd(resolvedKey, value);
 
             return this;
         }
