@@ -150,13 +150,12 @@ namespace GreenDonut
 
                 if (_options.Batching)
                 {
-                    if (!_buffer.TryAdd(resolvedKey, promise))
-                    {
-                        if (_buffer.TryGetValue(resolvedKey,
+                    if (!_buffer.TryAdd(resolvedKey, promise) &&
+                        _buffer.TryGetValue(resolvedKey,
                             out TaskCompletionSource<TValue> value))
-                        {
-                            promise = value;
-                        }
+                    {
+                        promise.TrySetCanceled();
+                        promise = value;
                     }
                 }
                 else
