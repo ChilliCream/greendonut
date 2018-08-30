@@ -136,34 +136,44 @@ namespace GreenDonut
                 throw new ArgumentNullException(nameof(key));
             }
 
-            TKey resolvedKey = _cacheKeyResolver(key);
-
-            if (_options.Caching && _cache.TryGetValue(resolvedKey,
-                out Task<TValue> cachedValue))
+            lock (_sync)
             {
-                return cachedValue;
-            }
+                TKey resolvedKey = _cacheKeyResolver(key);
 
-            var promise = new TaskCompletionSource<TValue>();
+                if (_options.Caching && _cache.TryGetValue(resolvedKey,
+                    out Task<TValue> cachedValue))
+                {
+                    return cachedValue;
+                }
 
-            if (_options.Batching)
-            {
-                _buffer.TryAdd(resolvedKey, promise);
-            }
-            else
-            {
-                // note: must run in the background; do not await here.
-                Task.Factory.StartNew(
-                    () => DispatchAsync(resolvedKey, promise),
-                    TaskCreationOptions.DenyChildAttach);
-            }
+                var promise = new TaskCompletionSource<TValue>();
 
-            if (_options.Caching)
-            {
-                _cache.TryAdd(resolvedKey, promise.Task);
-            }
+                if (_options.Batching)
+                {
+                    if (!_buffer.TryAdd(resolvedKey, promise))
+                    {
+                        if (_buffer.TryGetValue(resolvedKey,
+                            out TaskCompletionSource<TValue> value))
+                        {
+                            promise = value;
+                        }
+                    }
+                }
+                else
+                {
+                    // note: must run in the background; do not await here.
+                    Task.Factory.StartNew(
+                        () => DispatchAsync(resolvedKey, promise),
+                        TaskCreationOptions.DenyChildAttach);
+                }
 
-            return promise.Task;
+                if (_options.Caching)
+                {
+                    _cache.TryAdd(resolvedKey, promise.Task);
+                }
+
+                return promise.Task;
+            }
         }
 
         /// <inheritdoc />
@@ -217,9 +227,7 @@ namespace GreenDonut
         }
 
         /// <inheritdoc />
-        public IDataLoader<TKey, TValue> Set(
-            TKey key,
-            Task<TValue> value)
+        public IDataLoader<TKey, TValue> Set(TKey key, Task<TValue> value)
         {
             if (key == null)
             {
@@ -231,9 +239,12 @@ namespace GreenDonut
                 throw new ArgumentNullException(nameof(value));
             }
 
-            TKey resolvedKey = _cacheKeyResolver(key);
+            lock (_sync)
+            {
+                TKey resolvedKey = _cacheKeyResolver(key);
 
-            _cache.TryAdd(resolvedKey, value);
+                _cache.TryAdd(resolvedKey, value);
+            }
 
             return this;
         }
@@ -314,35 +325,27 @@ namespace GreenDonut
         private async Task<IReadOnlyList<TValue>> LoadInternalAsync(
             IReadOnlyCollection<TKey> keys)
         {
-            var tasks = new Task<TValue>[keys.Count];
             var index = 0;
+            var tasks = new Task<TValue>[keys.Count];
 
             foreach (TKey key in keys)
             {
                 tasks[index++] = LoadAsync(key);
             }
 
-            for (var i = 0; i < tasks.Length; i++)
-            {
-                if (tasks[i] is IAsyncResult result)
-                {
-                    result.AsyncWaitHandle.WaitOne();
-                }
-            }
-
             return await Task.WhenAll(tasks).ConfigureAwait(false);
         }
 
         private void SetBatchResults(
-            TaskCompletionBuffer<TKey, TValue> buffer,
+            IDictionary<TKey, TaskCompletionSource<TValue>> bufferedPromises,
             IReadOnlyList<TKey> keys,
             IReadOnlyList<Result<TValue>> results)
         {
             if (keys.Count == results.Count)
             {
-                for (var i = 0; i < buffer.Count; i++)
+                for (var i = 0; i < keys.Count; i++)
                 {
-                    SetSingleResult(buffer[keys[i]], results[i]);
+                    SetSingleResult(bufferedPromises[keys[i]], results[i]);
                 }
             }
             else
@@ -350,9 +353,9 @@ namespace GreenDonut
                 Exception error = Errors.CreateKeysAndValusMustMatch(
                     keys.Count, results.Count);
 
-                for (var i = 0; i < buffer.Count; i++)
+                for (var i = 0; i < keys.Count; i++)
                 {
-                    buffer[keys[i]].SetException(error);
+                    bufferedPromises[keys[i]].SetException(error);
                 }
             }
         }
@@ -394,6 +397,7 @@ namespace GreenDonut
 
         #region IDisposable
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -413,7 +417,7 @@ namespace GreenDonut
                     _stopBatching?.Dispose();
                     _delaySignal?.Dispose();
                 }
-                
+
                 _buffer = null;
                 _cache = null;
                 _delaySignal = null;

@@ -1,6 +1,6 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,11 +10,10 @@ namespace GreenDonut
         : ITaskCache<TKey, TValue>
         , IDisposable
     {
-        private ImmutableDictionary<TKey, CacheEntry> _cache =
-            ImmutableDictionary<TKey, CacheEntry>.Empty;
+        private readonly ConcurrentDictionary<TKey, CacheEntry> _cache =
+            new ConcurrentDictionary<TKey, CacheEntry>();
         private CancellationTokenSource _dispose;
         private bool _disposed;
-        private LinkedListNode<TKey> _first;
         private readonly LinkedList<TKey> _ranking = new LinkedList<TKey>();
         private readonly object _sync = new object();
 
@@ -34,14 +33,11 @@ namespace GreenDonut
 
         public void Clear()
         {
-            _sync.Lock(
-                () => _cache.Count > 0,
-                () =>
-                {
-                    _ranking.Clear();
-                    _cache = _cache.Clear();
-                    _first = null;
-                });
+            lock (_sync)
+            {
+                _ranking.Clear();
+                _cache.Clear();
+            }
         }
 
         public void Remove(TKey key)
@@ -51,14 +47,13 @@ namespace GreenDonut
                 throw new ArgumentNullException(nameof(key));
             }
 
-            _sync.Lock(
-                () => _cache.ContainsKey(key),
-                () =>
+            lock (_sync)
+            {
+                if (_cache.TryRemove(key, out CacheEntry entry))
                 {
-                    _ranking.Remove(_cache[key].Rank);
-                    _cache = _cache.Remove(key);
-                    _first = _ranking.First;
-                });
+                    _ranking.Remove(entry.Rank);
+                }
+            }
         }
 
         public bool TryAdd(TKey key, Task<TValue> value)
@@ -81,11 +76,12 @@ namespace GreenDonut
                 {
                     var entry = new CacheEntry(key, value);
 
-                    ClearSpaceForNewEntry();
-                    _ranking.AddFirst(entry.Rank);
-                    _cache = _cache.Add(entry.Key, entry);
-                    _first = entry.Rank;
-                    added = true;
+                    if (_cache.TryAdd(entry.Key, entry))
+                    {
+                        EnsureCacheSizeDoesNotExceed();
+                        _ranking.AddFirst(entry.Rank);
+                        added = true;
+                    }
                 });
 
             return added;
@@ -98,42 +94,45 @@ namespace GreenDonut
                 throw new ArgumentNullException(nameof(key));
             }
 
-            if (_cache.TryGetValue(key, out CacheEntry entry))
-            {
-                TouchEntry(entry);
-                value = entry.Value;
+            var exists = false;
+            Task<TValue> cachedValue = null;
 
-                return true;
-            }
-
-            value = null;
-
-            return false;
-        }
-
-        private void TouchEntry(CacheEntry entry)
-        {
             lock (_sync)
             {
-                entry.LastTouched = DateTimeOffset.UtcNow;
+                if (_cache.TryGetValue(key, out CacheEntry entry))
+                {
+                    TouchEntry(entry);
+                    cachedValue = entry.Value;
+                    exists = true;
+                }
+            }
 
-                if (_first != entry.Rank)
+            value = cachedValue;
+
+            return exists;
+        }
+
+        private void EnsureCacheSizeDoesNotExceed()
+        {
+            if (_cache.Count > Size)
+            {
+                TKey key = _ranking.Last.Value;
+
+                if (_cache.TryRemove(key, out CacheEntry entry))
                 {
                     _ranking.Remove(entry.Rank);
-                    _ranking.AddFirst(entry.Rank);
-                    _first = entry.Rank;
                 }
             }
         }
 
-        private void ClearSpaceForNewEntry()
+        private void TouchEntry(CacheEntry entry)
         {
-            if (_cache.Count >= Size)
-            {
-                LinkedListNode<TKey> entry = _ranking.Last;
+            entry.LastTouched = DateTimeOffset.UtcNow;
 
-                _cache = _cache.Remove(entry.Value);
-                _ranking.Remove(entry);
+            if (_ranking.First != entry.Rank)
+            {
+                _ranking.Remove(entry.Rank);
+                _ranking.AddFirst(entry.Rank);
             }
         }
 
@@ -142,6 +141,7 @@ namespace GreenDonut
             if (SlidingExpirartion > TimeSpan.Zero)
             {
                 _dispose = new CancellationTokenSource();
+
                 Task.Factory.StartNew(async () =>
                 {
                     while (!_dispose.Token.IsCancellationRequested)
@@ -187,6 +187,7 @@ namespace GreenDonut
 
         #region IDisposable
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);

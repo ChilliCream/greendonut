@@ -1,6 +1,6 @@
 ![GreenDonut](https://cdn.rawgit.com/ChilliCream/greendonut-logo/master/img/greendonut-banner-light.svg)
 
-[![GitHub release](https://img.shields.io/github/release/chillicream/GreenDonut.svg)](https://github.com/ChilliCream/greendonut/releases) [![NuGet Package](https://img.shields.io/nuget/v/greendonut.svg)](https://www.nuget.org/packages/GreenDonut/) [![License](https://img.shields.io/github/license/ChilliCream/greendonut.svg)](https://github.com/ChilliCream/greendonut/releases) [![Build](https://ci.appveyor.com/api/projects/status/fm01y9pt10f84145/branch/master?svg=true)](https://ci.appveyor.com/project/rstaib/greendonut) [![Tests](https://img.shields.io/appveyor/tests/rstaib/greendonut/master.svg)](https://ci.appveyor.com/project/rstaib/greendonut) [![Coverage Status](https://sonarcloud.io/api/project_badges/measure?project=GreenDonut&metric=coverage)](https://sonarcloud.io/dashboard?id=GreenDonut) [![Quality](https://sonarcloud.io/api/project_badges/measure?project=GreenDonut&metric=alert_status)](https://sonarcloud.io/dashboard?id=GreenDonut) [![BCH compliance](https://bettercodehub.com/edge/badge/ChilliCream/greendonut?branch=master)](https://bettercodehub.com/)
+[![GitHub release](https://img.shields.io/github/release/ChilliCream/GreenDonut.svg)](https://github.com/ChilliCream/greendonut/releases) [![NuGet Package](https://img.shields.io/nuget/v/greendonut.svg)](https://www.nuget.org/packages/GreenDonut/) [![License](https://img.shields.io/github/license/ChilliCream/greendonut.svg)](https://github.com/ChilliCream/greendonut/releases) [![Build](https://ci.appveyor.com/api/projects/status/fm01y9pt10f84145/branch/master?svg=true)](https://ci.appveyor.com/project/rstaib/greendonut) [![Tests](https://img.shields.io/appveyor/tests/rstaib/greendonut/master.svg)](https://ci.appveyor.com/project/rstaib/greendonut) [![Coverage Status](https://sonarcloud.io/api/project_badges/measure?project=GreenDonut&metric=coverage)](https://sonarcloud.io/dashboard?id=GreenDonut) [![Quality](https://sonarcloud.io/api/project_badges/measure?project=GreenDonut&metric=alert_status)](https://sonarcloud.io/dashboard?id=GreenDonut) [![BCH compliance](https://bettercodehub.com/edge/badge/ChilliCream/greendonut?branch=master)](https://bettercodehub.com/)
 
 ---
 
@@ -74,9 +74,8 @@ the original _facebook_ implementation.
 
 ### Best Practise
 
-- Be careful when and how to create `DataLoader` instances, becuase sometimes users have different
-  privileges. That implies perhaps a `DataLoader` on a per request base. However, it really depends
-  on your application logic and the specific case you try to find a perfect solution for.
+- Consider using a `DataLoader` instance per request if the results may differ due to user
+  privileges for instance.
 
 ## Documentation
 
