@@ -55,38 +55,11 @@ namespace GreenDonut
 
         #region Resolve
 
-        [Fact(DisplayName = "Resolve: Should throw an argument null exception for value")]
-        public void ResolveValueNull()
+        [InlineData(null)]
+        [InlineData("Foo")]
+        [Theory(DisplayName = "Resolve: Should return a resolved Result")]
+        public void Resolve(string value)
         {
-            // arrange
-            string value = null;
-
-            // act
-            Action verify = () => Result<string>.Resolve(value);
-
-            // assert
-            Assert.Throws<ArgumentNullException>("value", verify);
-        }
-
-        [Fact(DisplayName = "Resolve: Should not throw any exception")]
-        public void ResolveValueNotNull()
-        {
-            // arrange
-            string value = "Foo";
-
-            // act
-            Action verify = () => Result<string>.Resolve(value);
-
-            // assert
-            Assert.Null(Record.Exception(verify));
-        }
-
-        [Fact(DisplayName = "Resolve: Should return a resolved Result")]
-        public void Resolve()
-        {
-            // arrange
-            string value = "Foo";
-
             // act
             Result<string> result = Result<string>.Resolve(value);
 
@@ -94,7 +67,7 @@ namespace GreenDonut
             Assert.NotNull(result);
             Assert.Null(result.Error);
             Assert.False(result.IsError);
-            Assert.Equal("Foo", result.Value);
+            Assert.Equal(value, result.Value);
         }
 
         #endregion
