@@ -53,11 +53,6 @@ namespace GreenDonut
         /// <returns>A value result.</returns>
         public static Result<TValue> Resolve(TValue value)
         {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-
             var result = new Result<TValue>();
 
             result.Value = value;
