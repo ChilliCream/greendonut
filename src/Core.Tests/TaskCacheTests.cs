@@ -398,7 +398,7 @@ namespace GreenDonut
         {
             // arrange
             var cacheSize = 10;
-            var slidingExpiration = TimeSpan.FromMilliseconds(200);
+            var slidingExpiration = TimeSpan.FromMilliseconds(150);
             var cache = new TaskCache<string, string>(cacheSize,
                 slidingExpiration);
             var key = "Foo";

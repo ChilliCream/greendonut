@@ -63,8 +63,9 @@ namespace GreenDonut
         /// </param>
         protected DataLoaderBase(DataLoaderOptions<TKey> options)
             : this(options, new TaskCache<TKey, TValue>(
-                options?.CacheSize ?? 1000,
-                options?.SlidingExpiration ?? TimeSpan.Zero))
+                options?.CacheSize ?? Defaults.CacheSize,
+                options?.SlidingExpiration ??
+                    Defaults.SlidingExpiration))
         { }
 
         /// <summary>
@@ -270,7 +271,7 @@ namespace GreenDonut
             else
             {
                 promise.SetException(
-                    Errors.CreateKeysAndValusMustMatch(1, results.Count));
+                    Errors.CreateKeysAndValuesMustMatch(1, results.Count));
             }
         }
 
@@ -347,7 +348,7 @@ namespace GreenDonut
             }
             else
             {
-                Exception error = Errors.CreateKeysAndValusMustMatch(
+                Exception error = Errors.CreateKeysAndValuesMustMatch(
                     keys.Count, results.Count);
 
                 for (var i = 0; i < keys.Count; i++)

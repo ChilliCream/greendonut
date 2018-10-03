@@ -10,7 +10,6 @@ namespace GreenDonut
         : ITaskCache<TKey, TValue>
         , IDisposable
     {
-        private const int _minimumCacheSize = 10;
         private readonly ConcurrentDictionary<TKey, CacheEntry> _cache =
             new ConcurrentDictionary<TKey, CacheEntry>();
         private CancellationTokenSource _dispose;
@@ -20,7 +19,8 @@ namespace GreenDonut
 
         public TaskCache(int size, TimeSpan slidingExpiration)
         {
-            Size = (_minimumCacheSize > size) ? _minimumCacheSize : size;
+            Size = (Defaults.MinimumCacheSize > size)
+                ? Defaults.MinimumCacheSize : size;
             SlidingExpirartion = slidingExpiration;
 
             StartExpiredEntryDetectionCycle();
