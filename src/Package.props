@@ -6,7 +6,7 @@
     <Company>ChilliCream</Company>
     <Copyright>Copyright © 2018 ChilliCream (Michael &amp; Rafael Staib)</Copyright>
     <PackageLicenseUrl>https://github.com/ChilliCream/greendonut/blob/master/LICENSE</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/ChilliCream/greendonut</PackageProjectUrl>
+    <PackageProjectUrl>https://greendonut.io</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ChilliCream/greendonut</RepositoryUrl>
     <PackageTags>DataLoader Batching Caching GraphQL ChilliCream Facebook</PackageTags>
     <PackageReleaseNotes>Release notes: https://github.com/ChilliCream/greendonut/releases/$(PackageVersion)</PackageReleaseNotes>
