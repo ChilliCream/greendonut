@@ -12,7 +12,7 @@ namespace GreenDonut
     /// SQL table or document name in a MongoDB database, given a batch loading
     /// function. -- facebook
     ///
-    /// Each <c>DataLoader</c> instance contains a unique memoized cache. Use
+    /// Each <c>DataLoader</c> instance contains a unique memorized cache. Use
     /// caution when used in long-lived applications or those which serve many
     /// users with different access permissions and consider creating a new
     /// instance per web request. -- facebook
