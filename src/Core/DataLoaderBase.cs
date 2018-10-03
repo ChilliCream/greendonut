@@ -146,7 +146,8 @@ namespace GreenDonut
                     return cachedValue;
                 }
 
-                var promise = new TaskCompletionSource<TValue>();
+                var promise = new TaskCompletionSource<TValue>(
+                    TaskCreationOptions.RunContinuationsAsynchronously);
 
                 if (_options.Batching)
                 {
@@ -163,7 +164,7 @@ namespace GreenDonut
                     // note: must run in the background; do not await here.
                     Task.Factory.StartNew(
                         () => DispatchAsync(resolvedKey, promise),
-                        TaskCreationOptions.DenyChildAttach);
+                        TaskCreationOptions.RunContinuationsAsynchronously);
                 }
 
                 if (_options.Caching)

@@ -438,7 +438,8 @@ namespace GreenDonut
 
                     return await dataLoader.LoadAsync(keyArray[index])
                         .ConfigureAwait(false);
-                }, TaskCreationOptions.DenyChildAttach).Unwrap();
+                }, TaskCreationOptions.RunContinuationsAsynchronously)
+                    .Unwrap();
             }
 
             // assert
