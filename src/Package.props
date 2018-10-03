@@ -8,7 +8,7 @@
     <PackageLicenseUrl>https://github.com/ChilliCream/greendonut/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/ChilliCream/greendonut</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ChilliCream/greendonut</RepositoryUrl>
-    <PackageTags>DataLoader ChilliCream Facebook</PackageTags>
+    <PackageTags>DataLoader Batching Caching GraphQL ChilliCream Facebook</PackageTags>
     <PackageReleaseNotes>Release notes: https://github.com/ChilliCream/greendonut/releases/$(PackageVersion)</PackageReleaseNotes>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageIconUrl>https://cdn.rawgit.com/ChilliCream/greendonut-logo/master/img/greendonut-signet.png</PackageIconUrl>
