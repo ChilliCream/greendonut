@@ -235,6 +235,33 @@ namespace GreenDonut
                 await loadResult.ConfigureAwait(false));
         }
 
+        [Fact(DisplayName = "DispatchAsync: Should return an invalid operation exception due to 2 missing values")]
+        public async Task DispatchAsyncKeysValuesNotMatching()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>
+            {
+                BatchRequestDelay = TimeSpan.FromMinutes(10)
+            };
+            var loader = new DataLoader<string, string>(options, fetch);
+
+            await Task.Delay(10);
+
+            Task<IReadOnlyList<string>> loadResult = loader.LoadAsync("Foo", "Bar");
+
+            await loader.DispatchAsync().ConfigureAwait(false);
+
+            // act
+            Func<Task> verify = () => loadResult;
+
+            // assert
+            await Assert.ThrowsAsync<InvalidOperationException>(verify)
+                .ConfigureAwait(false);
+        }
+
         #endregion
 
         #region Dispose
@@ -247,6 +274,27 @@ namespace GreenDonut
                 await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
+            var loader = new DataLoader<string, string>(options, fetch);
+
+            // act
+            Action verify = () => loader.Dispose();
+
+            // assert
+            Assert.Null(Record.Exception(verify));
+        }
+
+        [Fact(DisplayName = "Dispose: Should dispose and not throw any exception (batching & cache disablked)")]
+        public void DisposeNoExceptionNobatchingAndCaching()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>
+            {
+                Batching = false,
+                Caching = false
+            };
             var loader = new DataLoader<string, string>(options, fetch);
 
             // act
@@ -438,7 +486,8 @@ namespace GreenDonut
 
                     return await dataLoader.LoadAsync(keyArray[index])
                         .ConfigureAwait(false);
-                }, TaskCreationOptions.DenyChildAttach).Unwrap();
+                }, TaskCreationOptions.RunContinuationsAsynchronously)
+                    .Unwrap();
             }
 
             // assert

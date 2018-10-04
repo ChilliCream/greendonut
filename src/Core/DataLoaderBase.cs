@@ -12,7 +12,7 @@ namespace GreenDonut
     /// SQL table or document name in a MongoDB database, given a batch loading
     /// function. -- facebook
     ///
-    /// Each <c>DataLoader</c> instance contains a unique memoized cache. Use
+    /// Each <c>DataLoader</c> instance contains a unique memorized cache. Use
     /// caution when used in long-lived applications or those which serve many
     /// users with different access permissions and consider creating a new
     /// instance per web request. -- facebook
@@ -63,8 +63,9 @@ namespace GreenDonut
         /// </param>
         protected DataLoaderBase(DataLoaderOptions<TKey> options)
             : this(options, new TaskCache<TKey, TValue>(
-                options?.CacheSize ?? 1000,
-                options?.SlidingExpiration ?? TimeSpan.Zero))
+                options?.CacheSize ?? Defaults.CacheSize,
+                options?.SlidingExpiration ??
+                    Defaults.SlidingExpiration))
         { }
 
         /// <summary>
@@ -146,7 +147,8 @@ namespace GreenDonut
                     return cachedValue;
                 }
 
-                var promise = new TaskCompletionSource<TValue>();
+                var promise = new TaskCompletionSource<TValue>(
+                    TaskCreationOptions.RunContinuationsAsynchronously);
 
                 if (_options.Batching)
                 {
@@ -163,7 +165,7 @@ namespace GreenDonut
                     // note: must run in the background; do not await here.
                     Task.Factory.StartNew(
                         () => DispatchAsync(resolvedKey, promise),
-                        TaskCreationOptions.DenyChildAttach);
+                        TaskCreationOptions.RunContinuationsAsynchronously);
                 }
 
                 if (_options.Caching)
@@ -269,7 +271,7 @@ namespace GreenDonut
             else
             {
                 promise.SetException(
-                    Errors.CreateKeysAndValusMustMatch(1, results.Count));
+                    Errors.CreateKeysAndValuesMustMatch(1, results.Count));
             }
         }
 
@@ -346,7 +348,7 @@ namespace GreenDonut
             }
             else
             {
-                Exception error = Errors.CreateKeysAndValusMustMatch(
+                Exception error = Errors.CreateKeysAndValuesMustMatch(
                     keys.Count, results.Count);
 
                 for (var i = 0; i < keys.Count; i++)

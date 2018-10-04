@@ -16,7 +16,9 @@ namespace GreenDonut
     /// instance per web request. -- facebook
     ///
     /// A default <c>DataLoader</c> implementation which supports automatic and
-    /// manual batch dispatching.
+    /// manual batch dispatching. Also this implementation is using the default
+    /// cache implementation which useses the LRU (Least Recently Used) caching
+    /// algorithm for keeping track on which item has to be discarded first.
     /// </summary>
     /// <typeparam name="TKey">A key type</typeparam>
     /// <typeparam name="TValue">A value type</typeparam>

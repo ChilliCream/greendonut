@@ -17,10 +17,10 @@ namespace GreenDonut
         {
             AutoDispatching = true;
             Batching = true;
-            BatchRequestDelay = TimeSpan.FromMilliseconds(50);
-            CacheSize = 1000;
+            BatchRequestDelay = Defaults.BatchRequestDelay;
+            CacheSize = Defaults.CacheSize;
             Caching = true;
-            SlidingExpiration = TimeSpan.Zero;
+            SlidingExpiration = Defaults.SlidingExpiration;
         }
 
         /// <summary>

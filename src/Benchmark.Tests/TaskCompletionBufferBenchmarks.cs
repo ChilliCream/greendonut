@@ -31,7 +31,8 @@ namespace GreenDonut.Benchmark.Tests
         [Benchmark]
         public bool TryAddSingle()
         {
-            return _buffer.TryAdd(_keys[0], new TaskCompletionSource<int>());
+            return _buffer.TryAdd(_keys[0], new TaskCompletionSource<int>(
+                TaskCreationOptions.RunContinuationsAsynchronously));
         }
 
         [Benchmark]
@@ -39,8 +40,10 @@ namespace GreenDonut.Benchmark.Tests
         {
             var result = false;
 
-            result = _buffer.TryAdd(_keys[0], new TaskCompletionSource<int>());
-            result = _buffer.TryAdd(_keys[0], new TaskCompletionSource<int>());
+            result = _buffer.TryAdd(_keys[0], new TaskCompletionSource<int>(
+                TaskCreationOptions.RunContinuationsAsynchronously));
+            result = _buffer.TryAdd(_keys[0], new TaskCompletionSource<int>(
+                TaskCreationOptions.RunContinuationsAsynchronously));
 
             return result;
         }
@@ -52,7 +55,9 @@ namespace GreenDonut.Benchmark.Tests
 
             for (var i = 0; i < _keys.Length; i++)
             {
-                result = _buffer.TryAdd(_keys[i], new TaskCompletionSource<int>());
+                result = _buffer.TryAdd(_keys[i],
+                    new TaskCompletionSource<int>(
+                        TaskCreationOptions.RunContinuationsAsynchronously));
             }
 
             return result;

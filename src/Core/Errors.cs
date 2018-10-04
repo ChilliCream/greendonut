@@ -4,7 +4,7 @@ namespace GreenDonut
 {
     internal static class Errors
     {
-        public static InvalidOperationException CreateKeysAndValusMustMatch(
+        public static InvalidOperationException CreateKeysAndValuesMustMatch(
             int keysCount,
             int valuesCount)
         {

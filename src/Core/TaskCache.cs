@@ -19,7 +19,8 @@ namespace GreenDonut
 
         public TaskCache(int size, TimeSpan slidingExpiration)
         {
-            Size = (size < 10) ? 10 : size;
+            Size = (Defaults.MinimumCacheSize > size)
+                ? Defaults.MinimumCacheSize : size;
             SlidingExpirartion = slidingExpiration;
 
             StartExpiredEntryDetectionCycle();
