@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Set the _.Net Standard_ version to `1.3` in order to support _.Net 4.6_ framework.
+
 ## [1.0.3] - 2018-10-04
 
 ### Added
