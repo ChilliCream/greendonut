@@ -7,10 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2018-11-04
+
 ### Added
 
 - Code Documentation for Exceptions.
-- An overload for Set which takes a value without a wraping task. Closes [#30](https://github.com/ChilliCream/greendonut/issues/30).
+- An overload for Set which takes a bare value without a wrapping _Task_. Closes [#30](https://github.com/ChilliCream/greendonut/issues/30).
 - Instrumentation API. Closes [#29](https://github.com/ChilliCream/greendonut/issues/29).
 
 ### Changed
@@ -83,7 +85,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated readme.
 
-[unreleased]: https://github.com/ChilliCream/greendonut/compare/1.0.3...HEAD
+[unreleased]: https://github.com/ChilliCream/greendonut/compare/1.1.0...HEAD
+[1.1.0]: https://github.com/ChilliCream/greendonut/compare/1.0.3...1.1.0
 [1.0.3]: https://github.com/ChilliCream/greendonut/compare/1.0.2...1.0.3
 [1.0.2]: https://github.com/ChilliCream/greendonut/compare/1.0.1...1.0.2
 [1.0.1]: https://github.com/ChilliCream/greendonut/compare/1.0.0...1.0.1
