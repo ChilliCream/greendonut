@@ -50,6 +50,9 @@ namespace GreenDonut
         /// <param name="cache">
         /// A cache instance for <c>Tasks</c>.
         /// </param>
+        /// <exception cref="cache">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
         protected DataLoaderBase(ITaskCache<TKey, TValue> cache)
             : this(new DataLoaderOptions<TKey>(), cache)
         { }
@@ -61,6 +64,9 @@ namespace GreenDonut
         /// <param name="options">
         /// A configuration for <c>DataLoaders</c>.
         /// </param>
+        /// <exception cref="options">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
         protected DataLoaderBase(DataLoaderOptions<TKey> options)
             : this(options, new TaskCache<TKey, TValue>(
                 options?.CacheSize ?? Defaults.CacheSize,
@@ -78,6 +84,12 @@ namespace GreenDonut
         /// <param name="cache">
         /// A cache instance for <c>Tasks</c>.
         /// </param>
+        /// <exception cref="options">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
+        /// <exception cref="cache">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
         protected DataLoaderBase(DataLoaderOptions<TKey> options,
             ITaskCache<TKey, TValue> cache)
         {

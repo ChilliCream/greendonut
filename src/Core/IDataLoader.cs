@@ -29,6 +29,9 @@ namespace GreenDonut
         /// or enqueues this single request for bacthing if enabled.
         /// </summary>
         /// <param name="key">A unique key.</param>
+        /// <exception cref="key">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
         /// <returns>
         /// A single result which may contain a value or information about the
         /// error which may occurred during the call.
@@ -41,6 +44,12 @@ namespace GreenDonut
         /// enabled.
         /// </summary>
         /// <param name="keys">A list of unique keys.</param>
+        /// <exception cref="keys">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
+        /// <exception cref="keys">
+        /// Throws an <see cref="ArgumentOutOfRangeException"/> if empty.
+        /// </exception>
         /// <returns>
         /// A list of values in the same order as the provided keys.
         /// </returns>
@@ -52,6 +61,12 @@ namespace GreenDonut
         /// enabled.
         /// </summary>
         /// <param name="keys">A list of unique keys.</param>
+        /// <exception cref="keys">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
+        /// <exception cref="keys">
+        /// Throws an <see cref="ArgumentOutOfRangeException"/> if empty.
+        /// </exception>
         /// <returns>
         /// A list of values in the same order as the provided keys.
         /// </returns>
@@ -61,6 +76,9 @@ namespace GreenDonut
         /// Removes a single entry from the cache.
         /// </summary>
         /// <param name="key">A cache entry key.</param>
+        /// <exception cref="key">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
         /// <returns>Itself for chaining support.</returns>
         IDataLoader<TKey, TValue> Remove(TKey key);
 
@@ -69,6 +87,12 @@ namespace GreenDonut
         /// </summary>
         /// <param name="key">A cache entry key.</param>
         /// <param name="value">A cache entry value.</param>
+        /// <exception cref="key">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
+        /// <exception cref="value">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
         /// <returns>Itself for chaining support.</returns>
         IDataLoader<TKey, TValue> Set(TKey key, Task<TValue> value);
     }
