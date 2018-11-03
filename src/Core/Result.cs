@@ -30,6 +30,9 @@ namespace GreenDonut
         /// Creates a new error result.
         /// </summary>
         /// <param name="error">An arbitrary error.</param>
+        /// <exception cref="error">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
         /// <returns>An error result.</returns>
         public static Result<TValue> Reject(Exception error)
         {

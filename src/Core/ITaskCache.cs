@@ -34,6 +34,9 @@ namespace GreenDonut
         /// Removes a specific entry from the cache.
         /// </summary>
         /// <param name="key">A cache entry key.</param>
+        /// <exception cref="key">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
         void Remove(TKey key);
 
         /// <summary>
@@ -42,6 +45,12 @@ namespace GreenDonut
         /// </summary>
         /// <param name="key">A cache entry key.</param>
         /// <param name="value">A cache entry value.</param>
+        /// <exception cref="key">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
+        /// <exception cref="value">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
         /// <returns>
         /// A value indicating whether the add was successful.
         /// </returns>
@@ -52,6 +61,9 @@ namespace GreenDonut
         /// </summary>
         /// <param name="key">A cache entry key.</param>
         /// <param name="value">A single cache entry value.</param>
+        /// <exception cref="key">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
         /// <returns>
         /// A value indicating whether the get request returned a entry.
         /// </returns>
