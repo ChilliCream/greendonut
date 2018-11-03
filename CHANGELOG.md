@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Code Documentation for Exceptions.
+- An overload for Set which takes a value without a wraping task. Closes [#30](https://github.com/ChilliCream/greendonut/issues/30).
+- Instrumentation API. Closes [#29](https://github.com/ChilliCream/greendonut/issues/29).
+
 ### Changed
 
 - Set the _.Net Standard_ version to `1.3` in order to support _.Net 4.6_ framework.
