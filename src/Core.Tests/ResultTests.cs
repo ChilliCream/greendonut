@@ -42,7 +42,7 @@ namespace GreenDonut
             var error = new Exception(errorMessage);
 
             // act
-            Result<string> result = Result<string>.Reject(error);
+            IResult<string> result = Result<string>.Reject(error);
 
             // assert
             Assert.NotNull(result);
@@ -61,7 +61,7 @@ namespace GreenDonut
         public void Resolve(string value)
         {
             // act
-            Result<string> result = Result<string>.Resolve(value);
+            IResult<string> result = Result<string>.Resolve(value);
 
             // assert
             Assert.NotNull(result);

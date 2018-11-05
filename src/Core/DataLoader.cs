@@ -35,6 +35,9 @@ namespace GreenDonut
         /// A delegate to fetch data batches which will be invoked every time
         /// when trying to setup a new batch request.
         /// </param>
+        /// <exception cref="fetch">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
         public DataLoader(FetchDataDelegate<TKey, TValue> fetch)
             : this(new DataLoaderOptions<TKey>(), fetch)
         { }
@@ -51,6 +54,12 @@ namespace GreenDonut
         /// A delegate to fetch data batches which will be invoked every time
         /// when trying to setup a new batch request.
         /// </param>
+        /// <exception cref="options">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
+        /// <exception cref="fetch">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
         public DataLoader(
             DataLoaderOptions<TKey> options,
             FetchDataDelegate<TKey, TValue> fetch)
@@ -60,7 +69,7 @@ namespace GreenDonut
         }
 
         /// <inheritdoc />
-        protected override Task<IReadOnlyList<Result<TValue>>> Fetch(
+        protected override Task<IReadOnlyList<IResult<TValue>>> Fetch(
             IReadOnlyList<TKey> keys)
         {
             return _fetch(keys);
