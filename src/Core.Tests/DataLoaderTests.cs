@@ -430,7 +430,8 @@ namespace GreenDonut
         [InlineData(10000, 1000000, 10, 0, true, false, 0)]
         [InlineData(10000, 1000000, 10, 100, false, true, 0)]
         [InlineData(10000, 1000000, 10, 0, false, false, 0)]
-        [Theory(DisplayName = "LoadAsync: Runs integration tests with different settings")]
+        [Theory(DisplayName = "LoadAsync: Runs integration tests with different settings",
+            Skip = "Test execution takes too long on AppVayor")]
         public async Task LoadTest(int uniqueKeys, int maxRequests,
             int maxDelay, int maxBatchSize, bool caching, bool batching,
             int slidingExpirationInMilliseconds)

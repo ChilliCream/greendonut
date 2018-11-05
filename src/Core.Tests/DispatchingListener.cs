@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Microsoft.Extensions.DiagnosticAdapter;
 
@@ -6,11 +7,12 @@ namespace GreenDonut
 {
     public class DispatchingListener
     {
-        public readonly List<string> Keys = new List<string>();
-        public readonly Dictionary<string, IResult<string>> Values =
-            new Dictionary<string, IResult<string>>();
-        public readonly Dictionary<string, Exception> Errors =
-            new Dictionary<string, Exception>();
+        public readonly ConcurrentQueue<string> Keys =
+            new ConcurrentQueue<string>();
+        public readonly ConcurrentDictionary<string, IResult<string>> Values =
+            new ConcurrentDictionary<string, IResult<string>>();
+        public readonly ConcurrentDictionary<string, Exception> Errors =
+            new ConcurrentDictionary<string, Exception>();
 
         [DiagnosticName("ExecuteBatchRequest")]
         public void OnExecuteBatchRequest() { }
@@ -19,7 +21,10 @@ namespace GreenDonut
         public void OnExecuteBatchRequestStart(
             IReadOnlyList<string> keys)
         {
-            Keys.AddRange(keys);
+            for (int i = 0; i < keys.Count; i++)
+            {
+                Keys.Enqueue(keys[i]);
+            }
         }
 
         [DiagnosticName("ExecuteBatchRequest.Stop")]
@@ -29,14 +34,14 @@ namespace GreenDonut
         {
             for (int i = 0; i < keys.Count; i++)
             {
-                Values[keys[i]] = results[i];
+                Values.TryAdd(keys[i], results[i]);
             }
         }
 
         [DiagnosticName("Error")]
         public void OnError(string key, Exception exception)
         {
-            Errors.Add(key, exception);
+            Errors.TryAdd(key, exception);
         }
     }
 }

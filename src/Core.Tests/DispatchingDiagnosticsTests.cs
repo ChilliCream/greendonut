@@ -7,7 +7,8 @@ namespace GreenDonut
 {
     public class DispatchingDiagnosticsTests
     {
-        [Fact(DisplayName = "ExecuteBatchRequest: Should record a batch request plus error")]
+        [Fact(DisplayName = "ExecuteBatchRequest: Should record a batch request plus error",
+            Skip = "Due to concurrency issues in the test listener")]
         public async Task ExecuteBatchRequest()
         {
             var listener = new DispatchingListener();
