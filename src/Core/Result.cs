@@ -8,22 +8,17 @@ namespace GreenDonut
     /// </summary>
     /// <typeparam name="TValue">A value type</typeparam>
     public class Result<TValue>
+        : IResult<TValue>
     {
         private Result() { }
 
-        /// <summary>
-        /// Gets an error if it is an error; otherwise null.
-        /// </summary>
+        /// <inheritdoc/>
         public Exception Error { get; private set; }
 
-        /// <summary>
-        /// Gets a value indicating whether the result is an error.
-        /// </summary>
+        /// <inheritdoc/>
         public bool IsError { get; private set; }
 
-        /// <summary>
-        /// Gets the value if not an error; otherwise null.
-        /// </summary>
+        /// <inheritdoc/>
         public TValue Value { get; private set; }
 
         /// <summary>

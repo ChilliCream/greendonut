@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -138,7 +139,7 @@ namespace GreenDonut
         /// in a memory store to decrease round-trips to the server and improve
         /// overall performance.
         /// </summary>
-        protected abstract Task<IReadOnlyList<Result<TValue>>> Fetch(
+        protected abstract Task<IReadOnlyList<IResult<TValue>>> Fetch(
             IReadOnlyList<TKey> keys);
 
         /// <inheritdoc />
@@ -156,6 +157,9 @@ namespace GreenDonut
                 if (_options.Caching && _cache.TryGetValue(resolvedKey,
                     out Task<TValue> cachedValue))
                 {
+                    DispatchingDiagnostics.RecordCachedValue(resolvedKey,
+                        cachedValue);
+
                     return cachedValue;
                 }
 
@@ -272,19 +276,27 @@ namespace GreenDonut
             TKey resolvedKey,
             TaskCompletionSource<TValue> promise)
         {
-            var keys = new TKey[] { resolvedKey };
-            IReadOnlyCollection<Result<TValue>> results = await Fetch(keys)
-                .ConfigureAwait(false);
+            var resolvedKeys = new TKey[] { resolvedKey };
+            Activity activity = DispatchingDiagnostics
+                .StartBatching(resolvedKeys);
+            IReadOnlyList<IResult<TValue>> results =
+                await Fetch(resolvedKeys).ConfigureAwait(false);
 
             if (results.Count == 1)
             {
-                SetSingleResult(promise, results.First());
+                SetSingleResult(promise, resolvedKey, results.First());
             }
             else
             {
-                promise.SetException(
-                    Errors.CreateKeysAndValuesMustMatch(1, results.Count));
+                Exception error = Errors.CreateKeysAndValuesMustMatch(1,
+                    results.Count);
+
+                DispatchingDiagnostics.RecordError(resolvedKey, error);
+                promise.SetException(error);
             }
+
+            DispatchingDiagnostics.StopBatching(activity, resolvedKeys,
+                results);
         }
 
         private Task DispatchBatchAsync()
@@ -309,20 +321,31 @@ namespace GreenDonut
                                 .Skip(i * _options.MaxBatchSize)
                                 .Take(_options.MaxBatchSize)
                                 .ToArray();
-                            IReadOnlyList<Result<TValue>> values =
-                                await Fetch(chunkedKeys).ConfigureAwait(false);
 
-                            SetBatchResults(copy, chunkedKeys, values);
+                            await FetchInternalAsync(copy, chunkedKeys)
+                                .ConfigureAwait(false);
                         }
                     }
                     else
                     {
-                        IReadOnlyList<Result<TValue>> values =
-                            await Fetch(resolvedKeys).ConfigureAwait(false);
-
-                        SetBatchResults(copy, resolvedKeys, values);
+                        await FetchInternalAsync(copy, resolvedKeys)
+                            .ConfigureAwait(false);
                     }
                 });
+        }
+
+        private async Task FetchInternalAsync(
+            IDictionary<TKey, TaskCompletionSource<TValue>> bufferedPromises,
+            IReadOnlyList<TKey> resolvedKeys)
+        {
+            Activity activity = DispatchingDiagnostics
+                .StartBatching(resolvedKeys);
+            IReadOnlyList<IResult<TValue>> results =
+                await Fetch(resolvedKeys).ConfigureAwait(false);
+
+            SetBatchResults(bufferedPromises, resolvedKeys, results);
+            DispatchingDiagnostics.StopBatching(activity, resolvedKeys,
+                results);
         }
 
         private async Task<IReadOnlyList<TValue>> LoadInternalAsync(
@@ -348,34 +371,38 @@ namespace GreenDonut
 
         private void SetBatchResults(
             IDictionary<TKey, TaskCompletionSource<TValue>> bufferedPromises,
-            IReadOnlyList<TKey> keys,
-            IReadOnlyList<Result<TValue>> results)
+            IReadOnlyList<TKey> resolvedKeys,
+            IReadOnlyList<IResult<TValue>> results)
         {
-            if (keys.Count == results.Count)
+            if (resolvedKeys.Count == results.Count)
             {
-                for (var i = 0; i < keys.Count; i++)
+                for (var i = 0; i < resolvedKeys.Count; i++)
                 {
-                    SetSingleResult(bufferedPromises[keys[i]], results[i]);
+                    SetSingleResult(bufferedPromises[resolvedKeys[i]],
+                        resolvedKeys[i], results[i]);
                 }
             }
             else
             {
                 Exception error = Errors.CreateKeysAndValuesMustMatch(
-                    keys.Count, results.Count);
+                    resolvedKeys.Count, results.Count);
 
-                for (var i = 0; i < keys.Count; i++)
+                for (var i = 0; i < resolvedKeys.Count; i++)
                 {
-                    bufferedPromises[keys[i]].SetException(error);
+                    DispatchingDiagnostics.RecordError(resolvedKeys[i], error);
+                    bufferedPromises[resolvedKeys[i]].SetException(error);
                 }
             }
         }
 
         private void SetSingleResult(
             TaskCompletionSource<TValue> promise,
-            Result<TValue> result)
+            TKey resolvedKey,
+            IResult<TValue> result)
         {
             if (result.IsError)
             {
+                DispatchingDiagnostics.RecordError(resolvedKey, result.Error);
                 promise.SetException(result.Error);
             }
             else

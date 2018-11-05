@@ -28,7 +28,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
+                await Task.FromResult(new IResult<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
@@ -47,7 +47,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
+                await Task.FromResult(new IResult<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
@@ -66,7 +66,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
+                await Task.FromResult(new IResult<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
@@ -88,7 +88,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
+                await Task.FromResult(new IResult<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);

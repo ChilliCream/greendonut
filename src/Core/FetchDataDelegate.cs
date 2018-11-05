@@ -12,6 +12,6 @@ namespace GreenDonut
     /// <returns>
     /// A list of values which must be in the same order as the provided keys.
     /// </returns>
-    public delegate Task<IReadOnlyList<Result<TValue>>> FetchDataDelegate
+    public delegate Task<IReadOnlyList<IResult<TValue>>> FetchDataDelegate
         <TKey, TValue>(IReadOnlyList<TKey> keys);
 }
