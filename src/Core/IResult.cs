@@ -7,7 +7,7 @@ namespace GreenDonut
     /// error.
     /// </summary>
     /// <typeparam name="TValue">A value type</typeparam>
-    public interface IResult<TValue>
+    public interface IResult<out TValue>
     {
         /// <summary>
         /// Gets an error if it is an error; otherwise null.
