@@ -201,12 +201,6 @@ namespace GreenDonut
                 throw new ArgumentNullException(nameof(keys));
             }
 
-            if (keys.Length < 1)
-            {
-                throw new ArgumentOutOfRangeException(nameof(keys),
-                    "There must be at least one key");
-            }
-
             return LoadInternalAsync(keys);
         }
 
@@ -217,12 +211,6 @@ namespace GreenDonut
             if (keys == null)
             {
                 throw new ArgumentNullException(nameof(keys));
-            }
-
-            if (keys.Count < 1)
-            {
-                throw new ArgumentOutOfRangeException(nameof(keys),
-                    "There must be at least one key");
             }
 
             return LoadInternalAsync(keys);
