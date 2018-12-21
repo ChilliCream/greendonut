@@ -523,25 +523,29 @@ namespace GreenDonut
             await Assert.ThrowsAsync<ArgumentNullException>("keys", verify)
                 .ConfigureAwait(false);
         }
-
-        [Fact(DisplayName = "LoadAsync: Should throw an argument out of range exception for keys")]
+        
+        [Fact(DisplayName = "LoadAsync: Should allow empty list of keys")]
         public async Task LoadParamsZeroKeys()
         {
             // arrange
+            var fetchResult = Result<string>.Resolve("Bar");
             FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new[] { fetchResult })
                     .ConfigureAwait(false);
-            var options = new DataLoaderOptions<string>();
+            var options = new DataLoaderOptions<string>
+            {
+                Batching = false
+            };
             var loader = new DataLoader<string, string>(options, fetch);
-            var keys = new string[0];
+            var keys = new string[] { };
 
             // act
-            Func<Task<IReadOnlyList<string>>> verify = () =>
-                loader.LoadAsync(keys);
+            IReadOnlyList<string> loadResult = await loader
+                .LoadAsync(keys)
+                .ConfigureAwait(false);
 
             // assert
-            await Assert.ThrowsAsync<ArgumentOutOfRangeException>("keys",
-                verify).ConfigureAwait(false);
+            Assert.Empty(loadResult);
         }
 
         [Fact(DisplayName = "LoadAsync: Should not throw any exception")]
@@ -616,24 +620,28 @@ namespace GreenDonut
                 .ConfigureAwait(false);
         }
 
-        [Fact(DisplayName = "LoadAsync: Should throw an argument out of range exception for keys")]
+        [Fact(DisplayName = "LoadAsync: Should allow empty list of keys")]
         public async Task LoadCollectionZeroKeys()
         {
             // arrange
+            var fetchResult = Result<string>.Resolve("Bar");
             FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new[] { fetchResult })
                     .ConfigureAwait(false);
-            var options = new DataLoaderOptions<string>();
+            var options = new DataLoaderOptions<string>
+            {
+                Batching = false
+            };
             var loader = new DataLoader<string, string>(options, fetch);
             var keys = new List<string>();
 
             // act
-            Func<Task<IReadOnlyList<string>>> verify = () =>
-                loader.LoadAsync(keys);
+            IReadOnlyList<string> loadResult = await loader
+                .LoadAsync(keys)
+                .ConfigureAwait(false);
 
             // assert
-            await Assert.ThrowsAsync<ArgumentOutOfRangeException>("keys",
-                verify).ConfigureAwait(false);
+            Assert.Empty(loadResult);
         }
 
         [Fact(DisplayName = "LoadAsync: Should not throw any exception")]

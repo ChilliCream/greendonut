@@ -58,43 +58,6 @@ namespace GreenDonut
 
         #endregion
 
-        #region bugfix - Allow Empty Lists To be loaded
-
-
-        [Fact(DisplayName = "Confirm EmptyListDataLoader works as expected")]
-        public async Task TestEmptyListDataLoader() {
-            var strings = new [] {"item1", "item2", "item3"};
-            var dataLoader = new EmptyListDataLoader();
-
-            var loadTask = Task.WhenAll(dataLoader.LoadAsync(strings));
-            await dataLoader.DispatchAsync();
-            var result = loadTask.Result;
-
-            Assert.Collection(result, m => Assert.True(strings.All(s => m.Contains(s))));
-        }
         
-        [Fact(DisplayName = "LoadAsync should allow empty lists as parameter")]
-        public async Task AllowEmptyListOnReadOnlyListAsync() {
-            var dataLoader = new EmptyListDataLoader();
-
-            var loadTask = Task.WhenAll(dataLoader.LoadAsync(new List<string>()));
-            await dataLoader.DispatchAsync();
-            var result = loadTask.Result;
-
-            Assert.Collection(result, m => Assert.True(m.Count == 0));
-        }
-        
-        [Fact(DisplayName = "LoadAsync should allow empty lists as parameter")]
-        public async Task AllowEmptyListOnArrayAsync() {
-            var dataLoader = new EmptyListDataLoader();
-
-            var loadTask = Task.WhenAll(dataLoader.LoadAsync(new string[0]));
-            await dataLoader.DispatchAsync();
-            var result = loadTask.Result;
-
-            Assert.Collection(result, m => Assert.True(m.Count == 0));
-        }
-        
-        #endregion
     }
 }
