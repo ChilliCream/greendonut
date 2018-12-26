@@ -528,16 +528,15 @@ namespace GreenDonut
         public async Task LoadParamsZeroKeys()
         {
             // arrange
-            var fetchResult = Result<string>.Resolve("Bar");
             FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new[] { fetchResult })
+                await Task.FromResult(new IResult<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>
             {
                 Batching = false
             };
             var loader = new DataLoader<string, string>(options, fetch);
-            var keys = new string[] { };
+            var keys = new string[0];
 
             // act
             IReadOnlyList<string> loadResult = await loader
@@ -624,9 +623,8 @@ namespace GreenDonut
         public async Task LoadCollectionZeroKeys()
         {
             // arrange
-            var fetchResult = Result<string>.Resolve("Bar");
             FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new[] { fetchResult })
+                await Task.FromResult(new IResult<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>
             {
