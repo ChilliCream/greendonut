@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- `ArgumentOutOfRangeException` for `keys` argument in the `LoadAsync` method.
+
 ## [1.1.0] - 2018-11-05
 
 ### Added
