@@ -27,7 +27,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
 
             // act
@@ -61,7 +61,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             DataLoaderOptions<string> options = null;
 
@@ -78,7 +78,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
 
@@ -99,7 +99,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
@@ -116,7 +116,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>
             {
@@ -147,7 +147,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
@@ -164,7 +164,7 @@ namespace GreenDonut
         public async Task DispatchAsyncNoBatching()
         {
             // arrange
-            IResult<string> expectedResult = Result<string>.Resolve("Bar");
+            Result<string> expectedResult = "Bar";
             FetchDataDelegate<string, string> fetch = async keys =>
                 await Task.FromResult(new[] { expectedResult })
                     .ConfigureAwait(false);
@@ -189,7 +189,7 @@ namespace GreenDonut
         public async Task DispatchAsyncManual()
         {
             // arrange
-            IResult<string> expectedResult = Result<string>.Resolve("Bar");
+            Result<string> expectedResult = "Bar";
             FetchDataDelegate<string, string> fetch = async keys =>
                 await Task.FromResult(new[] { expectedResult })
                     .ConfigureAwait(false);
@@ -213,9 +213,9 @@ namespace GreenDonut
         public async Task DispatchAsyncAuto()
         {
             // arrange
-            IResult<string> expectedResult = Result<string>.Resolve("Bar");
+            Result<string> expectedResult = "Bar";
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new[] { expectedResult })
+                await Task.FromResult(new Result<string>[] { expectedResult })
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>
             {
@@ -240,7 +240,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>
             {
@@ -271,7 +271,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
@@ -288,7 +288,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>
             {
@@ -313,7 +313,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
@@ -332,7 +332,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new[] { Result<string>.Resolve("Bar") })
+                await Task.FromResult(new Result<string>[] { "Bar" })
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>()
             {
@@ -353,9 +353,9 @@ namespace GreenDonut
         public async Task LoadSingleResult()
         {
             // arrange
-            IResult<string> expectedResult = Result<string>.Resolve("Bar");
+            Result<string> expectedResult = "Bar";
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new[] { expectedResult })
+                await Task.FromResult(new Result<string>[] { expectedResult })
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>
             {
@@ -375,9 +375,9 @@ namespace GreenDonut
         public async Task LoadSingleErrorResult()
         {
             // arrange
-            IResult<string> expectedResult = Result<string>.Resolve("Bar");
+            Result<string> expectedResult = "Bar";
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>
             {
@@ -406,32 +406,31 @@ namespace GreenDonut
         [InlineData(100, 1000, 25, 0, true, false, 0)]
         [InlineData(100, 1000, 25, 0, false, true, 0)]
         [InlineData(100, 1000, 25, 0, false, false, 0)]
-        [InlineData(1000, 100000, 15, 50, true, true, 0)]
-        [InlineData(1000, 100000, 15, 0, true, true, 0)]
-        [InlineData(1000, 100000, 15, 0, true, true, 25)]
-        [InlineData(1000, 100000, 15, 0, true, false, 0)]
-        [InlineData(1000, 100000, 15, 0, false, true, 0)]
-        [InlineData(1000, 100000, 15, 0, false, false, 0)]
-        [InlineData(1500, 10000, 20, 100, true, true, 0)]
-        [InlineData(1500, 10000, 20, 0, true, true, 0)]
-        [InlineData(1500, 10000, 20, 0, true, true, 25)]
-        [InlineData(1500, 10000, 20, 0, true, false, 0)]
-        [InlineData(1500, 10000, 20, 0, false, true, 0)]
-        [InlineData(1500, 10000, 20, 0, false, false, 0)]
-        [InlineData(3000, 100000, 10, 250, true, true, 0)]
-        [InlineData(3000, 100000, 10, 0, true, true, 0)]
-        [InlineData(3000, 100000, 10, 0, true, true, 25)]
-        [InlineData(3000, 100000, 10, 0, true, false, 0)]
-        [InlineData(3000, 100000, 10, 0, false, true, 0)]
-        [InlineData(3000, 100000, 10, 0, false, false, 0)]
-        [InlineData(10000, 1000000, 10, 100, true, true, 0)]
-        [InlineData(10000, 1000000, 10, 0, true, true, 0)]
-        [InlineData(10000, 1000000, 10, 100, true, true, 25)]
-        [InlineData(10000, 1000000, 10, 0, true, false, 0)]
-        [InlineData(10000, 1000000, 10, 100, false, true, 0)]
-        [InlineData(10000, 1000000, 10, 0, false, false, 0)]
-        [Theory(DisplayName = "LoadAsync: Runs integration tests with different settings",
-            Skip = "Test execution takes too long on AppVayor")]
+        //[InlineData(1000, 100000, 15, 50, true, true, 0)]
+        //[InlineData(1000, 100000, 15, 0, true, true, 0)]
+        //[InlineData(1000, 100000, 15, 0, true, true, 25)]
+        //[InlineData(1000, 100000, 15, 0, true, false, 0)]
+        //[InlineData(1000, 100000, 15, 0, false, true, 0)]
+        //[InlineData(1000, 100000, 15, 0, false, false, 0)]
+        //[InlineData(1500, 10000, 20, 100, true, true, 0)]
+        //[InlineData(1500, 10000, 20, 0, true, true, 0)]
+        //[InlineData(1500, 10000, 20, 0, true, true, 25)]
+        //[InlineData(1500, 10000, 20, 0, true, false, 0)]
+        //[InlineData(1500, 10000, 20, 0, false, true, 0)]
+        //[InlineData(1500, 10000, 20, 0, false, false, 0)]
+        //[InlineData(3000, 100000, 10, 250, true, true, 0)]
+        //[InlineData(3000, 100000, 10, 0, true, true, 0)]
+        //[InlineData(3000, 100000, 10, 0, true, true, 25)]
+        //[InlineData(3000, 100000, 10, 0, true, false, 0)]
+        //[InlineData(3000, 100000, 10, 0, false, true, 0)]
+        //[InlineData(3000, 100000, 10, 0, false, false, 0)]
+        //[InlineData(10000, 1000000, 10, 100, true, true, 0)]
+        //[InlineData(10000, 1000000, 10, 0, true, true, 0)]
+        //[InlineData(10000, 1000000, 10, 100, true, true, 25)]
+        //[InlineData(10000, 1000000, 10, 0, true, false, 0)]
+        //[InlineData(10000, 1000000, 10, 100, false, true, 0)]
+        //[InlineData(10000, 1000000, 10, 0, false, false, 0)]
+        [Theory(DisplayName = "LoadAsync: Runs integration tests with different settings")]
         public async Task LoadTest(int uniqueKeys, int maxRequests,
             int maxDelay, int maxBatchSize, bool caching, bool batching,
             int slidingExpirationInMilliseconds)
@@ -440,13 +439,13 @@ namespace GreenDonut
             var random = new Random();
             FetchDataDelegate<Guid, int> fetch = async keys =>
             {
-                var values = new List<IResult<int>>(keys.Count);
+                var values = new List<Result<int>>(keys.Count);
 
                 foreach (Guid key in keys)
                 {
                     var value = random.Next(1, maxRequests);
 
-                    values.Add(Result<int>.Resolve(value));
+                    values.Add(value);
                 }
 
                 var delay = random.Next(maxDelay);
@@ -509,7 +508,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
@@ -529,7 +528,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>
             {
@@ -552,7 +551,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new[] { Result<string>.Resolve("Bar") })
+                await Task.FromResult(new Result<string>[] { "Bar" })
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>()
             {
@@ -574,7 +573,7 @@ namespace GreenDonut
         public async Task LoadParamsResult()
         {
             // arrange
-            var expectedResult = Result<string>.Resolve("Bar");
+            Result<string> expectedResult = "Bar";
             FetchDataDelegate<string, string> fetch = async k =>
                 await Task.FromResult(new[] { expectedResult })
                     .ConfigureAwait(false);
@@ -604,7 +603,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
@@ -624,7 +623,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>
             {
@@ -647,7 +646,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new[] { Result<string>.Resolve("Bar") })
+                await Task.FromResult(new Result<string>[] { "Bar" })
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>()
             {
@@ -669,7 +668,7 @@ namespace GreenDonut
         public async Task LoadCollectionResult()
         {
             // arrange
-            var expectedResult = Result<string>.Resolve("Bar");
+            Result<string> expectedResult = "Bar";
             FetchDataDelegate<string, string> fetch = async k =>
                 await Task.FromResult(new[] { expectedResult })
                     .ConfigureAwait(false);
@@ -694,7 +693,7 @@ namespace GreenDonut
         public async Task LoadAutoDispatching()
         {
             // arrange
-            var expectedResult = Result<string>.Resolve("Bar");
+            Result<string> expectedResult = "Bar";
             var repository = new Dictionary<string, string>
             {
                 { "Foo", "Bar" },
@@ -703,20 +702,20 @@ namespace GreenDonut
             };
             FetchDataDelegate<string, string> fetch = async k =>
             {
-                var values = new List<IResult<string>>();
+                var values = new List<Result<string>>();
 
                 foreach (var key in k)
                 {
                     if (repository.ContainsKey(key))
                     {
-                        values.Add(Result<string>.Resolve(repository[key]));
+                        values.Add(repository[key]);
                     }
                     else
                     {
                         var error = new Exception($"Value for key \"{key}\" " +
                             "not found");
 
-                        values.Add(Result<string>.Reject(error));
+                        values.Add(error);
                     }
                 }
 
@@ -742,7 +741,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
@@ -762,7 +761,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
@@ -780,7 +779,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>
             {
@@ -815,7 +814,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
@@ -834,7 +833,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
@@ -853,7 +852,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
@@ -872,7 +871,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
@@ -894,7 +893,7 @@ namespace GreenDonut
         {
             // arrange
             FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new IResult<string>[0])
+                await Task.FromResult(new Result<string>[0])
                     .ConfigureAwait(false);
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);

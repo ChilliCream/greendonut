@@ -42,7 +42,24 @@ namespace GreenDonut
             var error = new Exception(errorMessage);
 
             // act
-            IResult<string> result = Result<string>.Reject(error);
+            Result<string> result = Result<string>.Reject(error);
+
+            // assert
+            Assert.NotNull(result);
+            Assert.True(result.IsError);
+            Assert.Equal("Foo", result.Error?.Message);
+            Assert.Null(result.Value);
+        }
+
+        [Fact(DisplayName = "Error: Should convert an error into an error result")]
+        public void ConvertError()
+        {
+            // arrange
+            var errorMessage = "Foo";
+            var error = new Exception(errorMessage);
+
+            // act
+            Result<string> result = error;
 
             // assert
             Assert.NotNull(result);
@@ -61,7 +78,22 @@ namespace GreenDonut
         public void Resolve(string value)
         {
             // act
-            IResult<string> result = Result<string>.Resolve(value);
+            Result<string> result = Result<string>.Resolve(value);
+
+            // assert
+            Assert.NotNull(result);
+            Assert.Null(result.Error);
+            Assert.False(result.IsError);
+            Assert.Equal(value, result.Value);
+        }
+
+        [InlineData(null)]
+        [InlineData("Foo")]
+        [Theory(DisplayName = "Resolve: Should convert a value into a value result")]
+        public void ConvertValue(string value)
+        {
+            // act
+            Result<string> result = value;
 
             // assert
             Assert.NotNull(result);

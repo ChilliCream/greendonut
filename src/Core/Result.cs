@@ -8,17 +8,22 @@ namespace GreenDonut
     /// </summary>
     /// <typeparam name="TValue">A value type</typeparam>
     public class Result<TValue>
-        : IResult<TValue>
     {
         private Result() { }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets an error if it is an error; otherwise null.
+        /// </summary>
         public Exception Error { get; private set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets a value indicating whether the result is an error.
+        /// </summary>
         public bool IsError { get; private set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets the value if not an error; otherwise null.
+        /// </summary>
         public TValue Value { get; private set; }
 
         /// <summary>
@@ -29,6 +34,7 @@ namespace GreenDonut
         /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
         /// </exception>
         /// <returns>An error result.</returns>
+        [Obsolete("This method is deprecated; use instead implicit conversion. E.g. Result<string> foo = new Exception(\"Bar\");")]
         public static Result<TValue> Reject(Exception error)
         {
             if (error == null)
@@ -49,6 +55,7 @@ namespace GreenDonut
         /// </summary>
         /// <param name="value">An arbitrary value.</param>
         /// <returns>A value result.</returns>
+        [Obsolete("This method is deprecated; use instead implicit conversion. E.g. Result<string> foo = \"Bar\";")]
         public static Result<TValue> Resolve(TValue value)
         {
             var result = new Result<TValue>();
@@ -57,6 +64,27 @@ namespace GreenDonut
             result.IsError = false;
 
             return result;
+        }
+
+        /// <summary>
+        /// Converts an error into an error result.
+        /// </summary>
+        /// <param name="error">An arbitrary error.</param>
+        /// <exception cref="error">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
+        public static implicit operator Result<TValue>(Exception error)
+        {
+            return Reject(error);
+        }
+
+        /// <summary>
+        /// Converts a value into a value result.
+        /// </summary>
+        /// <param name="value">An arbitrary value.</param>
+        public static implicit operator Result<TValue>(TValue value)
+        {
+            return Resolve(value);
         }
     }
 }

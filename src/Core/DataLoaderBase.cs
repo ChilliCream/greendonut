@@ -139,7 +139,7 @@ namespace GreenDonut
         /// in a memory store to decrease round-trips to the server and improve
         /// overall performance.
         /// </summary>
-        protected abstract Task<IReadOnlyList<IResult<TValue>>> Fetch(
+        protected abstract Task<IReadOnlyList<Result<TValue>>> Fetch(
             IReadOnlyList<TKey> keys);
 
         /// <inheritdoc />
@@ -267,7 +267,7 @@ namespace GreenDonut
             var resolvedKeys = new TKey[] { resolvedKey };
             Activity activity = DispatchingDiagnostics
                 .StartBatching(resolvedKeys);
-            IReadOnlyList<IResult<TValue>> results =
+            IReadOnlyList<Result<TValue>> results =
                 await Fetch(resolvedKeys).ConfigureAwait(false);
 
             if (results.Count == 1)
@@ -328,7 +328,7 @@ namespace GreenDonut
         {
             Activity activity = DispatchingDiagnostics
                 .StartBatching(resolvedKeys);
-            IReadOnlyList<IResult<TValue>> results =
+            IReadOnlyList<Result<TValue>> results =
                 await Fetch(resolvedKeys).ConfigureAwait(false);
 
             SetBatchResults(bufferedPromises, resolvedKeys, results);
@@ -360,7 +360,7 @@ namespace GreenDonut
         private void SetBatchResults(
             IDictionary<TKey, TaskCompletionSource<TValue>> bufferedPromises,
             IReadOnlyList<TKey> resolvedKeys,
-            IReadOnlyList<IResult<TValue>> results)
+            IReadOnlyList<Result<TValue>> results)
         {
             if (resolvedKeys.Count == results.Count)
             {
@@ -386,7 +386,7 @@ namespace GreenDonut
         private void SetSingleResult(
             TaskCompletionSource<TValue> promise,
             TKey resolvedKey,
-            IResult<TValue> result)
+            Result<TValue> result)
         {
             if (result.IsError)
             {

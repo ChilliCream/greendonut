@@ -69,7 +69,7 @@ namespace GreenDonut
         }
 
         /// <inheritdoc />
-        protected override Task<IReadOnlyList<IResult<TValue>>> Fetch(
+        protected override Task<IReadOnlyList<Result<TValue>>> Fetch(
             IReadOnlyList<TKey> keys)
         {
             return _fetch(keys);
