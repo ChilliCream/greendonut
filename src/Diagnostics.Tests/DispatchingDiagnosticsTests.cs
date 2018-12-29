@@ -26,7 +26,10 @@ namespace GreenDonut
                         error
                     }).ConfigureAwait(false);
                 };
-                var options = new DataLoaderOptions<string>();
+                var options = new DataLoaderOptions<string>
+                {
+                    AutoDispatching = true
+                };
                 var loader = new DataLoader<string, string>(options, fetch);
 
                 // act

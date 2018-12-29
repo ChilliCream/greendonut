@@ -12,7 +12,7 @@ namespace GreenDonut
         public void ConstructorNoException()
         {
             // arrange
-            var cacheSize = 10;
+            var cacheSize = 1;
             TimeSpan slidingExpiration = TimeSpan.Zero;
 
             // act
@@ -27,8 +27,8 @@ namespace GreenDonut
 
         #region Size
 
-        [InlineData(0, 10)]
-        [InlineData(1, 10)]
+        [InlineData(0, 1)]
+        [InlineData(1, 1)]
         [InlineData(10, 10)]
         [InlineData(100, 100)]
         [InlineData(1000, 1000)]
