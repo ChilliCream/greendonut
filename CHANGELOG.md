@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Switched to implicit conversion to create error or value results [#40](https://github.com/ChilliCream/greendonut/issues/40).
+- Set `DataLoaderOptions` default for `AutoDispatching` to `false` [#36](https://github.com/ChilliCream/greendonut/issues/36).
+- Set `Defaults.MinimumCacheSize` to `1` [#36](https://github.com/ChilliCream/greendonut/issues/36).
 
 ### Fixed
 

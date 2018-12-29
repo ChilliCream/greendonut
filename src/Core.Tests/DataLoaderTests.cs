@@ -459,6 +459,7 @@ namespace GreenDonut
                 : TimeSpan.Zero;
             var options = new DataLoaderOptions<Guid>
             {
+                AutoDispatching = true,
                 Caching = caching,
                 Batching = batching,
                 MaxBatchSize = maxBatchSize,
@@ -721,7 +722,10 @@ namespace GreenDonut
 
                 return await Task.FromResult(values).ConfigureAwait(false);
             };
-            var options = new DataLoaderOptions<string>();
+            var options = new DataLoaderOptions<string>
+            {
+                AutoDispatching = true
+            };
             var loader = new DataLoader<string, string>(options, fetch);
             var keys = new List<string> { "Foo", "Bar", "Baz", "Qux" };
 

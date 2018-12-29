@@ -15,7 +15,7 @@ namespace GreenDonut
         /// <param name="cacheKeyResolver"></param>
         public DataLoaderOptions()
         {
-            AutoDispatching = true;
+            AutoDispatching = false;
             Batching = true;
             BatchRequestDelay = Defaults.BatchRequestDelay;
             CacheSize = Defaults.CacheSize;
@@ -25,7 +25,7 @@ namespace GreenDonut
 
         /// <summary>
         /// Gets or sets a value indicating whether auto dispatching is
-        /// enabled. The default value is <c>true</c>.
+        /// enabled. The default value is <c>false</c>.
         /// </summary>
         public bool AutoDispatching { get; set; }
 
@@ -50,8 +50,8 @@ namespace GreenDonut
         public Func<TKey, TKey> CacheKeyResolver { get; set; }
 
         /// <summary>
-        /// Gets or sets the cache size. If set to <c>10</c> for example, it
-        /// says only <c>10</c> cache entries can live inside the cache. Whan
+        /// Gets or sets the cache size. If set to <c>1</c> for example, it
+        /// says only <c>1</c> cache entries can live inside the cache. Whan
         /// adding an additional entry the least recently used entry will be
         /// removed. The default value is set to <c>1000</c>.
         /// </summary>
