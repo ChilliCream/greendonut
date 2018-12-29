@@ -7,9 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Switched to implicit conversion to create error or value results [#40](https://github.com/ChilliCream/greendonut/issues/40).
+
+### Deprecated
+
+- `Result<>.Reject(error)` method is obsolete as of now [#40](https://github.com/ChilliCream/greendonut/issues/40).
+- `Result<>.Resolve(value)` method is obsolete as of now [#40](https://github.com/ChilliCream/greendonut/issues/40).
+
 ### Removed
 
-- `ArgumentOutOfRangeException` for `keys` argument in the `LoadAsync` method.
+- `ArgumentOutOfRangeException` for `keys` argument in the `LoadAsync` method. Thanks to [jbray1982](https://github.com/jbray1982) for fixing this.
 
 ## [1.1.0] - 2018-11-05
 
