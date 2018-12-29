@@ -128,12 +128,11 @@ namespace GreenDonut
             loader.Set("Bar", Task.FromResult("Baz"));
 
             // act
-            IDataLoader<string, string> result = loader.Clear();
+            loader.Clear();
 
             // assert
             Func<Task> verify = () => loader.LoadAsync("Foo", "Bar");
-
-            Assert.Equal(loader, result);
+            
             await Assert.ThrowsAsync<InvalidOperationException>(verify)
                 .ConfigureAwait(false);
         }
@@ -799,7 +798,7 @@ namespace GreenDonut
             loader.Set(key, Task.FromResult("Bar"));
 
             // act
-            IDataLoader<string, string> result = loader.Remove(key);
+            loader.Remove(key);
 
             // assert
             Task<string> loadResult = loader.LoadAsync(key);
@@ -808,8 +807,7 @@ namespace GreenDonut
             {
                 asyncResult.AsyncWaitHandle.WaitOne();
             }
-
-            Assert.Equal(loader, result);
+            
             Assert.NotNull(loadResult.Exception);
         }
 
@@ -887,12 +885,11 @@ namespace GreenDonut
             var value = Task.FromResult("Bar");
 
             // act
-            IDataLoader<string, string> result = loader.Set(key, value);
+            loader.Set(key, value);
 
             // assert
             var loadResult = await loader.LoadAsync(key).ConfigureAwait(false);
-
-            Assert.Equal(loader, result);
+            
             Assert.Equal(value.Result, loadResult);
         }
 
@@ -917,56 +914,6 @@ namespace GreenDonut
             var loadResult = await loader.LoadAsync(key).ConfigureAwait(false);
             
             Assert.Equal(first.Result, loadResult);
-        }
-
-        #endregion
-
-        #region IDataLoader.Clear
-
-        [Fact(DisplayName = "IDataLoader.Clear: Should not throw any exception")]
-        public void IDataLoaderClearNoException()
-        {
-            // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
-            var options = new DataLoaderOptions<string>();
-            IDataLoader loader = new DataLoader<string, string>(options,
-                fetch);
-
-            // act
-            Action verify = () => loader.Clear();
-
-            // assert
-            Assert.Null(Record.Exception(verify));
-        }
-
-        [Fact(DisplayName = "IDataLoader.Clear: Should remove all entries from the cache")]
-        public async Task IDataLoaderClearAllEntries()
-        {
-            // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
-            var options = new DataLoaderOptions<string>
-            {
-                Batching = false
-            };
-            IDataLoader loader = new DataLoader<string, string>(options,
-                fetch);
-
-            loader.Set("Foo", Task.FromResult((object)"Bar"));
-            loader.Set("Bar", Task.FromResult((object)"Baz"));
-
-            // act
-            IDataLoader result = loader.Clear();
-
-            // assert
-            Func<Task> verify = () => loader.LoadAsync("Foo", "Bar");
-
-            Assert.Equal(loader, result);
-            await Assert.ThrowsAsync<InvalidOperationException>(verify)
-                .ConfigureAwait(false);
         }
 
         #endregion
@@ -1370,7 +1317,7 @@ namespace GreenDonut
             loader.Set(key, Task.FromResult((object)"Bar"));
 
             // act
-            IDataLoader result = loader.Remove(key);
+            loader.Remove(key);
 
             // assert
             Task<object> loadResult = loader.LoadAsync(key);
@@ -1379,8 +1326,7 @@ namespace GreenDonut
             {
                 asyncResult.AsyncWaitHandle.WaitOne();
             }
-
-            Assert.Equal(loader, result);
+            
             Assert.NotNull(loadResult.Exception);
         }
 
@@ -1462,12 +1408,11 @@ namespace GreenDonut
             var value = Task.FromResult((object)"Bar");
 
             // act
-            IDataLoader result = loader.Set(key, value);
+            loader.Set(key, value);
 
             // assert
             var loadResult = await loader.LoadAsync(key).ConfigureAwait(false);
-
-            Assert.Equal(loader, result);
+            
             Assert.Equal(value.Result, loadResult);
         }
 

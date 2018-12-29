@@ -74,12 +74,11 @@ namespace GreenDonut
             var value = "Bar";
 
             // act
-            IDataLoader<string, string> result = loader.Set(key, value);
+            loader.Set(key, value);
 
             // assert
             var loadResult = await loader.LoadAsync(key).ConfigureAwait(false);
-
-            Assert.Equal(loader, result);
+            
             Assert.Equal(value, loadResult);
         }
 
