@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Switched to implicit conversion to create error or value results [#40](https://github.com/ChilliCream/greendonut/issues/40).
 
+### Fixed
+
+- Failed batch operations were cached [#42](https://github.com/ChilliCream/greendonut/issues/42).
+
 ### Deprecated
 
 - `Result<>.Reject(error)` method is obsolete as of now [#40](https://github.com/ChilliCream/greendonut/issues/40).

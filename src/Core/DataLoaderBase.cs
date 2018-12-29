@@ -178,7 +178,8 @@ namespace GreenDonut
                 }
                 else
                 {
-                    // note: must run in the background; do not await here.
+                    // must run decoupled from this task, so that LoadAsync
+                    // responds immediately; do not await here.
                     Task.Factory.StartNew(
                         () => DispatchSingleAsync(resolvedKey, promise),
                         TaskCreationOptions.RunContinuationsAsynchronously);
@@ -251,6 +252,44 @@ namespace GreenDonut
             return this;
         }
 
+        private void BatchOperationFailed(
+            IDictionary<TKey, TaskCompletionSource<TValue>> bufferedPromises,
+            IReadOnlyList<TKey> resolvedKeys,
+            Exception error)
+        {
+            for (var i = 0; i < resolvedKeys.Count; i++)
+            {
+                DispatchingDiagnostics.RecordError(resolvedKeys[i], error);
+                bufferedPromises[resolvedKeys[i]].SetException(error);
+                _cache.Remove(resolvedKeys[i]);
+            }
+        }
+
+        private void BatchOperationSucceeded(
+            IDictionary<TKey, TaskCompletionSource<TValue>> bufferedPromises,
+            IReadOnlyList<TKey> resolvedKeys,
+            IReadOnlyList<Result<TValue>> results)
+        {
+            if (resolvedKeys.Count == results.Count)
+            {
+                for (var i = 0; i < resolvedKeys.Count; i++)
+                {
+                    SetSingleResult(bufferedPromises[resolvedKeys[i]],
+                        resolvedKeys[i], results[i]);
+                }
+            }
+            else
+            {
+                // in case we got here less or more results as expected, the
+                // complete batch operation failed.
+
+                Exception error = Errors.CreateKeysAndValuesMustMatch(
+                    resolvedKeys.Count, results.Count);
+
+                BatchOperationFailed(bufferedPromises, resolvedKeys, error);
+            }
+        }
+
         private TaskCompletionBuffer<TKey, TValue> CopyAndClearBuffer()
         {
             TaskCompletionBuffer<TKey, TValue> copy = _buffer;
@@ -258,32 +297,6 @@ namespace GreenDonut
             _buffer = new TaskCompletionBuffer<TKey, TValue>();
 
             return copy;
-        }
-
-        private async Task DispatchSingleAsync(
-            TKey resolvedKey,
-            TaskCompletionSource<TValue> promise)
-        {
-            var resolvedKeys = new TKey[] { resolvedKey };
-            Activity activity = DispatchingDiagnostics
-                .StartSingle(resolvedKey);
-            IReadOnlyList<Result<TValue>> results =
-                await Fetch(resolvedKeys).ConfigureAwait(false);
-
-            if (results.Count == 1)
-            {
-                SetSingleResult(promise, resolvedKey, results.First());
-            }
-            else
-            {
-                Exception error = Errors.CreateKeysAndValuesMustMatch(1,
-                    results.Count);
-
-                DispatchingDiagnostics.RecordError(resolvedKey, error);
-                promise.SetException(error);
-            }
-
-            DispatchingDiagnostics.StopSingle(activity, resolvedKey, results);
         }
 
         private Task DispatchBatchAsync()
@@ -325,16 +338,51 @@ namespace GreenDonut
                 });
         }
 
+        private async Task DispatchSingleAsync(
+            TKey resolvedKey,
+            TaskCompletionSource<TValue> promise)
+        {
+            var resolvedKeys = new TKey[] { resolvedKey };
+            Activity activity = DispatchingDiagnostics
+                .StartSingle(resolvedKey);
+            IReadOnlyList<Result<TValue>> results =
+                await Fetch(resolvedKeys).ConfigureAwait(false);
+
+            if (results.Count == 1)
+            {
+                SetSingleResult(promise, resolvedKey, results.First());
+            }
+            else
+            {
+                Exception error = Errors.CreateKeysAndValuesMustMatch(1,
+                    results.Count);
+
+                DispatchingDiagnostics.RecordError(resolvedKey, error);
+                promise.SetException(error);
+            }
+
+            DispatchingDiagnostics.StopSingle(activity, resolvedKey, results);
+        }
+
         private async Task FetchInternalAsync(
             IDictionary<TKey, TaskCompletionSource<TValue>> bufferedPromises,
             IReadOnlyList<TKey> resolvedKeys)
         {
             Activity activity = DispatchingDiagnostics
                 .StartBatching(resolvedKeys);
-            IReadOnlyList<Result<TValue>> results =
-                await Fetch(resolvedKeys).ConfigureAwait(false);
+            IReadOnlyList<Result<TValue>> results = new Result<TValue>[0];
 
-            SetBatchResults(bufferedPromises, resolvedKeys, results);
+            try
+            {
+                results = await Fetch(resolvedKeys).ConfigureAwait(false);
+                BatchOperationSucceeded(bufferedPromises, resolvedKeys,
+                    results);
+            }
+            catch (Exception ex)
+            {
+                BatchOperationFailed(bufferedPromises, resolvedKeys, ex);
+            }
+
             DispatchingDiagnostics.StopBatching(activity, resolvedKeys,
                 results);
         }
@@ -358,34 +406,6 @@ namespace GreenDonut
             }
 
             return await Task.WhenAll(tasks).ConfigureAwait(false);
-        }
-
-        private void SetBatchResults(
-            IDictionary<TKey, TaskCompletionSource<TValue>> bufferedPromises,
-            IReadOnlyList<TKey> resolvedKeys,
-            IReadOnlyList<Result<TValue>> results)
-        {
-            if (resolvedKeys.Count == results.Count)
-            {
-                for (var i = 0; i < resolvedKeys.Count; i++)
-                {
-                    SetSingleResult(bufferedPromises[resolvedKeys[i]],
-                        resolvedKeys[i], results[i]);
-                }
-            }
-            else
-            {
-                // todo: throw insteadof silently fail and messing up the cache
-
-                Exception error = Errors.CreateKeysAndValuesMustMatch(
-                    resolvedKeys.Count, results.Count);
-
-                for (var i = 0; i < resolvedKeys.Count; i++)
-                {
-                    DispatchingDiagnostics.RecordError(resolvedKeys[i], error);
-                    bufferedPromises[resolvedKeys[i]].SetException(error);
-                }
-            }
         }
 
         private void SetSingleResult(
