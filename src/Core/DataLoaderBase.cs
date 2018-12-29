@@ -135,11 +135,17 @@ namespace GreenDonut
         }
 
         /// <summary>
-        /// Gets a delegate used for data fetching. The results will be stored
-        /// in a memory store to decrease round-trips to the server and improve
-        /// overall performance.
+        /// A batch loading function which has to be implemented for each
+        /// individual <c>DataLoader</c>. For every provided key must be a
+        /// result returned. Also to be mentioned is, the results must be
+        /// returned in the exact same order the keys were provided.
         /// </summary>
-        protected abstract Task<IReadOnlyList<Result<TValue>>> Fetch(
+        /// <param name="keys">A list of keys.</param>
+        /// <returns>
+        /// A list of results which are in the exact same order as the provided
+        /// keys.
+        /// </returns>
+        protected abstract Task<IReadOnlyList<Result<TValue>>> FetchAsync(
             IReadOnlyList<TKey> keys);
 
         /// <inheritdoc />
@@ -346,7 +352,7 @@ namespace GreenDonut
             Activity activity = DispatchingDiagnostics
                 .StartSingle(resolvedKey);
             IReadOnlyList<Result<TValue>> results =
-                await Fetch(resolvedKeys).ConfigureAwait(false);
+                await FetchAsync(resolvedKeys).ConfigureAwait(false);
 
             if (results.Count == 1)
             {
@@ -374,7 +380,7 @@ namespace GreenDonut
 
             try
             {
-                results = await Fetch(resolvedKeys).ConfigureAwait(false);
+                results = await FetchAsync(resolvedKeys).ConfigureAwait(false);
                 BatchOperationSucceeded(bufferedPromises, resolvedKeys,
                     results);
             }
