@@ -9,8 +9,8 @@ namespace GreenDonut
     {
         public readonly ConcurrentQueue<string> Keys =
             new ConcurrentQueue<string>();
-        public readonly ConcurrentDictionary<string, IResult<string>> Values =
-            new ConcurrentDictionary<string, IResult<string>>();
+        public readonly ConcurrentDictionary<string, Result<string>> Values =
+            new ConcurrentDictionary<string, Result<string>>();
         public readonly ConcurrentDictionary<string, Exception> Errors =
             new ConcurrentDictionary<string, Exception>();
 
@@ -30,7 +30,7 @@ namespace GreenDonut
         [DiagnosticName("ExecuteBatchRequest.Stop")]
         public void OnExecuteBatchRequestStop(
             IReadOnlyList<string> keys,
-            IReadOnlyList<IResult<string>> results)
+            IReadOnlyList<Result<string>> results)
         {
             for (int i = 0; i < keys.Count; i++)
             {

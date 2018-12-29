@@ -7,8 +7,8 @@ namespace GreenDonut
 {
     public class DispatchingDiagnosticsTests
     {
-        [Fact(DisplayName = "ExecuteBatchRequest: Should record a batch request plus error",
-            Skip = "Due to concurrency issues in the test listener")]
+        [Fact(DisplayName = "ExecuteBatchRequest: Should record a batch request plus error"/*,
+            Skip = "Due to concurrency issues in the test listener"*/)]
         public async Task ExecuteBatchRequest()
         {
             var listener = new DispatchingListener();
@@ -21,9 +21,9 @@ namespace GreenDonut
                 {
                     var error = new Exception("Quux");
 
-                    return await Task.FromResult(new[]
+                    return await Task.FromResult(new Result<string>[]
                     {
-                        Result<string>.Reject(error)
+                        error
                     }).ConfigureAwait(false);
                 };
                 var options = new DataLoaderOptions<string>();

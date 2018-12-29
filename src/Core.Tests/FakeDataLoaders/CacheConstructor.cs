@@ -11,7 +11,7 @@ namespace GreenDonut.FakeDataLoaders
             : base(cache)
         { }
 
-        protected override Task<IReadOnlyList<IResult<string>>> Fetch(
+        protected override Task<IReadOnlyList<Result<string>>> Fetch(
             IReadOnlyList<string> keys)
         {
             throw new NotImplementedException();

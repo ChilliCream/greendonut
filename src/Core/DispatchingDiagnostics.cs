@@ -65,7 +65,7 @@ namespace GreenDonut
         public static void StopBatching<TKey, TValue>(
             Activity activity,
             IReadOnlyList<TKey> keys,
-            IReadOnlyList<IResult<TValue>> results)
+            IReadOnlyList<Result<TValue>> results)
         {
             if (activity != null)
             {
