@@ -9,7 +9,7 @@ namespace GreenDonut
             int valuesCount)
         {
             var error = new InvalidOperationException("Fetch should have " +
-                $"returned exactly \"{keysCount}\" value(s) but instead " +
+                $"returned exactly \"{keysCount}\" value(s), but instead " +
                 $"returned \"{valuesCount}\" value(s).");
 
             return error;

@@ -180,7 +180,7 @@ namespace GreenDonut
                 {
                     // note: must run in the background; do not await here.
                     Task.Factory.StartNew(
-                        () => DispatchAsync(resolvedKey, promise),
+                        () => DispatchSingleAsync(resolvedKey, promise),
                         TaskCreationOptions.RunContinuationsAsynchronously);
                 }
 
@@ -260,13 +260,13 @@ namespace GreenDonut
             return copy;
         }
 
-        private async Task DispatchAsync(
+        private async Task DispatchSingleAsync(
             TKey resolvedKey,
             TaskCompletionSource<TValue> promise)
         {
             var resolvedKeys = new TKey[] { resolvedKey };
             Activity activity = DispatchingDiagnostics
-                .StartBatching(resolvedKeys);
+                .StartSingle(resolvedKey);
             IReadOnlyList<Result<TValue>> results =
                 await Fetch(resolvedKeys).ConfigureAwait(false);
 
@@ -283,8 +283,7 @@ namespace GreenDonut
                 promise.SetException(error);
             }
 
-            DispatchingDiagnostics.StopBatching(activity, resolvedKeys,
-                results);
+            DispatchingDiagnostics.StopSingle(activity, resolvedKey, results);
         }
 
         private Task DispatchBatchAsync()
@@ -300,6 +299,8 @@ namespace GreenDonut
                     if (_options.MaxBatchSize > 0 &&
                         copy.Count > _options.MaxBatchSize)
                     {
+                        // splits items from buffer into chunks and instead of
+                        // sending the complete buffer, it sends chunk by chunk
                         var chunkSize = (int)Math.Ceiling(
                             (decimal)copy.Count / _options.MaxBatchSize);
 
@@ -316,6 +317,8 @@ namespace GreenDonut
                     }
                     else
                     {
+                        // sends all items from the buffer in one batch
+                        // operation
                         await FetchInternalAsync(copy, resolvedKeys)
                             .ConfigureAwait(false);
                     }
@@ -372,6 +375,8 @@ namespace GreenDonut
             }
             else
             {
+                // todo: throw insteadof silently fail and messing up the cache
+
                 Exception error = Errors.CreateKeysAndValuesMustMatch(
                     resolvedKeys.Count, results.Count);
 
@@ -405,16 +410,16 @@ namespace GreenDonut
             {
                 // here we removed the lock because we take care that this
                 // function is called once within the constructor.
+
                 _delaySignal = new AutoResetEvent(true);
                 _stopBatching = new CancellationTokenSource();
+
                 Task.Factory.StartNew(async () =>
                 {
                     while (!_stopBatching.IsCancellationRequested)
                     {
-                        _delaySignal
-                            .WaitOne(_options.BatchRequestDelay);
-                        await DispatchBatchAsync()
-                            .ConfigureAwait(false);
+                        _delaySignal.WaitOne(_options.BatchRequestDelay);
+                        await DispatchBatchAsync().ConfigureAwait(false);
                     }
                 }, TaskCreationOptions.LongRunning);
             }
