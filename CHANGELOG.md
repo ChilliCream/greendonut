@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Set `Defaults.MinimumCacheSize` to `1` [#36](https://github.com/ChilliCream/greendonut/issues/36).
 - Renamed method `Fetch` to `FetchAsync` [#38](https://github.com/ChilliCream/greendonut/issues/38).
 - Moved the `DispatchAsync` method from the `IDispatchableDataLoader` interface to the `IDataLoader` interface [#51](https://github.com/ChilliCream/greendonut/issues/51).
+- Chaning for `Clear`, `Remove` and `Set` is not supported anymore.
 
 ### Fixed
 

@@ -21,8 +21,7 @@ namespace GreenDonut
         /// <summary>
         /// Empties the complete cache.
         /// </summary>
-        /// <returns>Itself for chaining support.</returns>
-        IDataLoader Clear();
+        void Clear();
 
         /// <summary>
         /// Dispatches one or more batch requests.
@@ -87,8 +86,7 @@ namespace GreenDonut
         /// <exception cref="key">
         /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
         /// </exception>
-        /// <returns>Itself for chaining support.</returns>
-        IDataLoader Remove(object key);
+        void Remove(object key);
 
         /// <summary>
         /// Adds a new entry to the cache if not already exists.
@@ -101,8 +99,7 @@ namespace GreenDonut
         /// <exception cref="value">
         /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
         /// </exception>
-        /// <returns>Itself for chaining support.</returns>
-        IDataLoader Set(object key, Task<object> value);
+        void Set(object key, Task<object> value);
     }
 
     #endregion
@@ -125,12 +122,6 @@ namespace GreenDonut
     public interface IDataLoader<TKey, TValue>
         : IDataLoader
     {
-        /// <summary>
-        /// Empties the complete cache.
-        /// </summary>
-        /// <returns>Itself for chaining support.</returns>
-        IDataLoader<TKey, TValue> Clear();
-
         /// <summary>
         /// Loads a single value by key. This call may return a cached value
         /// or enqueues this single request for bacthing if enabled.
@@ -186,8 +177,7 @@ namespace GreenDonut
         /// <exception cref="key">
         /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
         /// </exception>
-        /// <returns>Itself for chaining support.</returns>
-        IDataLoader<TKey, TValue> Remove(TKey key);
+        void Remove(TKey key);
 
         /// <summary>
         /// Adds a new entry to the cache if not already exists.
@@ -200,8 +190,7 @@ namespace GreenDonut
         /// <exception cref="value">
         /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
         /// </exception>
-        /// <returns>Itself for chaining support.</returns>
-        IDataLoader<TKey, TValue> Set(TKey key, Task<TValue> value);
+        void Set(TKey key, Task<TValue> value);
     }
 
     #endregion

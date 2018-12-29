@@ -107,12 +107,6 @@ namespace GreenDonut
         #region Explicit Implementation of IDataLoader
 
         /// <inheritdoc />
-        IDataLoader IDataLoader.Clear()
-        {
-            return Clear();
-        }
-
-        /// <inheritdoc />
         Task<object> IDataLoader.LoadAsync(object key)
         {
             if (key == null)
@@ -163,13 +157,13 @@ namespace GreenDonut
         }
 
         /// <inheritdoc />
-        IDataLoader IDataLoader.Remove(object key)
+        void IDataLoader.Remove(object key)
         {
-            return Remove((TKey)key);
+            Remove((TKey)key);
         }
 
         /// <inheritdoc />
-        IDataLoader IDataLoader.Set(object key, Task<object> value)
+        void IDataLoader.Set(object key, Task<object> value)
         {
             if (key == null)
             {
@@ -186,17 +180,15 @@ namespace GreenDonut
                     TaskCreationOptions.RunContinuationsAsynchronously)
                         .Unwrap();
 
-            return Set((TKey)key, newValue);
+            Set((TKey)key, newValue);
         }
 
         #endregion
 
         /// <inheritdoc />
-        public IDataLoader<TKey, TValue> Clear()
+        public void Clear()
         {
             _cache.Clear();
-
-            return this;
         }
 
         /// <inheritdoc />
@@ -310,7 +302,7 @@ namespace GreenDonut
         }
 
         /// <inheritdoc />
-        public IDataLoader<TKey, TValue> Remove(TKey key)
+        public void Remove(TKey key)
         {
             if (key == null)
             {
@@ -320,12 +312,10 @@ namespace GreenDonut
             TKey resolvedKey = _cacheKeyResolver(key);
 
             _cache.Remove(resolvedKey);
-
-            return this;
         }
 
         /// <inheritdoc />
-        public IDataLoader<TKey, TValue> Set(TKey key, Task<TValue> value)
+        public void Set(TKey key, Task<TValue> value)
         {
             if (key == null)
             {
@@ -340,8 +330,6 @@ namespace GreenDonut
             TKey resolvedKey = _cacheKeyResolver(key);
 
             _cache.TryAdd(resolvedKey, value);
-
-            return this;
         }
 
         private void BatchOperationFailed(
