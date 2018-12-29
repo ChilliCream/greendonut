@@ -8,6 +8,7 @@ namespace GreenDonut
     {
         private const string _diagnosticSourceName = "GreenDonut.Dispatching";
         private const string _batchActivityName = "ExecuteBatchRequest";
+        private const string _singleActivityName = "ExecuteSingleRequest";
         private const string _cachedValueEventName = "CachedValue";
         private const string _errorEventName = "Error";
 
@@ -76,6 +77,45 @@ namespace GreenDonut
                 };
 
                 if (_source.IsEnabled(_batchActivityName, context))
+                {
+                    _source.StopActivity(activity, context);
+                }
+            }
+        }
+
+        public static Activity StartSingle<TKey>(TKey key)
+        {
+            var context = new
+            {
+                Key = key
+            };
+
+            if (_source.IsEnabled(_singleActivityName, context))
+            {
+                var activity = new Activity(_singleActivityName);
+
+                _source.StartActivity(activity, context);
+
+                return activity;
+            }
+
+            return null;
+        }
+
+        public static void StopSingle<TKey, TValue>(
+            Activity activity,
+            TKey key,
+            IReadOnlyList<Result<TValue>> results)
+        {
+            if (activity != null)
+            {
+                var context = new
+                {
+                    Key = key,
+                    Results = results
+                };
+
+                if (_source.IsEnabled(_singleActivityName, context))
                 {
                     _source.StopActivity(activity, context);
                 }
