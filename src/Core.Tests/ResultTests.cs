@@ -5,7 +5,7 @@ namespace GreenDonut
 {
     public class ResultTests
     {
-        #region Reject
+        #region Rejected Result
 
         [Fact(DisplayName = "Reject: Should throw an argument null exception for error")]
         public void RejectErrorMessageNull()
@@ -14,7 +14,7 @@ namespace GreenDonut
             Exception error = null;
 
             // act
-            Action verify = () => Result<object>.Reject(error);
+            Action verify = () => { Result<object> result = error; };
 
             // assert
             Assert.Throws<ArgumentNullException>("error", verify);
@@ -28,7 +28,7 @@ namespace GreenDonut
             var error = new Exception(errorMessage);
 
             // act
-            Action verify = () => Result<object>.Reject(error);
+            Action verify = () => { Result<object> result = error; };
 
             // assert
             Assert.Null(Record.Exception(verify));
@@ -36,23 +36,6 @@ namespace GreenDonut
 
         [Fact(DisplayName = "Reject: Should return a rejected Result")]
         public void Reject()
-        {
-            // arrange
-            var errorMessage = "Foo";
-            var error = new Exception(errorMessage);
-
-            // act
-            Result<string> result = Result<string>.Reject(error);
-
-            // assert
-            Assert.NotNull(result);
-            Assert.True(result.IsError);
-            Assert.Equal("Foo", result.Error?.Message);
-            Assert.Null(result.Value);
-        }
-
-        [Fact(DisplayName = "Error: Should convert an error into an error result")]
-        public void ConvertError()
         {
             // arrange
             var errorMessage = "Foo";
@@ -68,9 +51,28 @@ namespace GreenDonut
             Assert.Null(result.Value);
         }
 
+        [Fact(DisplayName = "Reject (Obsolete): Should convert an error into an error result")]
+        public void DeprecatedRejectStillNeedsToBeTested()
+        {
+            // arrange
+            var errorMessage = "Foo";
+            var error = new Exception(errorMessage);
+
+            // act
+#pragma warning disable CS0618 // Type or member is obsolete
+            var result = Result<string>.Reject(error);
+#pragma warning restore CS0618 // Type or member is obsolete
+
+            // assert
+            Assert.NotNull(result);
+            Assert.True(result.IsError);
+            Assert.Equal("Foo", result.Error?.Message);
+            Assert.Null(result.Value);
+        }
+
         #endregion
 
-        #region Resolve
+        #region Resolved Result
 
         [InlineData(null)]
         [InlineData("Foo")]
@@ -78,7 +80,7 @@ namespace GreenDonut
         public void Resolve(string value)
         {
             // act
-            Result<string> result = Result<string>.Resolve(value);
+            Result<string> result = value;
 
             // assert
             Assert.NotNull(result);
@@ -89,11 +91,13 @@ namespace GreenDonut
 
         [InlineData(null)]
         [InlineData("Foo")]
-        [Theory(DisplayName = "Resolve: Should convert a value into a value result")]
-        public void ConvertValue(string value)
+        [Theory(DisplayName = "Resolve (Obsolete): Should convert a value into a value result")]
+        public void DeprecatedResolveStillNeedsToBeTested(string value)
         {
             // act
-            Result<string> result = value;
+#pragma warning disable CS0618 // Type or member is obsolete
+            var result = Result<string>.Resolve(value);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             // assert
             Assert.NotNull(result);
