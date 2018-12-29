@@ -19,12 +19,90 @@ namespace GreenDonut
     public interface IDataLoader
     {
         /// <summary>
-         /// Dispatches one or more batch requests.
-         /// In case of auto dispatching we just trigger an implicit dispatch
-         /// which could mean to interrupt a wait delay. Whereas in a manual
-         /// dispatch scenario it could mean to dispatch explicitly.
-         /// </summary>
+        /// Empties the complete cache.
+        /// </summary>
+        /// <returns>Itself for chaining support.</returns>
+        IDataLoader Clear();
+
+        /// <summary>
+        /// Dispatches one or more batch requests.
+        /// In case of auto dispatching we just trigger an implicit dispatch
+        /// which could mean to interrupt a wait delay. Whereas in a manual
+        /// dispatch scenario it could mean to dispatch explicitly.
+        /// </summary>
         Task DispatchAsync();
+
+        /// <summary>
+        /// Loads a single value by key. This call may return a cached value
+        /// or enqueues this single request for bacthing if enabled.
+        /// </summary>
+        /// <param name="key">A unique key.</param>
+        /// <exception cref="key">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
+        /// <returns>
+        /// A single result which may contain a value or information about the
+        /// error which may occurred during the call.
+        /// </returns>
+        Task<object> LoadAsync(object key);
+
+        /// <summary>
+        /// Loads multiple values by keys. This call may return cached values
+        /// and enqueues requests which were not cached for bacthing if
+        /// enabled.
+        /// </summary>
+        /// <param name="keys">A list of unique keys.</param>
+        /// <exception cref="keys">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
+        /// <exception cref="keys">
+        /// Throws an <see cref="ArgumentOutOfRangeException"/> if empty.
+        /// </exception>
+        /// <returns>
+        /// A list of values in the same order as the provided keys.
+        /// </returns>
+        Task<IReadOnlyList<object>> LoadAsync(params object[] keys);
+
+        /// <summary>
+        /// Loads multiple values by keys. This call may return cached values
+        /// and enqueues requests which were not cached for bacthing if
+        /// enabled.
+        /// </summary>
+        /// <param name="keys">A list of unique keys.</param>
+        /// <exception cref="keys">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
+        /// <exception cref="keys">
+        /// Throws an <see cref="ArgumentOutOfRangeException"/> if empty.
+        /// </exception>
+        /// <returns>
+        /// A list of values in the same order as the provided keys.
+        /// </returns>
+        Task<IReadOnlyList<object>> LoadAsync(IReadOnlyCollection<object> keys);
+
+        /// <summary>
+        /// Removes a single entry from the cache.
+        /// </summary>
+        /// <param name="key">A cache entry key.</param>
+        /// <exception cref="key">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
+        /// <returns>Itself for chaining support.</returns>
+        IDataLoader Remove(object key);
+
+        /// <summary>
+        /// Adds a new entry to the cache if not already exists.
+        /// </summary>
+        /// <param name="key">A cache entry key.</param>
+        /// <param name="value">A cache entry value.</param>
+        /// <exception cref="key">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
+        /// <exception cref="value">
+        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// </exception>
+        /// <returns>Itself for chaining support.</returns>
+        IDataLoader Set(object key, Task<object> value);
     }
 
     #endregion

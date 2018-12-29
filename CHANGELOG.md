@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Non-generic interface for DataLoader [#37](https://github.com/ChilliCream/greendonut/issues/37).
+
 ### Changed
 
 - Switched to implicit conversion to create error or value results [#40](https://github.com/ChilliCream/greendonut/issues/40).
