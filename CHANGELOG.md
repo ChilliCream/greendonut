@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Set `DataLoaderOptions` default for `AutoDispatching` to `false` [#36](https://github.com/ChilliCream/greendonut/issues/36).
 - Set `Defaults.MinimumCacheSize` to `1` [#36](https://github.com/ChilliCream/greendonut/issues/36).
 - Renamed method `Fetch` to `FetchAsync` [#38](https://github.com/ChilliCream/greendonut/issues/38).
+- Moved the `DispatchAsync` method from the `IDispatchableDataLoader` interface to the `IDataLoader` interface [#51](https://github.com/ChilliCream/greendonut/issues/51).
 
 ### Fixed
 
@@ -26,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - `ArgumentOutOfRangeException` for `keys` argument in the `LoadAsync` method. Thanks to [jbray1982](https://github.com/jbray1982) for fixing this.
+- `IDispatchableDataLoader` interface [#51](https://github.com/ChilliCream/greendonut/issues/51).
 
 ## [1.1.0] - 2018-11-05
 
