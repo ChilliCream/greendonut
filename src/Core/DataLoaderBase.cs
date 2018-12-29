@@ -104,6 +104,93 @@ namespace GreenDonut
             StartAsyncBackgroundDispatching();
         }
 
+        #region Explicit Implementation of IDataLoader
+
+        /// <inheritdoc />
+        IDataLoader IDataLoader.Clear()
+        {
+            return Clear();
+        }
+
+        /// <inheritdoc />
+        Task<object> IDataLoader.LoadAsync(object key)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            return Task.Factory.StartNew<Task<object>>(async () =>
+                await LoadAsync((TKey)key).ConfigureAwait(false),
+                    TaskCreationOptions.RunContinuationsAsynchronously)
+                        .Unwrap();
+        }
+
+        /// <inheritdoc />
+        Task<IReadOnlyList<object>> IDataLoader.LoadAsync(
+            params object[] keys)
+        {
+            if (keys == null)
+            {
+                throw new ArgumentNullException(nameof(keys));
+            }
+
+            TKey[] newKeys = keys.Select(k => (TKey)k).ToArray();
+
+            return Task.Factory.StartNew(async () =>
+                (IReadOnlyList<object>)await LoadAsync(newKeys)
+                    .ConfigureAwait(false),
+                        TaskCreationOptions.RunContinuationsAsynchronously)
+                            .Unwrap();
+        }
+
+        /// <inheritdoc />
+        Task<IReadOnlyList<object>> IDataLoader.LoadAsync(
+            IReadOnlyCollection<object> keys)
+        {
+            if (keys == null)
+            {
+                throw new ArgumentNullException(nameof(keys));
+            }
+
+            TKey[] newKeys = keys.Select(k => (TKey)k).ToArray();
+
+            return Task.Factory.StartNew(async () =>
+                (IReadOnlyList<object>)await LoadAsync(newKeys)
+                    .ConfigureAwait(false),
+                        TaskCreationOptions.RunContinuationsAsynchronously)
+                            .Unwrap();
+        }
+
+        /// <inheritdoc />
+        IDataLoader IDataLoader.Remove(object key)
+        {
+            return Remove((TKey)key);
+        }
+
+        /// <inheritdoc />
+        IDataLoader IDataLoader.Set(object key, Task<object> value)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            Task<TValue> newValue = Task.Factory.StartNew(async () =>
+                (TValue)await value.ConfigureAwait(false),
+                    TaskCreationOptions.RunContinuationsAsynchronously)
+                        .Unwrap();
+
+            return Set((TKey)key, newValue);
+        }
+
+        #endregion
+
         /// <inheritdoc />
         public IDataLoader<TKey, TValue> Clear()
         {
