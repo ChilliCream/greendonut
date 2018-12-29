@@ -7,31 +7,20 @@ namespace GreenDonut
     {
         #region Rejected Result
 
-        [Fact(DisplayName = "Reject: Should throw an argument null exception for error")]
-        public void RejectErrorMessageNull()
+        [Fact(DisplayName = "Reject: Should return a resolved Result if error is null")]
+        public void RejectErrorMessageNotNull()
         {
             // arrange
             Exception error = null;
 
             // act
-            Action verify = () => { Result<object> result = error; };
+            Result<object> result = error;
 
             // assert
-            Assert.Throws<ArgumentNullException>("error", verify);
-        }
-
-        [Fact(DisplayName = "Reject: Should not throw any exception")]
-        public void RejectErrorMessageNotNull()
-        {
-            // arrange
-            var errorMessage = "Foo";
-            var error = new Exception(errorMessage);
-
-            // act
-            Action verify = () => { Result<object> result = error; };
-
-            // assert
-            Assert.Null(Record.Exception(verify));
+            Assert.NotNull(result);
+            Assert.False(result.IsError);
+            Assert.Null(result.Error);
+            Assert.Null(result.Value);
         }
 
         [Fact(DisplayName = "Reject: Should return a rejected Result")]
@@ -51,7 +40,7 @@ namespace GreenDonut
             Assert.Null(result.Value);
         }
 
-        [Fact(DisplayName = "Reject (Obsolete): Should convert an error into an error result")]
+        [Fact(DisplayName = "Reject (Obsolete): Should return a rejected Result")]
         public void DeprecatedRejectStillNeedsToBeTested()
         {
             // arrange
@@ -91,7 +80,7 @@ namespace GreenDonut
 
         [InlineData(null)]
         [InlineData("Foo")]
-        [Theory(DisplayName = "Resolve (Obsolete): Should convert a value into a value result")]
+        [Theory(DisplayName = "Resolve (Obsolete): Should return a resolved Result")]
         public void DeprecatedResolveStillNeedsToBeTested(string value)
         {
             // act

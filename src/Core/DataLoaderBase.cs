@@ -24,7 +24,6 @@ namespace GreenDonut
     /// <typeparam name="TValue">A value type</typeparam>
     public abstract class DataLoaderBase<TKey, TValue>
         : IDataLoader<TKey, TValue>
-        , IDispatchableDataLoader
         , IDisposable
     {
         private readonly object _sync = new object();

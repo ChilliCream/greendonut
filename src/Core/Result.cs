@@ -13,7 +13,7 @@ namespace GreenDonut
 
         /// <summary>
         /// Gets an error if <see cref="IsError"/> is <c>true</c>;
-        /// otherwise null.
+        /// otherwise <c>null</c>.
         /// </summary>
         public Exception Error { get; private set; }
 
@@ -23,8 +23,8 @@ namespace GreenDonut
         public bool IsError { get; private set; }
 
         /// <summary>
-        /// Gets the value if <see cref="IsError"/> is <c>false</c>;
-        /// otherwise null.
+        /// Gets the value. If <see cref="IsError"/> is <c>true</c>, returns
+        /// <c>null</c> or <c>default</c> depending on its type.
         /// </summary>
         public TValue Value { get; private set; }
 
@@ -32,9 +32,6 @@ namespace GreenDonut
         /// Creates a new error result.
         /// </summary>
         /// <param name="error">An arbitrary error.</param>
-        /// <exception cref="error">
-        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
-        /// </exception>
         /// <returns>An error result.</returns>
         [Obsolete("This method is deprecated and will be removed in the next major release; " +
             "use instead implicit conversion. E.g. Result<string> foo = new Exception(\"Bar\");")]
@@ -59,14 +56,14 @@ namespace GreenDonut
         /// Creates a new error result.
         /// </summary>
         /// <param name="error">An arbitrary error.</param>
-        /// <exception cref="error">
-        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
-        /// </exception>
         public static implicit operator Result<TValue>(Exception error)
         {
             if (error == null)
             {
-                throw new ArgumentNullException(nameof(error));
+                return new Result<TValue>
+                {
+                    IsError = false
+                };
             }
 
             return new Result<TValue>
