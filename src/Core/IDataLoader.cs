@@ -117,8 +117,8 @@ namespace GreenDonut
     /// with different access permissions and consider creating a new instance
     /// per web request. -- facebook
     /// </summary>
-    /// <typeparam name="TKey">A key type</typeparam>
-    /// <typeparam name="TValue">A value type</typeparam>
+    /// <typeparam name="TKey">A key type.</typeparam>
+    /// <typeparam name="TValue">A value type.</typeparam>
     public interface IDataLoader<TKey, TValue>
         : IDataLoader
     {

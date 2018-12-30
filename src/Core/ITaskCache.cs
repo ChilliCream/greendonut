@@ -6,8 +6,8 @@ namespace GreenDonut
     /// <summary>
     /// A cache which stores <see cref="Task{TValue}"/>.
     /// </summary>
-    /// <typeparam name="TKey">A key type</typeparam>
-    /// <typeparam name="TValue">A value type</typeparam>
+    /// <typeparam name="TKey">A key type.</typeparam>
+    /// <typeparam name="TValue">A value type.</typeparam>
     public interface ITaskCache<TKey, TValue>
     {
         /// <summary>

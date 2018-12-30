@@ -20,8 +20,8 @@ namespace GreenDonut
     /// cache implementation which useses the LRU (Least Recently Used) caching
     /// algorithm for keeping track on which item has to be discarded first.
     /// </summary>
-    /// <typeparam name="TKey">A key type</typeparam>
-    /// <typeparam name="TValue">A value type</typeparam>
+    /// <typeparam name="TKey">A key type.</typeparam>
+    /// <typeparam name="TValue">A value type.</typeparam>
     public sealed class DataLoader<TKey, TValue>
         : DataLoaderBase<TKey, TValue>
     {

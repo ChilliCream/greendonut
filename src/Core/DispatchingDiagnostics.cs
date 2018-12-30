@@ -15,10 +15,14 @@ namespace GreenDonut
         private static readonly DiagnosticSource _source =
             new DiagnosticListener(_diagnosticSourceName);
 
-        public static void RecordCachedValue<TKey, TValue>(TKey key, TValue value)
+        public static void RecordCachedValue<TKey, TValue>(
+            TKey key,
+            TKey cacheKey,
+            TValue value)
         {
             var context = new
             {
+                CacheKey = cacheKey,
                 Key = key,
                 Value = value
             };

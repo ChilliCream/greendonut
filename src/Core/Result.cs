@@ -6,11 +6,9 @@ namespace GreenDonut
     /// A wrapper for a single value which could contain a valid value or any
     /// error.
     /// </summary>
-    /// <typeparam name="TValue">A value type</typeparam>
-    public class Result<TValue>
+    /// <typeparam name="TValue">A value type.</typeparam>
+    public struct Result<TValue>
     {
-        private Result() { }
-
         /// <summary>
         /// Gets an error if <see cref="IsError"/> is <c>true</c>;
         /// otherwise <c>null</c>.
@@ -84,6 +82,24 @@ namespace GreenDonut
                 Value = value,
                 IsError = false
             };
+        }
+
+        /// <summary>
+        /// Extracts the error from a result.
+        /// </summary>
+        /// <param name="result">An arbitrary result.</param>
+        public static implicit operator Exception(Result<TValue> result)
+        {
+            return result.Error;
+        }
+
+        /// <summary>
+        /// Extracts the value from a result.
+        /// </summary>
+        /// <param name="result">An arbitrary result.</param>
+        public static implicit operator TValue(Result<TValue> result)
+        {
+            return result.Value;
         }
     }
 }

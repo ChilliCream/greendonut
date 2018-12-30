@@ -37,8 +37,8 @@ namespace GreenDonut
         /// <summary>
         /// Adds a new entry to the cache if not already exists.
         /// </summary>
-        /// <typeparam name="TKey">A key type</typeparam>
-        /// <typeparam name="TValue">A value type</typeparam>
+        /// <typeparam name="TKey">A key type.</typeparam>
+        /// <typeparam name="TValue">A value type.</typeparam>
         /// <param name="dataLoader">A data loader instance.</param>
         /// <param name="key">A cache entry key.</param>
         /// <param name="value">A cache entry value.</param>

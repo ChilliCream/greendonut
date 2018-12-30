@@ -5,14 +5,13 @@ namespace GreenDonut
     /// <summary>
     /// An options object to configure the behavior for data loaders.
     /// </summary>
-    /// <typeparam name="TKey">A key type</typeparam>
+    /// <typeparam name="TKey">A key type.</typeparam>
     public class DataLoaderOptions<TKey>
     {
         /// <summary>
         /// Initializes a new instance of the
         /// <see cref="DataLoaderOptions{TKey}"/> class.
         /// </summary>
-        /// <param name="cacheKeyResolver"></param>
         public DataLoaderOptions()
         {
             AutoDispatching = false;
