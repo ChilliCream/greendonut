@@ -6,15 +6,11 @@
     <RootNamespace>GreenDonut.Benchmark.Tests</RootNamespace>
     <IsPackable>false</IsPackable>
     <AssemblyName>Benchmark.Tests</AssemblyName>
+    <StartupObject></StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.11.1" />
-    <PackageReference Include="Moq" Version="4.9.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.11.3" />
   </ItemGroup>
 
 </Project>

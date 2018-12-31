@@ -4,8 +4,7 @@ using System.Threading.Tasks;
 namespace GreenDonut
 {
     /// <summary>
-    /// A bunch of convenient <see cref="IDataLoader{TKey, TValue}"/> extension
-    /// methods.
+    /// A bunch of convenient <c>DataLoader</c> extension methods.
     /// </summary>
     public static class DataLoaderExtensions
     {
@@ -15,11 +14,11 @@ namespace GreenDonut
         /// <param name="dataLoader">A data loader instance.</param>
         /// <param name="key">A cache entry key.</param>
         /// <param name="value">A cache entry value.</param>
-        /// <exception cref="dataLoader">
-        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// <exception cref="ArgumentNullException">
+        /// Throws if <paramref name="dataLoader"/> <c>null</c>.
         /// </exception>
-        /// <exception cref="key">
-        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// <exception cref="ArgumentNullException">
+        /// Throws if <paramref name="key"/> <c>null</c>.
         /// </exception>
         public static void Set(
             this IDataLoader dataLoader,
@@ -37,16 +36,16 @@ namespace GreenDonut
         /// <summary>
         /// Adds a new entry to the cache if not already exists.
         /// </summary>
-        /// <typeparam name="TKey">A key type</typeparam>
-        /// <typeparam name="TValue">A value type</typeparam>
+        /// <typeparam name="TKey">A key type.</typeparam>
+        /// <typeparam name="TValue">A value type.</typeparam>
         /// <param name="dataLoader">A data loader instance.</param>
         /// <param name="key">A cache entry key.</param>
         /// <param name="value">A cache entry value.</param>
-        /// <exception cref="dataLoader">
-        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// <exception cref="ArgumentNullException">
+        /// Throws if <paramref name="dataLoader"/> <c>null</c>.
         /// </exception>
-        /// <exception cref="key">
-        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// <exception cref="ArgumentNullException">
+        /// Throws if <paramref name="key"/> <c>null</c>.
         /// </exception>
         public static void Set<TKey, TValue>(
             this IDataLoader<TKey, TValue> dataLoader,

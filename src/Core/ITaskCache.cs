@@ -4,11 +4,10 @@ using System.Threading.Tasks;
 namespace GreenDonut
 {
     /// <summary>
-    /// A cache which stores <see cref="Task{TValue}"/>.
+    /// A memorization cache for <c>DataLoader</c>.
     /// </summary>
-    /// <typeparam name="TKey">A key type</typeparam>
-    /// <typeparam name="TValue">A value type</typeparam>
-    public interface ITaskCache<TKey, TValue>
+    /// <typeparam name="TValue">A value type.</typeparam>
+    public interface ITaskCache<TValue>
     {
         /// <summary>
         /// Gets the maximum size of the cache.
@@ -34,10 +33,10 @@ namespace GreenDonut
         /// Removes a specific entry from the cache.
         /// </summary>
         /// <param name="key">A cache entry key.</param>
-        /// <exception cref="key">
-        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// <exception cref="ArgumentNullException">
+        /// Throws if <paramref name="key"/> is <c>null</c>.
         /// </exception>
-        void Remove(TKey key);
+        void Remove(object key);
 
         /// <summary>
         /// Tries to add a single entry to the cache. It does nothing if the
@@ -45,28 +44,28 @@ namespace GreenDonut
         /// </summary>
         /// <param name="key">A cache entry key.</param>
         /// <param name="value">A cache entry value.</param>
-        /// <exception cref="key">
-        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// <exception cref="ArgumentNullException">
+        /// Throws if <paramref name="key"/> is <c>null</c>.
         /// </exception>
-        /// <exception cref="value">
-        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// <exception cref="ArgumentNullException">
+        /// Throws if <paramref name="value"/> is <c>null</c>.
         /// </exception>
         /// <returns>
         /// A value indicating whether the add was successful.
         /// </returns>
-        bool TryAdd(TKey key, Task<TValue> value);
+        bool TryAdd(object key, Task<TValue> value);
 
         /// <summary>
         /// Tries to gets a single entry from the cache.
         /// </summary>
         /// <param name="key">A cache entry key.</param>
         /// <param name="value">A single cache entry value.</param>
-        /// <exception cref="key">
-        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// <exception cref="ArgumentNullException">
+        /// Throws if <paramref name="key"/> is <c>null</c>.
         /// </exception>
         /// <returns>
-        /// A value indicating whether the get request returned a entry.
+        /// A value indicating whether the get request returned an entry.
         /// </returns>
-        bool TryGetValue(TKey key, out Task<TValue> value);
+        bool TryGetValue(object key, out Task<TValue> value);
     }
 }

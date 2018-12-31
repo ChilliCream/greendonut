@@ -32,7 +32,7 @@ namespace GreenDonut
         public void ConstructorBCacheNull()
         {
             // arrange
-            TaskCache<string, string> cache = null;
+            TaskCache<string> cache = null;
 
             // act
             Action verify = () => new CacheConstructor(cache);
@@ -45,7 +45,7 @@ namespace GreenDonut
         public void ConstructorBNoException()
         {
             // arrange
-            var cache = new TaskCache<string, string>(10, TimeSpan.Zero);
+            var cache = new TaskCache<string>(10, TimeSpan.Zero);
 
             // act
             Action verify = () => new CacheConstructor(cache);

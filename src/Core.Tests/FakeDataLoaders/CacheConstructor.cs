@@ -7,7 +7,7 @@ namespace GreenDonut.FakeDataLoaders
     internal class CacheConstructor
         : DataLoaderBase<string, string>
     {
-        internal CacheConstructor(TaskCache<string, string> cache)
+        internal CacheConstructor(TaskCache<string> cache)
             : base(cache)
         { }
 

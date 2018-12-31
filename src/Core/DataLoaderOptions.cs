@@ -3,16 +3,15 @@ using System;
 namespace GreenDonut
 {
     /// <summary>
-    /// An options object to configure the behavior for data loaders.
+    /// An options object to configure the behavior for <c>DataLoader</c>.
     /// </summary>
-    /// <typeparam name="TKey">A key type</typeparam>
+    /// <typeparam name="TKey">A key type.</typeparam>
     public class DataLoaderOptions<TKey>
     {
         /// <summary>
         /// Initializes a new instance of the
         /// <see cref="DataLoaderOptions{TKey}"/> class.
         /// </summary>
-        /// <param name="cacheKeyResolver"></param>
         public DataLoaderOptions()
         {
             AutoDispatching = false;
@@ -44,14 +43,15 @@ namespace GreenDonut
         public TimeSpan BatchRequestDelay { get; set; }
 
         /// <summary>
-        /// Gets or sets a func which resolves the cache key which might differ
-        /// from the business key. The default value is set to <c>null</c>.
+        /// Gets or sets a delegate which resolves the cache key which might
+        /// differ from the key that is used to accessing the backend.
+        /// The default value is set to <c>null</c>.
         /// </summary>
-        public Func<TKey, TKey> CacheKeyResolver { get; set; }
+        public CacheKeyResolverDelegate<TKey> CacheKeyResolver { get; set; }
 
         /// <summary>
-        /// Gets or sets the cache size. If set to <c>1</c> for example, it
-        /// says only <c>1</c> cache entries can live inside the cache. Whan
+        /// Gets or sets the cache size. If set to <c>10</c> for example, it
+        /// says only <c>10</c> cache entries can live inside the cache. When
         /// adding an additional entry the least recently used entry will be
         /// removed. The default value is set to <c>1000</c>.
         /// </summary>

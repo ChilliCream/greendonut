@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace GreenDonut
@@ -8,7 +10,7 @@ namespace GreenDonut
         #region Rejected Result
 
         [Fact(DisplayName = "Reject: Should return a resolved Result if error is null")]
-        public void RejectErrorMessageNotNull()
+        public void RejectErrorIsNull()
         {
             // arrange
             Exception error = null;
@@ -17,7 +19,6 @@ namespace GreenDonut
             Result<object> result = error;
 
             // assert
-            Assert.NotNull(result);
             Assert.False(result.IsError);
             Assert.Null(result.Error);
             Assert.Null(result.Value);
@@ -34,9 +35,8 @@ namespace GreenDonut
             Result<string> result = error;
 
             // assert
-            Assert.NotNull(result);
             Assert.True(result.IsError);
-            Assert.Equal("Foo", result.Error?.Message);
+            Assert.Equal(error, result.Error);
             Assert.Null(result.Value);
         }
 
@@ -53,7 +53,6 @@ namespace GreenDonut
 #pragma warning restore CS0618 // Type or member is obsolete
 
             // assert
-            Assert.NotNull(result);
             Assert.True(result.IsError);
             Assert.Equal("Foo", result.Error?.Message);
             Assert.Null(result.Value);
@@ -72,10 +71,14 @@ namespace GreenDonut
             Result<string> result = value;
 
             // assert
-            Assert.NotNull(result);
             Assert.Null(result.Error);
             Assert.False(result.IsError);
-            Assert.Equal(value, result.Value);
+            Assert.Equal(value, result);
+        }
+
+        private object List<T>()
+        {
+            throw new NotImplementedException();
         }
 
         [InlineData(null)]
@@ -89,7 +92,6 @@ namespace GreenDonut
 #pragma warning restore CS0618 // Type or member is obsolete
 
             // assert
-            Assert.NotNull(result);
             Assert.Null(result.Error);
             Assert.False(result.IsError);
             Assert.Equal(value, result.Value);
