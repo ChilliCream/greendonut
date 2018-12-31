@@ -8,5 +8,5 @@ namespace GreenDonut
     /// <typeparam name="TKey">A key type.</typeparam>
     /// <param name="key">A key.</param>
     /// <returns>A cache key.</returns>
-    public delegate object CacheKeyResolverDelegate<TKey>(TKey key);
+    public delegate object CacheKeyResolverDelegate<in TKey>(TKey key);
 }

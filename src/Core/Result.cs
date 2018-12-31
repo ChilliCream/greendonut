@@ -8,6 +8,7 @@ namespace GreenDonut
     /// </summary>
     /// <typeparam name="TValue">A value type.</typeparam>
     public struct Result<TValue>
+        : IEquatable<Result<TValue>>
     {
         /// <summary>
         /// Gets an error if <see cref="IsError"/> is <c>true</c>;
@@ -27,6 +28,25 @@ namespace GreenDonut
         public TValue Value { get; private set; }
 
         /// <inheritdoc />
+        public bool Equals(Result<TValue> other)
+        {
+            return IsError == other.IsError &&
+                Error == other.Error &&
+                Value.Equals(other.Value);
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            return obj is Result<TValue> result && Equals(result);
+        }
+
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             return (IsError)
@@ -39,8 +59,9 @@ namespace GreenDonut
         /// </summary>
         /// <param name="error">An arbitrary error.</param>
         /// <returns>An error result.</returns>
-        [Obsolete("This method is deprecated and will be removed in the next major release; " +
-            "use instead implicit conversion. E.g. Result<string> foo = new Exception(\"Bar\");")]
+        [Obsolete("This method is deprecated and will be removed in the " +
+            "next major release; use instead implicit conversion. E.g. " +
+            "Result<string> foo = new Exception(\"Bar\");")]
         public static Result<TValue> Reject(Exception error)
         {
             return error;
@@ -51,8 +72,9 @@ namespace GreenDonut
         /// </summary>
         /// <param name="value">An arbitrary value.</param>
         /// <returns>A value result.</returns>
-        [Obsolete("This method is deprecated and will be removed in the next major release; " +
-            "use instead implicit conversion. E.g. Result<string> foo = \"Bar\";")]
+        [Obsolete("This method is deprecated and will be removed in the " +
+            "next major release; use instead implicit conversion. E.g. " +
+            "Result<string> foo = \"Bar\";")]
         public static Result<TValue> Resolve(TValue value)
         {
             return value;

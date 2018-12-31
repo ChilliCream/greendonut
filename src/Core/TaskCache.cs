@@ -10,6 +10,7 @@ namespace GreenDonut
         : ITaskCache<TValue>
         , IDisposable
     {
+        private const int _cleanupDelay = 10;
         private readonly ConcurrentDictionary<object, CacheEntry>
             _cache = new ConcurrentDictionary<object, CacheEntry>();
         private CancellationTokenSource _dispose;
@@ -145,7 +146,7 @@ namespace GreenDonut
                         }
                         else
                         {
-                            await Task.Delay(10, _dispose.Token)
+                            await Task.Delay(_cleanupDelay, _dispose.Token)
                                 .ConfigureAwait(false);
                         }
                     }
