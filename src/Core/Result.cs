@@ -26,6 +26,14 @@ namespace GreenDonut
         /// </summary>
         public TValue Value { get; private set; }
 
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return (IsError)
+                ? Error.GetHashCode()
+                : Value?.GetHashCode() ?? 0;
+        }
+
         /// <summary>
         /// Creates a new error result.
         /// </summary>

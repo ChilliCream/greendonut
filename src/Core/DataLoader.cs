@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 namespace GreenDonut
 {
     /// <summary>
-    /// A <see cref="DataLoader{TKey, TValue}"/> creates a public API for
-    /// loading data from a particular data back-end with unique keys such as
-    /// the `id` column of a SQL table or document name in a MongoDB database,
-    /// given a batch loading function. -- facebook
+    /// A <c>DataLoader</c> creates a public API for loading data from a
+    /// particular data back-end with unique keys such as the `id` column of a
+    /// SQL table or document name in a MongoDB database, given a batch loading
+    /// function. -- facebook
     ///
     /// Each <c>DataLoader</c> instance contains a unique memoized cache. Use
     /// caution when used in long-lived applications or those which serve many
@@ -35,8 +35,8 @@ namespace GreenDonut
         /// A delegate to fetch data batches which will be invoked every time
         /// when trying to setup a new batch request.
         /// </param>
-        /// <exception cref="fetch">
-        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// <exception cref="ArgumentNullException">
+        /// Throws if <paramref name="fetch"/> <c>null</c>.
         /// </exception>
         public DataLoader(FetchDataDelegate<TKey, TValue> fetch)
             : this(new DataLoaderOptions<TKey>(), fetch)
@@ -54,11 +54,11 @@ namespace GreenDonut
         /// A delegate to fetch data batches which will be invoked every time
         /// when trying to setup a new batch request.
         /// </param>
-        /// <exception cref="options">
-        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// <exception cref="ArgumentNullException">
+        /// Throws if <paramref name="options"/> <c>null</c>.
         /// </exception>
-        /// <exception cref="fetch">
-        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// <exception cref="ArgumentNullException">
+        /// Throws if <paramref name="fetch"/> <c>null</c>.
         /// </exception>
         public DataLoader(
             DataLoaderOptions<TKey> options,

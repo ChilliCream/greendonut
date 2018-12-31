@@ -17,7 +17,7 @@ namespace GreenDonut
 
         public static void RecordCachedValue<TKey, TValue>(
             TKey key,
-            TKey cacheKey,
+            object cacheKey,
             TValue value)
         {
             var context = new

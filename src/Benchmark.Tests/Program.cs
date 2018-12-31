@@ -6,7 +6,8 @@ namespace GreenDonut.Benchmark.Tests
     {
         static void Main(string[] args)
         {
-            BenchmarkRunner.Run<TaskCompletionBufferBenchmarks>();
+            BenchmarkRunner.Run<CompoundKeyBenchmarks>();
+            BenchmarkRunner.Run<CompoundKeyEqualBenchmarks>();
         }
     }
 }

@@ -13,7 +13,7 @@ namespace GreenDonut
     /// SQL table or document name in a MongoDB database, given a batch loading
     /// function. -- facebook
     ///
-    /// Each <c>DataLoader</c> instance contains a unique memorized cache. Use
+    /// Each <c>DataLoader</c> instance contains a unique memoized cache. Use
     /// caution when used in long-lived applications or those which serve many
     /// users with different access permissions and consider creating a new
     /// instance per web request. -- facebook
@@ -29,8 +29,8 @@ namespace GreenDonut
         private readonly object _sync = new object();
         private bool _disposed;
         private TaskCompletionBuffer<TKey, TValue> _buffer;
-        private ITaskCache<TKey, TValue> _cache;
-        private readonly Func<TKey, TKey> _cacheKeyResolver;
+        private ITaskCache<TValue> _cache;
+        private readonly CacheKeyResolverDelegate<TKey> _cacheKeyResolver;
         private AutoResetEvent _delaySignal;
         private DataLoaderOptions<TKey> _options;
         private CancellationTokenSource _stopBatching;
@@ -50,10 +50,10 @@ namespace GreenDonut
         /// <param name="cache">
         /// A cache instance for <c>Tasks</c>.
         /// </param>
-        /// <exception cref="cache">
-        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// <exception cref="ArgumentNullException">
+        /// Throws if <paramref name="cache"/> <c>null</c>.
         /// </exception>
-        protected DataLoaderBase(ITaskCache<TKey, TValue> cache)
+        protected DataLoaderBase(ITaskCache<TValue> cache)
             : this(new DataLoaderOptions<TKey>(), cache)
         { }
 
@@ -64,11 +64,11 @@ namespace GreenDonut
         /// <param name="options">
         /// A configuration for <c>DataLoaders</c>.
         /// </param>
-        /// <exception cref="options">
-        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// <exception cref="ArgumentNullException">
+        /// Throws if <paramref name="options"/> <c>null</c>.
         /// </exception>
         protected DataLoaderBase(DataLoaderOptions<TKey> options)
-            : this(options, new TaskCache<TKey, TValue>(
+            : this(options, new TaskCache<TValue>(
                 options?.CacheSize ?? Defaults.CacheSize,
                 options?.SlidingExpiration ??
                     Defaults.SlidingExpiration))
@@ -84,14 +84,14 @@ namespace GreenDonut
         /// <param name="cache">
         /// A cache instance for <c>Tasks</c>.
         /// </param>
-        /// <exception cref="options">
-        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// <exception cref="ArgumentNullException">
+        /// Throws if <paramref name="options"/> <c>null</c>.
         /// </exception>
-        /// <exception cref="cache">
-        /// Throws an <see cref="ArgumentNullException"/> if <c>null</c>.
+        /// <exception cref="ArgumentNullException">
+        /// Throws if <paramref name="cache"/> <c>null</c>.
         /// </exception>
         protected DataLoaderBase(DataLoaderOptions<TKey> options,
-            ITaskCache<TKey, TValue> cache)
+            ITaskCache<TValue> cache)
         {
             _options = options ??
                 throw new ArgumentNullException(nameof(options));
@@ -236,7 +236,7 @@ namespace GreenDonut
 
             lock (_sync)
             {
-                TKey cacheKey = _cacheKeyResolver(key);
+                object cacheKey = _cacheKeyResolver(key);
 
                 if (_options.Caching && _cache.TryGetValue(cacheKey,
                     out Task<TValue> cachedValue))
@@ -309,7 +309,7 @@ namespace GreenDonut
                 throw new ArgumentNullException(nameof(key));
             }
 
-            TKey cacheKey = _cacheKeyResolver(key);
+            object cacheKey = _cacheKeyResolver(key);
 
             _cache.Remove(cacheKey);
         }
@@ -327,7 +327,7 @@ namespace GreenDonut
                 throw new ArgumentNullException(nameof(value));
             }
 
-            TKey cacheKey = _cacheKeyResolver(key);
+            object cacheKey = _cacheKeyResolver(key);
 
             _cache.TryAdd(cacheKey, value);
         }
@@ -342,7 +342,7 @@ namespace GreenDonut
                 DispatchingDiagnostics.RecordError(keys[i], error);
                 bufferedPromises[keys[i]].SetException(error);
 
-                TKey cacheKey = _cacheKeyResolver(keys[i]);
+                object cacheKey = _cacheKeyResolver(keys[i]);
 
                 _cache.Remove(cacheKey);
             }
@@ -537,6 +537,7 @@ namespace GreenDonut
             GC.SuppressFinalize(this);
         }
 
+        /// <inheritdoc/>
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)

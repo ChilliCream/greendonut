@@ -16,7 +16,7 @@ namespace GreenDonut
             TimeSpan slidingExpiration = TimeSpan.Zero;
 
             // act
-            Action verify = () => new TaskCache<string, string>(cacheSize,
+            Action verify = () => new TaskCache<string>(cacheSize,
                 slidingExpiration);
 
             // assert
@@ -37,7 +37,7 @@ namespace GreenDonut
         {
             // arrange
             TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
+            var cache = new TaskCache<string>(cacheSize,
                 slidingExpiration);
 
             // act
@@ -65,7 +65,7 @@ namespace GreenDonut
             var cacheSize = 10;
             var slidingExpiration = TimeSpan
                 .FromMilliseconds(expirationInMilliseconds);
-            var cache = new TaskCache<string, string>(cacheSize,
+            var cache = new TaskCache<string>(cacheSize,
                 slidingExpiration);
 
             // act
@@ -91,7 +91,7 @@ namespace GreenDonut
             // arrange
             var cacheSize = 10;
             TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
+            var cache = new TaskCache<string>(cacheSize,
                 slidingExpiration);
 
             foreach (var value in values)
@@ -116,7 +116,7 @@ namespace GreenDonut
             // arrange
             var cacheSize = 10;
             TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
+            var cache = new TaskCache<string>(cacheSize,
                 slidingExpiration);
 
             // act
@@ -132,7 +132,7 @@ namespace GreenDonut
             // arrange
             var cacheSize = 10;
             TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
+            var cache = new TaskCache<string>(cacheSize,
                 slidingExpiration);
 
             // act
@@ -148,7 +148,7 @@ namespace GreenDonut
             // arrange
             var cacheSize = 10;
             TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
+            var cache = new TaskCache<string>(cacheSize,
                 slidingExpiration);
 
             cache.TryAdd("Foo", Task.FromResult("Bar"));
@@ -165,30 +165,13 @@ namespace GreenDonut
 
         #region Remove
 
-        [Fact(DisplayName = "Remove: Should throw an argument null exception for key")]
-        public void RemoveKeyNull()
-        {
-            // arrange
-            var cacheSize = 10;
-            TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
-                slidingExpiration);
-            string key = null;
-
-            // act
-            Action verify = () => cache.Remove(key);
-
-            // assert
-            Assert.Throws<ArgumentNullException>("key", verify);
-        }
-
         [Fact(DisplayName = "Remove: Should not throw any exception")]
         public void RemoveNoException()
         {
             // arrange
             var cacheSize = 10;
             TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
+            var cache = new TaskCache<string>(cacheSize,
                 slidingExpiration);
             var key = "Foo";
 
@@ -205,7 +188,7 @@ namespace GreenDonut
             // arrange
             var cacheSize = 10;
             TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
+            var cache = new TaskCache<string>(cacheSize,
                 slidingExpiration);
             var key = "Foo";
 
@@ -225,31 +208,13 @@ namespace GreenDonut
 
         #region TryAdd
 
-        [Fact(DisplayName = "TryAdd: Should throw an argument null exception for key")]
-        public void TryAddKeyNull()
-        {
-            // arrange
-            var cacheSize = 10;
-            TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
-                slidingExpiration);
-            string key = null;
-            var value = Task.FromResult("Foo");
-
-            // act
-            Action verify = () => cache.TryAdd(key, value);
-
-            // assert
-            Assert.Throws<ArgumentNullException>("key", verify);
-        }
-
         [Fact(DisplayName = "TryAdd: Should throw an argument null exception for value")]
         public void TryAddValueNull()
         {
             // arrange
             var cacheSize = 10;
             TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
+            var cache = new TaskCache<string>(cacheSize,
                 slidingExpiration);
             var key = "Foo";
             Task<string> value = null;
@@ -267,7 +232,7 @@ namespace GreenDonut
             // arrange
             var cacheSize = 10;
             TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
+            var cache = new TaskCache<string>(cacheSize,
                 slidingExpiration);
             var key = "Foo";
             var value = Task.FromResult("Bar");
@@ -285,7 +250,7 @@ namespace GreenDonut
             // arrange
             var cacheSize = 10;
             TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
+            var cache = new TaskCache<string>(cacheSize,
                 slidingExpiration);
             var key = "Foo";
             var expected = Task.FromResult("Bar");
@@ -308,7 +273,7 @@ namespace GreenDonut
             // arrange
             var cacheSize = 10;
             TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
+            var cache = new TaskCache<string>(cacheSize,
                 slidingExpiration);
             var key = "Foo";
             var expected = Task.FromResult("Bar");
@@ -332,31 +297,13 @@ namespace GreenDonut
 
         #region TryGetValue
 
-        [Fact(DisplayName = "TryGetValue: Should throw an argument null exception for key")]
-        public void TryGetValueKeyNull()
-        {
-            // arrange
-            var cacheSize = 10;
-            TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
-                slidingExpiration);
-            string key = null;
-
-            // act
-            Action verify = () => cache.TryGetValue(key,
-                out Task<string> value);
-
-            // assert
-            Assert.Throws<ArgumentNullException>("key", verify);
-        }
-
         [Fact(DisplayName = "TryGetValue: Should return false")]
         public void TryGetValueNullResult()
         {
             // arrange
             var cacheSize = 10;
             TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
+            var cache = new TaskCache<string>(cacheSize,
                 slidingExpiration);
             var key = "Foo";
 
@@ -367,15 +314,37 @@ namespace GreenDonut
             Assert.False(result);
         }
 
-        [Fact(DisplayName = "TryGetValue: Should return one result")]
-        public async Task TryGetValueResult()
+        [Fact(DisplayName = "TryGetValue (String): Should return one result")]
+        public async Task TryGetValueResultByString()
         {
             // arrange
             var cacheSize = 10;
             TimeSpan slidingExpiration = TimeSpan.Zero;
-            var cache = new TaskCache<string, string>(cacheSize,
+            var cache = new TaskCache<string>(cacheSize,
                 slidingExpiration);
             var key = "Foo";
+            var expected = Task.FromResult("Bar");
+
+            cache.TryAdd(key, expected);
+
+            // act
+            var result = cache.TryGetValue(key, out Task<string> actual);
+
+            // assert
+            Assert.True(result);
+            Assert.Equal(await expected.ConfigureAwait(false),
+                await actual.ConfigureAwait(false));
+        }
+
+        [Fact(DisplayName = "TryGetValue (Integer): Should return one result")]
+        public async Task TryGetValueResultByInteger()
+        {
+            // arrange
+            var cacheSize = 10;
+            TimeSpan slidingExpiration = TimeSpan.Zero;
+            var cache = new TaskCache<string>(cacheSize,
+                slidingExpiration);
+            var key = 1;
             var expected = Task.FromResult("Bar");
 
             cache.TryAdd(key, expected);
@@ -399,7 +368,7 @@ namespace GreenDonut
             // arrange
             var cacheSize = 10;
             var slidingExpiration = TimeSpan.FromMilliseconds(100);
-            var cache = new TaskCache<string, string>(cacheSize,
+            var cache = new TaskCache<string>(cacheSize,
                 slidingExpiration);
             var key = "Foo";
 
@@ -419,7 +388,7 @@ namespace GreenDonut
             // arrange
             var cacheSize = 10;
             var slidingExpiration = TimeSpan.FromMilliseconds(500);
-            var cache = new TaskCache<string, string>(cacheSize,
+            var cache = new TaskCache<string>(cacheSize,
                 slidingExpiration);
             var key = "Foo";
 

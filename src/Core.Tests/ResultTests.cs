@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace GreenDonut
@@ -72,6 +74,11 @@ namespace GreenDonut
             Assert.Null(result.Error);
             Assert.False(result.IsError);
             Assert.Equal(value, result);
+        }
+
+        private object List<T>()
+        {
+            throw new NotImplementedException();
         }
 
         [InlineData(null)]
