@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Failed batch operations were cached [#42](https://github.com/ChilliCream/greendonut/issues/42).
+- Wrong CacheKeyResolver implementation [#52](https://github.com/ChilliCream/greendonut/issues/52).
 
 ### Deprecated
 
