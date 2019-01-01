@@ -491,7 +491,7 @@ namespace GreenDonut
             return await Task.WhenAll(tasks).ConfigureAwait(false);
         }
 
-        private void SetSingleResult(
+        private static void SetSingleResult(
             TaskCompletionSource<TValue> promise,
             TKey key,
             Result<TValue> result)
