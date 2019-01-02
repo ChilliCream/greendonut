@@ -80,7 +80,7 @@ Task("Publish")
     .Does(() =>
 {
     using(var process = StartAndReturnProcess("msbuild",
-        new ProcessSettings{ Arguments = "src /t:pack /p:configuration=" + configuration}))
+        new ProcessSettings{ Arguments = "src /t:pack /p:configuration=" + configuration + " /p:IncludeSource=true /p:IncludeSymbols=true" }))
     {
         process.WaitForExit();
     }
