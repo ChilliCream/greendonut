@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -88,6 +89,151 @@ namespace GreenDonut
 
             // assert
             Assert.Null(Record.Exception(verify));
+        }
+
+        #endregion
+
+        #region RequestBuffered
+
+        [Fact(DisplayName = "RequestBuffered: Should raised 3 times if 3 items were requested")]
+        public void RequestBuffered()
+        {
+            // arrange
+            int raiseCount = 0;
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>();
+            var loader = new DataLoader<string, string>(options, fetch);
+
+            loader.RequestBuffered += (d, e) =>
+            {
+                Interlocked.Increment(ref raiseCount);
+            };
+
+            // act
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+            // must not be awaited, because we would wait here forever.
+            loader.LoadAsync("Foo", "Bar", "Baz");
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+
+            // assert
+            Assert.Equal(3, raiseCount);
+        }
+
+        #endregion
+
+        #region BufferedRequests
+
+        [Fact(DisplayName = "BufferedRequests: Should return 0 if not items were requested")]
+        public void BufferedRequestsZero()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>();
+            var loader = new DataLoader<string, string>(options, fetch);
+
+            // act
+            int result = loader.BufferedRequests;
+
+            // assert
+            Assert.Equal(0, result);
+        }
+
+        [Fact(DisplayName = "Clear: Should return 2 if two items were requested")]
+        public void BufferedRequestsTwo()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>();
+            var loader = new DataLoader<string, string>(options, fetch);
+
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+            // must not be awaited, because we would wait here forever.
+            loader.LoadAsync("Foo", "Bar");
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+
+            // act
+            int result = loader.BufferedRequests;
+
+            // assert
+            Assert.Equal(2, result);
+        }
+
+        #endregion
+
+        #region CachedValues
+
+        [Fact(DisplayName = "CachedValues: Should return 0 if caching is disabled")]
+        public void CachedValuesAlwaysZero()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>
+            {
+                Caching = false
+            };
+            var loader = new DataLoader<string, string>(options, fetch);
+
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+            // must not be awaited, because we would wait here forever.
+            loader.LoadAsync("Foo");
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+
+            loader.Set("Foo", Task.FromResult("Bar"));
+
+            // act
+            int result = loader.CachedValues;
+
+            // assert
+            Assert.Equal(0, result);
+        }
+
+        [Fact(DisplayName = "CachedValues: Should return 0 if not items were requested")]
+        public void CachedValuesZero()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>();
+            var loader = new DataLoader<string, string>(options, fetch);
+
+            // act
+            int result = loader.CachedValues;
+
+            // assert
+            Assert.Equal(0, result);
+        }
+
+        [Fact(DisplayName = "Clear: Should return 2 if two items were requested")]
+        public void CachedValuesTwo()
+        {
+            // arrange
+            FetchDataDelegate<string, string> fetch = async keys =>
+                await Task.FromResult(new Result<string>[0])
+                    .ConfigureAwait(false);
+            var options = new DataLoaderOptions<string>();
+            var loader = new DataLoader<string, string>(options, fetch);
+
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+            // must not be awaited, because we would wait here forever.
+            loader.LoadAsync("Foo", "Bar");
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+
+            loader.Set("Baz", Task.FromResult("Quux"));
+
+            // act
+            int result = loader.CachedValues;
+
+            // assert
+            Assert.Equal(3, result);
         }
 
         #endregion
