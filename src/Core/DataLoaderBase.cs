@@ -515,7 +515,7 @@ namespace GreenDonut
 
         private void RaiseRequestBuffered()
         {
-            RequestBuffered?.Invoke(this, null);
+            RequestBuffered?.Invoke(this, EventArgs.Empty);
         }
 
         private static void SetSingleResult(
