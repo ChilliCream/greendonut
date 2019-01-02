@@ -104,6 +104,15 @@ namespace GreenDonut
             StartAsyncBackgroundDispatching();
         }
 
+        /// <inheritdoc />
+        public event RequestBufferedEventHandler RequestBuffered;
+
+        /// <inheritdoc />
+        public int BufferedRequests => _buffer.Count;
+
+        /// <inheritdoc />
+        public int CachedValues => _cache.Usage;
+
         #region Explicit Implementation of IDataLoader
 
         /// <inheritdoc />
@@ -188,7 +197,10 @@ namespace GreenDonut
         /// <inheritdoc />
         public void Clear()
         {
-            _cache.Clear();
+            if (_options.Caching)
+            {
+                _cache.Clear();
+            }
         }
 
         /// <inheritdoc />
@@ -259,6 +271,10 @@ namespace GreenDonut
                         promise.TrySetCanceled();
                         promise = value;
                     }
+                    else
+                    {
+                        RaiseRequestBuffered();
+                    }
                 }
                 else
                 {
@@ -309,9 +325,12 @@ namespace GreenDonut
                 throw new ArgumentNullException(nameof(key));
             }
 
-            object cacheKey = _cacheKeyResolver(key);
+            if (_options.Caching)
+            {
+                object cacheKey = _cacheKeyResolver(key);
 
-            _cache.Remove(cacheKey);
+                _cache.Remove(cacheKey);
+            }
         }
 
         /// <inheritdoc />
@@ -327,9 +346,12 @@ namespace GreenDonut
                 throw new ArgumentNullException(nameof(value));
             }
 
-            object cacheKey = _cacheKeyResolver(key);
+            if (_options.Caching)
+            {
+                object cacheKey = _cacheKeyResolver(key);
 
-            _cache.TryAdd(cacheKey, value);
+                _cache.TryAdd(cacheKey, value);
+            }
         }
 
         private void BatchOperationFailed(
@@ -489,6 +511,11 @@ namespace GreenDonut
             }
 
             return await Task.WhenAll(tasks).ConfigureAwait(false);
+        }
+
+        private void RaiseRequestBuffered()
+        {
+            RequestBuffered?.Invoke(this, EventArgs.Empty);
         }
 
         private static void SetSingleResult(

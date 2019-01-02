@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Non-generic interface for DataLoader [#37](https://github.com/ChilliCream/greendonut/issues/37).
+- Introduced `RequestBuffered` event [#41](https://github.com/ChilliCream/greendonut/issues/41).
+- Introduced `BufferedRequests` property [#41](https://github.com/ChilliCream/greendonut/issues/41).
+- Introduced `CachedValues` property [#41](https://github.com/ChilliCream/greendonut/issues/41).
 
 ### Changed
 
