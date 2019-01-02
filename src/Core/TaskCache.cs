@@ -138,7 +138,8 @@ namespace GreenDonut
                             .Subtract(SlidingExpirartion);
 
                         if (_ranking.Last != null &&
-                            _cache.TryGetValue(_ranking.Last.Value,
+                            _cache.TryGetValue(
+                                _ranking.Last.Value,
                                 out CacheEntry entry) &&
                             removeAfter > entry.LastTouched)
                         {
@@ -146,8 +147,10 @@ namespace GreenDonut
                         }
                         else
                         {
-                            await Task.Delay(_cleanupDelay, _disposeTokenSource.Token)
-                                .ConfigureAwait(false);
+                            await Task.Delay(
+                                _cleanupDelay,
+                                _disposeTokenSource.Token)
+                                    .ConfigureAwait(false);
                         }
                     }
                 }, TaskCreationOptions.LongRunning);
