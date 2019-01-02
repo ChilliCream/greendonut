@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GreenDonut
@@ -11,10 +12,12 @@ namespace GreenDonut
     /// <typeparam name="TKey">A key type.</typeparam>
     /// <typeparam name="TValue">A value type.</typeparam>
     /// <param name="keys">A list of keys.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>
     /// A list of results which are in the exact same order as the provided
     /// keys.
     /// </returns>
     public delegate Task<IReadOnlyList<Result<TValue>>> FetchDataDelegate
-        <TKey, TValue>(IReadOnlyList<TKey> keys);
+        <TKey, TValue>(IReadOnlyList<TKey> keys,
+            CancellationToken cancellationToken);
 }

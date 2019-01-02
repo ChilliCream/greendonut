@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GreenDonut
@@ -36,7 +37,7 @@ namespace GreenDonut
         /// when trying to setup a new batch request.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// Throws if <paramref name="fetch"/> <c>null</c>.
+        /// Throws if <paramref name="fetch"/> is <c>null</c>.
         /// </exception>
         public DataLoader(FetchDataDelegate<TKey, TValue> fetch)
             : this(new DataLoaderOptions<TKey>(), fetch)
@@ -55,10 +56,10 @@ namespace GreenDonut
         /// when trying to setup a new batch request.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// Throws if <paramref name="options"/> <c>null</c>.
+        /// Throws if <paramref name="options"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        /// Throws if <paramref name="fetch"/> <c>null</c>.
+        /// Throws if <paramref name="fetch"/> is <c>null</c>.
         /// </exception>
         public DataLoader(
             DataLoaderOptions<TKey> options,
@@ -70,9 +71,10 @@ namespace GreenDonut
 
         /// <inheritdoc />
         protected override Task<IReadOnlyList<Result<TValue>>> FetchAsync(
-            IReadOnlyList<TKey> keys)
+            IReadOnlyList<TKey> keys,
+            CancellationToken cancellationToken)
         {
-            return _fetch(keys);
+            return _fetch(keys, cancellationToken);
         }
     }
 }

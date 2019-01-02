@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Introduced `RequestBuffered` event [#41](https://github.com/ChilliCream/greendonut/issues/41).
 - Introduced `BufferedRequests` property [#41](https://github.com/ChilliCream/greendonut/issues/41).
 - Introduced `CachedValues` property [#41](https://github.com/ChilliCream/greendonut/issues/41).
+- Added `CancellationToken` to all public async method [#39](https://github.com/ChilliCream/greendonut/issues/39).
 
 ### Changed
 

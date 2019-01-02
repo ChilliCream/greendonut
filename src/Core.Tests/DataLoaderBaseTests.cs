@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 using GreenDonut.FakeDataLoaders;
 using Xunit;
 
@@ -13,9 +12,8 @@ namespace GreenDonut
         public void ConstructorA()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
 
             // act
             Action verify = () => new EmptyConstructor();

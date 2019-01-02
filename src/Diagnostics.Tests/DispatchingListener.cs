@@ -7,12 +7,18 @@ namespace GreenDonut
 {
     public class DispatchingListener
     {
+        public readonly ConcurrentDictionary<string, Exception> Errors =
+            new ConcurrentDictionary<string, Exception>();
         public readonly ConcurrentQueue<string> Keys =
             new ConcurrentQueue<string>();
         public readonly ConcurrentDictionary<string, Result<string>> Values =
             new ConcurrentDictionary<string, Result<string>>();
-        public readonly ConcurrentDictionary<string, Exception> Errors =
-            new ConcurrentDictionary<string, Exception>();
+
+        [DiagnosticName("Error")]
+        public void OnError(string key, Exception exception)
+        {
+            Errors.TryAdd(key, exception);
+        }
 
         [DiagnosticName("ExecuteBatchRequest")]
         public void OnExecuteBatchRequest() { }
@@ -36,12 +42,6 @@ namespace GreenDonut
             {
                 Values.TryAdd(keys[i], results[i]);
             }
-        }
-
-        [DiagnosticName("Error")]
-        public void OnError(string key, Exception exception)
-        {
-            Errors.TryAdd(key, exception);
         }
     }
 }

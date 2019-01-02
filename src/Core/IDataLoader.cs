@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GreenDonut
@@ -49,13 +50,14 @@ namespace GreenDonut
         /// a wait delay. Whereas in a manual dispatch scenario it could mean
         /// to dispatch explicitly.
         /// </summary>
-        Task DispatchAsync();
+        Task DispatchAsync(CancellationToken cancellationToken);
 
         /// <summary>
         /// Loads a single value by key. This call may return a cached value
         /// or enqueues this single request for bacthing if enabled.
         /// </summary>
         /// <param name="key">A unique key.</param>
+        /// <param name="cancellationToken">A cancellation token.</param>
         /// <exception cref="ArgumentNullException">
         /// Throws if <paramref name="key"/> is <c>null</c>.
         /// </exception>
@@ -63,13 +65,16 @@ namespace GreenDonut
         /// A single result which may contain a value or information about the
         /// error which may occurred during the call.
         /// </returns>
-        Task<object> LoadAsync(object key);
+        Task<object> LoadAsync(
+            object key,
+            CancellationToken cancellationToken);
 
         /// <summary>
         /// Loads multiple values by keys. This call may return cached values
         /// and enqueues requests which were not cached for bacthing if
         /// enabled.
         /// </summary>
+        /// <param name="cancellationToken">A cancellation token.</param>
         /// <param name="keys">A list of unique keys.</param>
         /// <exception cref="ArgumentNullException">
         /// Throws if <paramref name="keys"/> is <c>null</c>.
@@ -77,7 +82,9 @@ namespace GreenDonut
         /// <returns>
         /// A list of values in the same order as the provided keys.
         /// </returns>
-        Task<IReadOnlyList<object>> LoadAsync(params object[] keys);
+        Task<IReadOnlyList<object>> LoadAsync(
+            CancellationToken cancellationToken,
+            params object[] keys);
 
         /// <summary>
         /// Loads multiple values by keys. This call may return cached values
@@ -85,13 +92,16 @@ namespace GreenDonut
         /// enabled.
         /// </summary>
         /// <param name="keys">A list of unique keys.</param>
+        /// <param name="cancellationToken">A cancellation token.</param>
         /// <exception cref="ArgumentNullException">
         /// Throws if <paramref name="keys"/> is <c>null</c>.
         /// </exception>
         /// <returns>
         /// A list of values in the same order as the provided keys.
         /// </returns>
-        Task<IReadOnlyList<object>> LoadAsync(IReadOnlyCollection<object> keys);
+        Task<IReadOnlyList<object>> LoadAsync(
+            IReadOnlyCollection<object> keys,
+            CancellationToken cancellationToken);
 
         /// <summary>
         /// Removes a single entry from the cache.
@@ -141,6 +151,7 @@ namespace GreenDonut
         /// or enqueues this single request for bacthing if enabled.
         /// </summary>
         /// <param name="key">A unique key.</param>
+        /// <param name="cancellationToken">A cancellation token.</param>
         /// <exception cref="ArgumentNullException">
         /// Throws if <paramref name="key"/> is <c>null</c>.
         /// </exception>
@@ -148,13 +159,14 @@ namespace GreenDonut
         /// A single result which may contain a value or information about the
         /// error which may occurred during the call.
         /// </returns>
-        Task<TValue> LoadAsync(TKey key);
+        Task<TValue> LoadAsync(TKey key, CancellationToken cancellationToken);
 
         /// <summary>
         /// Loads multiple values by keys. This call may return cached values
         /// and enqueues requests which were not cached for bacthing if
         /// enabled.
         /// </summary>
+        /// <param name="cancellationToken">A cancellation token.</param>
         /// <param name="keys">A list of unique keys.</param>
         /// <exception cref="ArgumentNullException">
         /// Throws if <paramref name="keys"/> is <c>null</c>.
@@ -162,7 +174,9 @@ namespace GreenDonut
         /// <returns>
         /// A list of values in the same order as the provided keys.
         /// </returns>
-        Task<IReadOnlyList<TValue>> LoadAsync(params TKey[] keys);
+        Task<IReadOnlyList<TValue>> LoadAsync(
+            CancellationToken cancellationToken,
+            params TKey[] keys);
 
         /// <summary>
         /// Loads multiple values by keys. This call may return cached values
@@ -170,13 +184,16 @@ namespace GreenDonut
         /// enabled.
         /// </summary>
         /// <param name="keys">A list of unique keys.</param>
+        /// <param name="cancellationToken">A cancellation token.</param>
         /// <exception cref="ArgumentNullException">
         /// Throws if <paramref name="keys"/> is <c>null</c>.
         /// </exception>
         /// <returns>
         /// A list of values in the same order as the provided keys.
         /// </returns>
-        Task<IReadOnlyList<TValue>> LoadAsync(IReadOnlyCollection<TKey> keys);
+        Task<IReadOnlyList<TValue>> LoadAsync(
+            IReadOnlyCollection<TKey> keys,
+            CancellationToken cancellationToken);
 
         /// <summary>
         /// Removes a single entry from the cache.

@@ -32,7 +32,7 @@ namespace GreenDonut
         {
             return IsError == other.IsError &&
                 Error == other.Error &&
-                Value.Equals(other.Value);
+                Equals(Value, other.Value);
         }
 
         /// <inheritdoc />

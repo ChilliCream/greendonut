@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GreenDonut.FakeDataLoaders
@@ -12,7 +13,8 @@ namespace GreenDonut.FakeDataLoaders
         { }
 
         protected override Task<IReadOnlyList<Result<string>>> FetchAsync(
-            IReadOnlyList<string> keys)
+            IReadOnlyList<string> keys,
+            CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
