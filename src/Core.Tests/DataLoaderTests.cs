@@ -27,9 +27,8 @@ namespace GreenDonut
         public void ConstructorANoException()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
 
             // act
             Action verify = () => new DataLoader<string, string>(fetch);
@@ -61,9 +60,8 @@ namespace GreenDonut
         public void ConstructorBOptionsNull()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             DataLoaderOptions<string> options = null;
 
             // act
@@ -78,9 +76,8 @@ namespace GreenDonut
         public void ConstructorBNoException()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
 
             // act
@@ -100,9 +97,8 @@ namespace GreenDonut
         {
             // arrange
             int raiseCount = 0;
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
 
@@ -129,9 +125,8 @@ namespace GreenDonut
         public void BufferedRequestsZero()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
 
@@ -146,9 +141,8 @@ namespace GreenDonut
         public void BufferedRequestsTwo()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
 
@@ -172,9 +166,8 @@ namespace GreenDonut
         public void CachedValuesAlwaysZero()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>
             {
                 Caching = false
@@ -199,9 +192,8 @@ namespace GreenDonut
         public void CachedValuesZero()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
 
@@ -216,9 +208,8 @@ namespace GreenDonut
         public void CachedValuesTwo()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
 
@@ -244,9 +235,8 @@ namespace GreenDonut
         public void ClearNoException()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
 
@@ -261,9 +251,8 @@ namespace GreenDonut
         public async Task ClearAllEntries()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>
             {
                 Batching = false
@@ -291,9 +280,8 @@ namespace GreenDonut
         public async Task DispatchAsyncNoException()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
 
@@ -310,9 +298,8 @@ namespace GreenDonut
         {
             // arrange
             Result<string> expectedResult = "Bar";
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new[] { expectedResult })
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>(expectedResult);
             var options = new DataLoaderOptions<string>
             {
                 Batching = false
@@ -335,9 +322,8 @@ namespace GreenDonut
         {
             // arrange
             Result<string> expectedResult = "Bar";
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new[] { expectedResult })
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>(expectedResult);
             var options = new DataLoaderOptions<string>
             {
                 AutoDispatching = false
@@ -359,9 +345,8 @@ namespace GreenDonut
         {
             // arrange
             Result<string> expectedResult = "Bar";
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[] { expectedResult })
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>(expectedResult);
             var options = new DataLoaderOptions<string>
             {
                 BatchRequestDelay = TimeSpan.FromMinutes(10)
@@ -384,9 +369,8 @@ namespace GreenDonut
         public async Task DispatchAsyncKeysValuesNotMatching()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>
             {
                 BatchRequestDelay = TimeSpan.FromMinutes(10)
@@ -415,9 +399,8 @@ namespace GreenDonut
         public void DisposeNoException()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
 
@@ -432,9 +415,8 @@ namespace GreenDonut
         public void DisposeNoExceptionNobatchingAndCaching()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>
             {
                 Batching = false,
@@ -457,9 +439,8 @@ namespace GreenDonut
         public async Task LoadSingleKeyNull()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             string key = null;
@@ -476,9 +457,8 @@ namespace GreenDonut
         public async Task LoadSingleNoException()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[] { "Bar" })
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>("Bar");
             var options = new DataLoaderOptions<string>()
             {
                 Batching = false
@@ -499,9 +479,8 @@ namespace GreenDonut
         {
             // arrange
             Result<string> expectedResult = "Bar";
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[] { expectedResult })
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>(expectedResult);
             var options = new DataLoaderOptions<string>
             {
                 Batching = false
@@ -521,9 +500,8 @@ namespace GreenDonut
         {
             // arrange
             Result<string> expectedResult = "Bar";
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>
             {
                 Batching = false
@@ -547,9 +525,8 @@ namespace GreenDonut
         public async Task LoadParamsKeysNull()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             string[] keys = null;
@@ -567,9 +544,8 @@ namespace GreenDonut
         public async Task LoadParamsZeroKeys()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>
             {
                 Batching = false
@@ -590,9 +566,8 @@ namespace GreenDonut
         public async Task LoadParamsNoException()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new Result<string>[] { "Bar" })
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>("Bar");
             var options = new DataLoaderOptions<string>()
             {
                 Batching = false
@@ -614,9 +589,8 @@ namespace GreenDonut
         {
             // arrange
             Result<string> expectedResult = "Bar";
-            FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new[] { expectedResult })
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>(expectedResult);
             var options = new DataLoaderOptions<string>
             {
                 Batching = false
@@ -642,9 +616,8 @@ namespace GreenDonut
         public async Task LoadCollectionKeysNull()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             List<string> keys = null;
@@ -662,9 +635,8 @@ namespace GreenDonut
         public async Task LoadCollectionZeroKeys()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>
             {
                 Batching = false
@@ -685,9 +657,8 @@ namespace GreenDonut
         public async Task LoadCollectionNoException()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new Result<string>[] { "Bar" })
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>("Bar");
             var options = new DataLoaderOptions<string>()
             {
                 Batching = false
@@ -709,9 +680,8 @@ namespace GreenDonut
         {
             // arrange
             Result<string> expectedResult = "Bar";
-            FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new[] { expectedResult })
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>(expectedResult);
             var options = new DataLoaderOptions<string>
             {
                 Batching = false
@@ -740,36 +710,37 @@ namespace GreenDonut
                 { "Bar", "Baz" },
                 { "Baz", "Foo" }
             };
-            FetchDataDelegate<string, string> fetch = async k =>
-            {
-                var values = new List<Result<string>>();
-
-                foreach (var key in k)
+            FetchDataDelegate<string, string> fetch =
+                async (keys, cancellationToken) =>
                 {
-                    if (repository.ContainsKey(key))
-                    {
-                        values.Add(repository[key]);
-                    }
-                    else
-                    {
-                        var error = new Exception($"Value for key \"{key}\" " +
-                            "not found");
+                    var values = new List<Result<string>>();
 
-                        values.Add(error);
-                    }
-                }
+                    foreach (var key in keys)
+                    {
+                        if (repository.ContainsKey(key))
+                        {
+                            values.Add(repository[key]);
+                        }
+                        else
+                        {
+                            var error = new Exception($"Value for key" +
+                                $"\"{key}\" not found");
 
-                return await Task.FromResult(values).ConfigureAwait(false);
-            };
+                            values.Add(error);
+                        }
+                    }
+
+                    return await Task.FromResult(values).ConfigureAwait(false);
+                };
             var options = new DataLoaderOptions<string>
             {
                 AutoDispatching = true
             };
             var loader = new DataLoader<string, string>(options, fetch);
-            var keys = new List<string> { "Foo", "Bar", "Baz", "Qux" };
+            var requestKeys = new [] { "Foo", "Bar", "Baz", "Qux" };
 
             // act
-            Func<Task> verify = () => loader.LoadAsync(keys);
+            Func<Task> verify = () => loader.LoadAsync(requestKeys);
 
             // assert
             await Assert.ThrowsAsync<Exception>(verify).ConfigureAwait(false);
@@ -822,23 +793,24 @@ namespace GreenDonut
         {
             // arrange
             var random = new Random();
-            FetchDataDelegate<Guid, int> fetch = async keys =>
-            {
-                var values = new List<Result<int>>(keys.Count);
-
-                foreach (Guid key in keys)
+            FetchDataDelegate<Guid, int> fetch =
+                async (keys, cancellationToken) =>
                 {
-                    var value = random.Next(1, maxRequests);
+                    var values = new List<Result<int>>(keys.Count);
 
-                    values.Add(value);
-                }
+                    foreach (Guid key in keys)
+                    {
+                        var value = random.Next(1, maxRequests);
 
-                var delay = random.Next(maxDelay);
+                        values.Add(value);
+                    }
 
-                await Task.Delay(delay).ConfigureAwait(false);
+                    var delay = random.Next(maxDelay);
 
-                return values;
-            };
+                    await Task.Delay(delay).ConfigureAwait(false);
+
+                    return values;
+                };
             TimeSpan slidingExpiration = (slidingExpirationInMilliseconds > 0)
                 ? TimeSpan.FromMilliseconds(slidingExpirationInMilliseconds)
                 : TimeSpan.Zero;
@@ -893,9 +865,8 @@ namespace GreenDonut
         public void RemoveKeyNull()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             string key = null;
@@ -913,9 +884,8 @@ namespace GreenDonut
         public void RemoveNoException()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             var key = "Foo";
@@ -931,9 +901,8 @@ namespace GreenDonut
         public void RemoveEntry()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>
             {
                 Batching = false
@@ -965,9 +934,8 @@ namespace GreenDonut
         public void SetKeyNull()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             string key = null;
@@ -984,9 +952,8 @@ namespace GreenDonut
         public void SetValueNull()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             var key = "Foo";
@@ -1003,9 +970,8 @@ namespace GreenDonut
         public void SetNoException()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             var key = "Foo";
@@ -1022,9 +988,8 @@ namespace GreenDonut
         public async Task SetNewCacheEntry()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             var key = "Foo";
@@ -1043,9 +1008,8 @@ namespace GreenDonut
         public async Task SetTwice()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             var key = "Foo";
@@ -1070,9 +1034,8 @@ namespace GreenDonut
         public async Task IDataLoaderLoadSingleKeyNull()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             IDataLoader loader = new DataLoader<string, string>(options,
                 fetch);
@@ -1090,9 +1053,8 @@ namespace GreenDonut
         public async Task IDataLoaderLoadSingleNoException()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[] { "Bar" })
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>("Bar");
             var options = new DataLoaderOptions<string>()
             {
                 Batching = false
@@ -1114,9 +1076,8 @@ namespace GreenDonut
         {
             // arrange
             Result<string> expectedResult = "Bar";
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[] { expectedResult })
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>(expectedResult);
             var options = new DataLoaderOptions<string>
             {
                 Batching = false
@@ -1136,10 +1097,8 @@ namespace GreenDonut
         public async Task IDataLoaderLoadSingleErrorResult()
         {
             // arrange
-            Result<string> expectedResult = "Bar";
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>
             {
                 Batching = false
@@ -1164,9 +1123,8 @@ namespace GreenDonut
         public async Task IDataLoaderLoadParamsKeysNull()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             IDataLoader loader = new DataLoader<string, string>(options,
                 fetch);
@@ -1185,9 +1143,8 @@ namespace GreenDonut
         public async Task IDataLoaderLoadParamsZeroKeys()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>
             {
                 Batching = false
@@ -1209,9 +1166,8 @@ namespace GreenDonut
         public async Task IDataLoaderLoadParamsNoException()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new Result<string>[] { "Bar" })
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>("Bar");
             var options = new DataLoaderOptions<string>()
             {
                 Batching = false
@@ -1234,9 +1190,8 @@ namespace GreenDonut
         {
             // arrange
             Result<string> expectedResult = "Bar";
-            FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new[] { expectedResult })
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>(expectedResult);
             var options = new DataLoaderOptions<string>
             {
                 Batching = false
@@ -1263,9 +1218,8 @@ namespace GreenDonut
         public async Task IDataLoaderLoadCollectionKeysNull()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             IDataLoader loader = new DataLoader<string, string>(options,
                 fetch);
@@ -1284,9 +1238,8 @@ namespace GreenDonut
         public async Task IDataLoaderLoadCollectionZeroKeys()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>
             {
                 Batching = false
@@ -1308,9 +1261,8 @@ namespace GreenDonut
         public async Task IDataLoaderLoadCollectionNoException()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new Result<string>[] { "Bar" })
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>("Bar");
             var options = new DataLoaderOptions<string>()
             {
                 Batching = false
@@ -1333,9 +1285,8 @@ namespace GreenDonut
         {
             // arrange
             Result<string> expectedResult = "Bar";
-            FetchDataDelegate<string, string> fetch = async k =>
-                await Task.FromResult(new[] { expectedResult })
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>(expectedResult);
             var options = new DataLoaderOptions<string>
             {
                 Batching = false
@@ -1365,37 +1316,38 @@ namespace GreenDonut
                 { "Bar", "Baz" },
                 { "Baz", "Foo" }
             };
-            FetchDataDelegate<string, string> fetch = async k =>
-            {
-                var values = new List<Result<string>>();
-
-                foreach (var key in k)
+            FetchDataDelegate<string, string> fetch =
+                async (keys, cancellationToken) =>
                 {
-                    if (repository.ContainsKey(key))
-                    {
-                        values.Add(repository[key]);
-                    }
-                    else
-                    {
-                        var error = new Exception($"Value for key \"{key}\" " +
-                            "not found");
+                    var values = new List<Result<string>>();
 
-                        values.Add(error);
-                    }
-                }
+                    foreach (var key in keys)
+                    {
+                        if (repository.ContainsKey(key))
+                        {
+                            values.Add(repository[key]);
+                        }
+                        else
+                        {
+                            var error = new Exception($"Value for key " +
+                                $"\"{key}\" not found");
 
-                return await Task.FromResult(values).ConfigureAwait(false);
-            };
+                            values.Add(error);
+                        }
+                    }
+
+                    return await Task.FromResult(values).ConfigureAwait(false);
+                };
             var options = new DataLoaderOptions<string>
             {
                 AutoDispatching = true
             };
             IDataLoader loader = new DataLoader<string, string>(options,
                 fetch);
-            var keys = new List<string> { "Foo", "Bar", "Baz", "Qux" };
+            var requestKeys = new [] { "Foo", "Bar", "Baz", "Qux" };
 
             // act
-            Func<Task> verify = () => loader.LoadAsync(keys);
+            Func<Task> verify = () => loader.LoadAsync(requestKeys);
 
             // assert
             await Assert.ThrowsAsync<Exception>(verify).ConfigureAwait(false);
@@ -1409,9 +1361,8 @@ namespace GreenDonut
         public void IDataLoaderRemoveKeyNull()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             IDataLoader loader = new DataLoader<string, string>(options,
                 fetch);
@@ -1430,9 +1381,8 @@ namespace GreenDonut
         public void IDataLoaderRemoveNoException()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             IDataLoader loader = new DataLoader<string, string>(options,
                 fetch);
@@ -1449,9 +1399,8 @@ namespace GreenDonut
         public void IDataLoaderRemoveEntry()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>
             {
                 Batching = false
@@ -1484,9 +1433,8 @@ namespace GreenDonut
         public void IDataLoaderSetKeyNull()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             IDataLoader loader = new DataLoader<string, string>(options,
                 fetch);
@@ -1504,9 +1452,8 @@ namespace GreenDonut
         public void IDataLoaderSetValueNull()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             IDataLoader loader = new DataLoader<string, string>(options,
                 fetch);
@@ -1524,9 +1471,8 @@ namespace GreenDonut
         public void IDataLoaderSetNoException()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             IDataLoader loader = new DataLoader<string, string>(options,
                 fetch);
@@ -1544,9 +1490,8 @@ namespace GreenDonut
         public async Task IDataLoaderSetNewCacheEntry()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             IDataLoader loader = new DataLoader<string, string>(options,
                 fetch);
@@ -1566,9 +1511,8 @@ namespace GreenDonut
         public async Task IDataLoaderSetTwice()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             IDataLoader loader = new DataLoader<string, string>(options,
                 fetch);

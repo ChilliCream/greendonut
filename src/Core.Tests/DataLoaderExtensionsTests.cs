@@ -27,9 +27,8 @@ namespace GreenDonut
         public void SetKeyNull()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             string key = null;
@@ -46,9 +45,8 @@ namespace GreenDonut
         public void SetNoException()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             var key = "Foo";
@@ -65,9 +63,8 @@ namespace GreenDonut
         public async Task SetNewCacheEntry()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             var key = "Foo";
@@ -86,9 +83,8 @@ namespace GreenDonut
         public async Task SetTwice()
         {
             // arrange
-            FetchDataDelegate<string, string> fetch = async keys =>
-                await Task.FromResult(new Result<string>[0])
-                    .ConfigureAwait(false);
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
             var loader = new DataLoader<string, string>(options, fetch);
             var key = "Foo";

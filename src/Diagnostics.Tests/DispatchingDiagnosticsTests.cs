@@ -17,15 +17,16 @@ namespace GreenDonut
             using (DiagnosticListener.AllListeners.Subscribe(observer))
             {
                 // arrange
-                FetchDataDelegate<string, string> fetch = async keys =>
-                {
-                    var error = new Exception("Quux");
-
-                    return await Task.FromResult(new Result<string>[]
+                FetchDataDelegate<string, string> fetch =
+                    async (keys, cancellationToken) =>
                     {
-                        error
-                    }).ConfigureAwait(false);
-                };
+                        var error = new Exception("Quux");
+
+                        return await Task.FromResult(new Result<string>[]
+                        {
+                            error
+                        }).ConfigureAwait(false);
+                    };
                 var options = new DataLoaderOptions<string>
                 {
                     AutoDispatching = true
