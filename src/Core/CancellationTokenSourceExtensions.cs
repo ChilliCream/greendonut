@@ -13,6 +13,11 @@ namespace GreenDonut
                 return cancellationToken;
             }
 
+            if (cancellationToken == CancellationToken.None)
+            {
+                return source.Token;
+            }
+
             return CancellationTokenSource.CreateLinkedTokenSource(
                 source.Token,
                 cancellationToken)

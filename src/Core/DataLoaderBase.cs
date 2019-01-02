@@ -615,10 +615,10 @@ namespace GreenDonut
                 if (disposing)
                 {
                     Clear();
-                    _disposeTokenSource?.Cancel();
+                    _disposeTokenSource.Cancel();
                     _delaySignal?.Set();
-                    (_cache as IDisposable)?.Dispose();
-                    _disposeTokenSource?.Dispose();
+                    (_cache as IDisposable).Dispose();
+                    _disposeTokenSource.Dispose();
                     _delaySignal?.Dispose();
                 }
 

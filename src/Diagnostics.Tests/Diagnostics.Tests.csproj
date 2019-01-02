@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <AssemblyName>GreenDonut.Tests</AssemblyName>
+    <AssemblyName>GreenDonut.Diagnostics.Tests</AssemblyName>
     <RootNamespace>GreenDonut</RootNamespace>
 
     <IsPackable>false</IsPackable>

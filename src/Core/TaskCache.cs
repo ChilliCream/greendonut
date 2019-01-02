@@ -13,7 +13,7 @@ namespace GreenDonut
         private const int _cleanupDelay = 10;
         private readonly ConcurrentDictionary<object, CacheEntry>
             _cache = new ConcurrentDictionary<object, CacheEntry>();
-        private CancellationTokenSource _dispose;
+        private CancellationTokenSource _disposeTokenSource;
         private bool _disposed;
         private readonly LinkedList<object> _ranking =
             new LinkedList<object>();
@@ -128,11 +128,11 @@ namespace GreenDonut
         {
             if (SlidingExpirartion > TimeSpan.Zero)
             {
-                _dispose = new CancellationTokenSource();
+                _disposeTokenSource = new CancellationTokenSource();
 
                 Task.Factory.StartNew(async () =>
                 {
-                    while (!_dispose.Token.IsCancellationRequested)
+                    while (!_disposeTokenSource.Token.IsCancellationRequested)
                     {
                         DateTimeOffset removeAfter = DateTimeOffset.UtcNow
                             .Subtract(SlidingExpirartion);
@@ -146,7 +146,7 @@ namespace GreenDonut
                         }
                         else
                         {
-                            await Task.Delay(_cleanupDelay, _dispose.Token)
+                            await Task.Delay(_cleanupDelay, _disposeTokenSource.Token)
                                 .ConfigureAwait(false);
                         }
                     }
@@ -189,8 +189,8 @@ namespace GreenDonut
                 if (disposing)
                 {
                     Clear();
-                    _dispose?.Cancel();
-                    _dispose?.Dispose();
+                    _disposeTokenSource?.Cancel();
+                    _disposeTokenSource?.Dispose();
                 }
 
                 _disposed = true;

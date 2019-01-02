@@ -96,7 +96,7 @@ namespace GreenDonut
         public void RequestBuffered()
         {
             // arrange
-            int raiseCount = 0;
+            var raiseCount = 0;
             FetchDataDelegate<string, string> fetch = TestHelpers
                 .CreateFetch<string, string>();
             var options = new DataLoaderOptions<string>();
@@ -109,7 +109,7 @@ namespace GreenDonut
 
             // act
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-            // must not be awaited, because we would wait here forever.
+            // don't await in this specific case
             loader.LoadAsync("Foo", "Bar", "Baz");
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
@@ -147,7 +147,7 @@ namespace GreenDonut
             var loader = new DataLoader<string, string>(options, fetch);
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-            // must not be awaited, because we would wait here forever.
+            // don't await in this specific case
             loader.LoadAsync("Foo", "Bar");
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
@@ -175,7 +175,7 @@ namespace GreenDonut
             var loader = new DataLoader<string, string>(options, fetch);
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-            // must not be awaited, because we would wait here forever.
+            // don't await in this specific case
             loader.LoadAsync("Foo");
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
@@ -214,11 +214,11 @@ namespace GreenDonut
             var loader = new DataLoader<string, string>(options, fetch);
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-            // must not be awaited, because we would wait here forever.
+            // don't await in this specific case
             loader.LoadAsync("Foo", "Bar");
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
-            loader.Set("Baz", Task.FromResult("Quux"));
+            loader.Set("Baz", Task.FromResult("Qux"));
 
             // act
             int result = loader.CachedValues;
@@ -391,17 +391,46 @@ namespace GreenDonut
                 .ConfigureAwait(false);
         }
 
+        [Fact(DisplayName = "DispatchAsync: Should interrupt auto dispatching wait delay")]
+        public async Task DispatchAsyncInterruptDispatching()
+        {
+            // arrange
+            Result<string> expectedResult = "Bar";
+            FetchDataDelegate<string, string> fetch = TestHelpers
+                .CreateFetch<string, string>(expectedResult);
+            var options = new DataLoaderOptions<string>
+            {
+                AutoDispatching = true,
+                BatchRequestDelay = TimeSpan.FromMinutes(1)
+            };
+            var loader = new DataLoader<string, string>(options, fetch);
+
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+            // don't await in this specific case
+            loader.LoadAsync("Foo");
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+
+            // act
+            await loader.DispatchAsync().ConfigureAwait(false);
+
+            // assert
+            Assert.Equal(1, loader.CachedValues);
+        }
+
         #endregion
 
         #region Dispose
 
-        [Fact(DisplayName = "Dispose: Should dispose and not throw any exception")]
+        [Fact(DisplayName = "Dispose: Should dispose and not throw any exception (auto dispatching enabled)")]
         public void DisposeNoException()
         {
             // arrange
             FetchDataDelegate<string, string> fetch = TestHelpers
                 .CreateFetch<string, string>();
-            var options = new DataLoaderOptions<string>();
+            var options = new DataLoaderOptions<string>
+            {
+                AutoDispatching = true
+            };
             var loader = new DataLoader<string, string>(options, fetch);
 
             // act
@@ -411,7 +440,7 @@ namespace GreenDonut
             Assert.Null(Record.Exception(verify));
         }
 
-        [Fact(DisplayName = "Dispose: Should dispose and not throw any exception (batching & cache disablked)")]
+        [Fact(DisplayName = "Dispose: Should dispose and not throw any exception (batching & cache disabled)")]
         public void DisposeNoExceptionNobatchingAndCaching()
         {
             // arrange
@@ -699,10 +728,60 @@ namespace GreenDonut
                 v => Assert.Equal(expectedResult.Value, v));
         }
 
-        [Fact(DisplayName = "LoadAsync: Should throw one exception for not existing value regarding key 'Qux'")]
-        public async Task LoadAutoDispatching()
+        [Fact(DisplayName = "LoadAsync: Should return a list with null values")]
+        public async Task LoadWithNullValuesl()
         {
             // arrange
+            Result<string> expectedResult = "Bar";
+            var repository = new Dictionary<string, string>
+            {
+                { "Foo", "Bar" },
+                { "Bar", null },
+                { "Baz", "Foo" },
+                { "Qux", null }
+            };
+            FetchDataDelegate<string, string> fetch =
+                async (keys, cancellationToken) =>
+                {
+                    var values = new List<Result<string>>();
+
+                    foreach (var key in keys)
+                    {
+                        if (repository.ContainsKey(key))
+                        {
+                            values.Add(repository[key]);
+                        }
+                    }
+
+                    return await Task.FromResult(values).ConfigureAwait(false);
+                };
+            var options = new DataLoaderOptions<string>
+            {
+                AutoDispatching = true
+            };
+            var loader = new DataLoader<string, string>(options, fetch);
+            var requestKeys = new[] { "Foo", "Bar", "Baz", "Qux" };
+
+            // act
+            IReadOnlyList<string> results = await loader
+                .LoadAsync(requestKeys)
+                .ConfigureAwait(false);
+
+            // assert
+            Assert.Collection(results,
+                v => Assert.Equal("Bar", v),
+                v => Assert.Null(v),
+                v => Assert.Equal("Foo", v),
+                v => Assert.Null(v));
+            Assert.Equal(4, loader.CachedValues);
+        }
+
+        [Fact(DisplayName = "LoadAsync: Should result in a list of error results and cleaning up the cache because the key and value list count are not equal")]
+        public async Task LoadKeyAndValueCountNotEquel()
+        {
+            // arrange
+            InvalidOperationException expectedException = Errors
+                .CreateKeysAndValuesMustMatch(4, 3);
             Result<string> expectedResult = "Bar";
             var repository = new Dictionary<string, string>
             {
@@ -721,13 +800,6 @@ namespace GreenDonut
                         {
                             values.Add(repository[key]);
                         }
-                        else
-                        {
-                            var error = new Exception($"Value for key" +
-                                $"\"{key}\" not found");
-
-                            values.Add(error);
-                        }
                     }
 
                     return await Task.FromResult(values).ConfigureAwait(false);
@@ -743,7 +815,37 @@ namespace GreenDonut
             Func<Task> verify = () => loader.LoadAsync(requestKeys);
 
             // assert
-            await Assert.ThrowsAsync<Exception>(verify).ConfigureAwait(false);
+            InvalidOperationException actualException = await Assert
+                .ThrowsAsync<InvalidOperationException>(verify)
+                .ConfigureAwait(false);
+            Assert.Equal(expectedException.Message, actualException.Message);
+            Assert.Equal(0, loader.CachedValues);
+        }
+
+        [Fact(DisplayName = "LoadAsync: Should handle batching error")]
+        public async Task LoadBatchingError()
+        {
+            // arrange
+            var expectedException = new Exception("Foo");
+            Result<string> expectedResult = "Bar";
+            FetchDataDelegate<string, string> fetch =
+                (keys, cancellationToken) => throw expectedException;
+            var options = new DataLoaderOptions<string>
+            {
+                AutoDispatching = true
+            };
+            var loader = new DataLoader<string, string>(options, fetch);
+            var requestKeys = new[] { "Foo", "Bar", "Baz", "Qux" };
+
+            // act
+            Func<Task> verify = () => loader.LoadAsync(requestKeys);
+
+            // assert
+            Exception actualException = await Assert
+                .ThrowsAsync<Exception>(verify)
+                .ConfigureAwait(false);
+            Assert.Equal(expectedException, actualException);
+            Assert.Equal(0, loader.CachedValues);
         }
 
         #endregion
