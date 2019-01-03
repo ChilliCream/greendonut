@@ -124,7 +124,7 @@ public interface IUserDataLoader
 Though the extra interface `IUserDataLoader` isn't necessarily required, I strongly recommend to
 create an extra interface in this particular case because of several reasons. One reason is you
 might have a handful of _DataLoader_ which implemanting a completely different data fetching logic,
-but from the outside they look very similar due to their generic interface identifier. That's why we
+but from the outside they look identic due to their identic type parameter list. That's why we
 should always create a separate interface for each _DataLoader_. I just mentioned one reason here
 because the explanation would go beyond the scope of custom _DataLoader_.
 
