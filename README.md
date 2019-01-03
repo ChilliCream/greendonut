@@ -12,10 +12,11 @@ Framework.
 > and caching. -- facebook
 
 _DataLoader_ are perfect in various client-side and server-side scenarios. They decouple any kind of
-request in a simplified way to a backend resource like a datasource or web API to reduce the overall
-traffic to those resources by using two common techniques in computer science namely batching and
-caching. With batching we decrease the amount of requests to a backend resource by grouping single
-requests into one batch request. Whereas with caching we avoid requesting a backend resource at all.
+request in a simplified way to a backend resource like a database or a web service to reduce the
+overall traffic to those resources by using two common techniques in computer science namely
+batching and caching. With batching we decrease the amount of requests to a backend resource by
+grouping single requests into one batch request. Whereas with caching we avoid requesting a backend
+resource at all.
 
 ## Getting Started
 
@@ -52,8 +53,8 @@ _Dependency Injection_, you might wanne also take a look at the _Custom DataLoad
 
 Creating a new instance is easy as you will see in the following example. The tricky part here is to
 implement our data fetching logic - here shown as `FetchUsers` - which depends on our beckend
-resource/service. Once we have done that, we just pass our fetch function into the _DataLoader_
-constructor. That's actually everything so far.
+resource. Once we have done that, we just pass our fetch function into the _DataLoader_ constructor.
+That's actually everything so far.
 
 ```csharp
 var userLoader = new DataLoader<string, User>(FetchUsers);
@@ -88,8 +89,8 @@ await userLoader.LoadAsync("Foo", "Bar", "Baz");
 
 The second part is dispatching our requested data items. There are two options. First option is
 _manual dispatching_ the default behavior as of version `2.0.0`. As the name says,
-_manual dispatching_ means we have to trigger the dispatching process manually; otherwise nothing
-will happen.
+_manual dispatching_ means we have to trigger the dispatching process manually; otherwise no data is
+being fetched.
 
 ```csharp
 await userLoader.DispatchAsync();
@@ -119,11 +120,11 @@ public interface IUserDataLoader
 { }
 ```
 
-Though the extra interface `IUserDataLoader` isn't necessarily required, I strongly recommend to
+Although the extra interface `IUserDataLoader` isn't necessarily required, we strongly recommend to
 create an extra interface in this particular case because of several reasons. One reason is you
 might have a handful of _DataLoader_ which implemanting a completely different data fetching logic,
 but from the outside they look identic due to their identic type parameter list. That's why we
-should always create a separate interface for each _DataLoader_. I just mentioned one reason here
+should always create a separate interface for each _DataLoader_. We just mentioned one reason here
 because the explanation would go beyond the scope of custom _DataLoader_.
 
 ```csharp
