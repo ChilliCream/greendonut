@@ -4,8 +4,6 @@
 
 ---
 
-**Green Donut is a DataLoader implementation for _.net core_ and _classic_**
-
 **Green Donut** is a port of _facebook's_ _DataLoader_ utility, written in C# for .NET Core and .NET
 Framework.
 
