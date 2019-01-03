@@ -6,46 +6,57 @@
 
 **Green Donut is a DataLoader implementation for _.net core_ and _classic_**
 
-Here is a short sentence how _facebook_ describes _DataLoaders_.
+**Green Donut** is a port of _facebook's_ _DataLoader_ utility, written in C# for .NET Core and .NET
+Framework.
 
 > DataLoader is a generic utility to be used as part of your application's data fetching layer to
 > provide a consistent API over various backends and reduce requests to those backends via batching
 > and caching. -- facebook
 
-_DataLoaders_ are a perfect fit for client-side and server-side scenarios. They decouple any kind of
-request to a back-end component or resource. This will reduce in general the traffic (round-trips)
-to e.g. a _GraphQL API_, _REST API_, _DB_, or something completly else.
+_DataLoader_ are perfect in various client-side and server-side scenarios. They decouple any kind of
+request in a simplified way to a backend resource like a datasource or web API to reduce the overall
+traffic to those resources by using two common techniques in computer science namely batching and
+caching. With batching we decrease the amount of requests to a backend resource by grouping single
+requests into one batch request. Whereas with caching we avoid requesting a backend resource at all.
 
 ## Getting Started
 
-Before we start let us install the package via _NuGet_.
+First things first, install the package via _NuGet_.
 
-For _.net core_ we could use the dotnet CLI. Which is perhaps the preferred way doing this.
+For _.NET Core_ we use the `dotnet` _CLI_, which is perhaps the preferred way doing this.
 
 ```powershell
 dotnet add package GreenDonut
 ```
 
-And for _.net classic_ we still could use the following line.
+And for _.NET Framework_ we still use the following line.
 
 ```powershell
 Install-Package GreenDonut
 ```
 
-Of course there are more ways to install a package. However, I just focused here on the most common
-console way for both _.net core_ and _classic_.
+People who prefer a UI to install packages might wanne use the _NuGet Package Manager_, which is
+provided by _Visual Studio_.
 
 After we have installed the package, we should probably start using it, right. We really tried to
-keep the _API_ of _DataLoaders_ congruent to the
+keep the _API_ of _DataLoader_ congruent to the
 [original facebook implementation which is written in JavaScript](https://github.com/facebook/dataloader),
-but without making the experience for us .net developers weird.
+but without making the experience for us _.NET_ developers weird.
+
+### Basic Example
+
+The simplest way to get started is to create an instance of the default _DataLoader_ implementation,
+which might be the right choice if you're need just one type of _DataLoader_. However, if you're
+need a bunch of individual _DataLoader_ and/or using _DI_, which is an abbreviation for
+_Dependency Injection_, you might wanne skip this example and hop over directly to the
+_Advanced Example_ section instead.
 
 ```csharp
 var userLoader = new DataLoader<string, User>(keys => FetchUsers(keys));
 ```
 
 In order to change the default behavior of a `DataLoader`, we have to create a new instance of
-`DataLoaderOptions` and pass it right into the `DataLoader`. Let us see how it would look like.
+`DataLoaderOptions` and pass it right into the `DataLoader`. Let us see how this would look like.
 
 ```csharp
 var options = new DataLoaderOptions<string>
@@ -61,9 +72,26 @@ cache size does not exceed. Whereas `1 hour` means a single cache entry will sta
 long as the entry gets touched within one hour. This is an additional feature that does not exist in
 the original _facebook_ implementation.
 
+### Advanced Example
+
 ### API
 
-| Methods           | Description                                                                                                                                                                                                                     |
+#### Events
+
+| Name              | Description                                                                                                |
+| ----------------- | ---------------------------------------------------------------------------------------------------------- |
+| `RequestBuffered` | Raises when an incoming data request is added to the buffer. Will never be raised if batching is disabled. |
+
+#### Properties
+
+| Name               | Description                                                                                                                               |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `BufferedRequests` | Gets the current count of buffered data requests waiting for being dispatched as batches. Will always return `0` if batching is disabled. |
+| `CachedValues`     | Gets the current count of cached values. Will always return `0` if caching is disabled.                                                   |
+
+#### Methods
+
+| Name              | Description                                                                                                                                                                                                                     |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Clear()`         | Empties the complete cache.                                                                                                                                                                                                     |
 | `DispatchAsync()` | Dispatches one or more batch requests. In case of auto dispatching we just trigger an implicit dispatch which could mean to interrupt a wait delay. Whereas in a manual dispatch scenario it could mean to dispatch explicitly. |
@@ -79,4 +107,4 @@ the original _facebook_ implementation.
 
 ## Documentation
 
-For more examples and a detailed documentation click [here](http://greendonut.io).
+Click [here](https://greendonut.io) for more documentation.
