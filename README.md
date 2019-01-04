@@ -94,7 +94,7 @@ being fetched. This is actually an **important difference** to _facebook's_ orig
 which is written in _JavaScript_. _Facebook's_ implementation is using a trick in _NodeJs_ to
 dispatch automatically. If you're interested how that works, click
 [here](https://stackoverflow.com/questions/19822668/what-exactly-is-a-node-js-event-loop-tick/19823583#19823583)
-to learn more about that. But now lets see how we trigger the dispatch process manually.
+to learn more about that. But now lets see how we trigger the dispatching process manually.
 
 ```csharp
 await userLoader.DispatchAsync();
