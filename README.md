@@ -90,7 +90,11 @@ await userLoader.LoadAsync("Foo", "Bar", "Baz");
 The second part is dispatching our requested data items. There are two options. First option is
 _manual dispatching_ the default behavior as of version `2.0.0`. As the name says,
 _manual dispatching_ means we have to trigger the dispatching process manually; otherwise no data is
-being fetched.
+being fetched. This is actually an **important difference** to _facebook's_ original implementation,
+which is written in _JavaScript_. _Facebook's_ implementation is using a trick in _NodeJs_ to
+dispatch automatically. If you're interested how that works, click
+[here](https://stackoverflow.com/questions/19822668/what-exactly-is-a-node-js-event-loop-tick/19823583#19823583)
+to learn more about that. But now lets see how we trigger the dispatch process manually.
 
 ```csharp
 await userLoader.DispatchAsync();
