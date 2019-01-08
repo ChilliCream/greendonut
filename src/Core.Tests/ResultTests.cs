@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace GreenDonut
@@ -182,8 +183,8 @@ namespace GreenDonut
 
         #region Rejected Result
 
-        [Fact(DisplayName = "Reject: Should return a resolved Result if error is null")]
-        public void RejectErrorIsNull()
+        [Fact(DisplayName = "ImplicitReject: Should return a resolved Result if error is null")]
+        public void ImplicitRejectErrorIsNull()
         {
             // arrange
             Exception error = null;
@@ -197,8 +198,8 @@ namespace GreenDonut
             Assert.Null(result.Value);
         }
 
-        [Fact(DisplayName = "Reject: Should return a rejected Result")]
-        public void Reject()
+        [Fact(DisplayName = "ImplicitReject: Should return a rejected Result")]
+        public void ImplicitReject()
         {
             // arrange
             var errorMessage = "Foo";
@@ -213,17 +214,15 @@ namespace GreenDonut
             Assert.Null(result.Value);
         }
 
-        [Fact(DisplayName = "Reject (Obsolete): Should return a rejected Result")]
-        public void DeprecatedRejectStillNeedsToBeTested()
+        [Fact(DisplayName = "ExplicitReject: Should return a rejected Result")]
+        public void ExplicitReject()
         {
             // arrange
             var errorMessage = "Foo";
             var error = new Exception(errorMessage);
 
             // act
-#pragma warning disable CS0618 // Type or member is obsolete
             var result = Result<string>.Reject(error);
-#pragma warning restore CS0618 // Type or member is obsolete
 
             // assert
             Assert.True(result.IsError);
@@ -237,8 +236,8 @@ namespace GreenDonut
 
         [InlineData(null)]
         [InlineData("Foo")]
-        [Theory(DisplayName = "Resolve: Should return a resolved Result")]
-        public void Resolve(string value)
+        [Theory(DisplayName = "ImplicitResolve: Should return a resolved Result")]
+        public void ImplicitResolve(string value)
         {
             // act
             Result<string> result = value;
@@ -249,20 +248,28 @@ namespace GreenDonut
             Assert.Equal(value, result);
         }
 
-        private object List<T>()
-        {
-            throw new NotImplementedException();
-        }
-
         [InlineData(null)]
         [InlineData("Foo")]
-        [Theory(DisplayName = "Resolve (Obsolete): Should return a resolved Result")]
-        public void DeprecatedResolveStillNeedsToBeTested(string value)
+        [Theory(DisplayName = "ExplicitResolve: Should return a resolved Result")]
+        public void ExplicitResolve(string value)
         {
             // act
-#pragma warning disable CS0618 // Type or member is obsolete
             var result = Result<string>.Resolve(value);
-#pragma warning restore CS0618 // Type or member is obsolete
+
+            // assert
+            Assert.Null(result.Error);
+            Assert.False(result.IsError);
+            Assert.Equal(value, result.Value);
+        }
+
+        [Fact(DisplayName = "ExplicitResolve: Should return a resolved Result of list")]
+        public void ExplicitResolveList()
+        {
+            // arrange
+            var value = new[] { "Foo", "Bar", "Baz" };
+
+            // act
+            var result = Result<IReadOnlyCollection<string>>.Resolve(value);
 
             // assert
             Assert.Null(result.Error);
