@@ -59,9 +59,6 @@ namespace GreenDonut
         /// </summary>
         /// <param name="error">An arbitrary error.</param>
         /// <returns>An error result.</returns>
-        [Obsolete("This method is deprecated and will be removed in the " +
-            "next major release; use instead implicit conversion. E.g. " +
-            "Result<string> foo = new Exception(\"Bar\");")]
         public static Result<TValue> Reject(Exception error)
         {
             return error;
@@ -72,9 +69,6 @@ namespace GreenDonut
         /// </summary>
         /// <param name="value">An arbitrary value.</param>
         /// <returns>A value result.</returns>
-        [Obsolete("This method is deprecated and will be removed in the " +
-            "next major release; use instead implicit conversion. E.g. " +
-            "Result<string> foo = \"Bar\";")]
         public static Result<TValue> Resolve(TValue value)
         {
             return value;

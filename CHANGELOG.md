@@ -29,11 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Failed batch operations were cached [#42](https://github.com/ChilliCream/greendonut/issues/42).
 - Wrong CacheKeyResolver implementation [#52](https://github.com/ChilliCream/greendonut/issues/52).
 
-### Deprecated
-
-- `Result<>.Reject(error)` method is obsolete as of now [#40](https://github.com/ChilliCream/greendonut/issues/40).
-- `Result<>.Resolve(value)` method is obsolete as of now [#40](https://github.com/ChilliCream/greendonut/issues/40).
-
 ### Removed
 
 - `ArgumentOutOfRangeException` for `keys` argument in the `LoadAsync` method. Thanks to [jbray1982](https://github.com/jbray1982) for fixing this.
