@@ -21,8 +21,8 @@ namespace GreenDonut
     public interface IDataLoader
     {
         /// <summary>
-        /// Raises when an incoming data request is added to the buffer. Will never be raised if
-        /// batching is disabled.
+        /// Raises when an incoming data request is added to the buffer. Will
+        /// never be raised if batching is disabled.
         /// </summary>
         event RequestBufferedEventHandler RequestBuffered;
 
