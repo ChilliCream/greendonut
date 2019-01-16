@@ -272,7 +272,7 @@ namespace GreenDonut
                     cacheKey,
                     out Task<TValue> cachedValue))
                 {
-                    DispatchingDiagnostics.RecordCachedValue(
+                    DiagnosticEvents.ReceivedValueFromCache(
                         key,
                         cacheKey,
                         cachedValue);
@@ -390,13 +390,13 @@ namespace GreenDonut
             IReadOnlyList<TKey> keys,
             Exception error)
         {
+            DiagnosticEvents.ReceivedBatchError(keys, error);
+
             for (var i = 0; i < keys.Count; i++)
             {
-                DispatchingDiagnostics.RecordError(keys[i], error);
-                bufferedPromises[keys[i]].SetException(error);
-
                 object cacheKey = _cacheKeyResolver(keys[i]);
 
+                bufferedPromises[keys[i]].SetException(error);
                 _cache.Remove(cacheKey);
             }
         }
@@ -486,7 +486,7 @@ namespace GreenDonut
             CancellationToken cancellationToken)
         {
             var keys = new TKey[] { key };
-            Activity activity = DispatchingDiagnostics
+            Activity activity = DiagnosticEvents
                 .StartSingle(key);
             IReadOnlyList<Result<TValue>> results =
                 await FetchAsync(keys, cancellationToken)
@@ -501,11 +501,11 @@ namespace GreenDonut
                 Exception error = Errors.CreateKeysAndValuesMustMatch(1,
                     results.Count);
 
-                DispatchingDiagnostics.RecordError(key, error);
+                DiagnosticEvents.ReceivedError(key, error);
                 promise.SetException(error);
             }
 
-            DispatchingDiagnostics.StopSingle(activity, key, results);
+            DiagnosticEvents.StopSingle(activity, key, results);
         }
 
         private async Task FetchInternalAsync(
@@ -513,7 +513,7 @@ namespace GreenDonut
             IReadOnlyList<TKey> keys,
             CancellationToken cancellationToken)
         {
-            Activity activity = DispatchingDiagnostics
+            Activity activity = DiagnosticEvents
                 .StartBatching(keys);
             IReadOnlyList<Result<TValue>> results = new Result<TValue>[0];
 
@@ -529,7 +529,7 @@ namespace GreenDonut
                 BatchOperationFailed(bufferedPromises, keys, ex);
             }
 
-            DispatchingDiagnostics.StopBatching(activity, keys,
+            DiagnosticEvents.StopBatching(activity, keys,
                 results);
         }
 
@@ -568,7 +568,7 @@ namespace GreenDonut
         {
             if (result.IsError)
             {
-                DispatchingDiagnostics.RecordError(key, result);
+                DiagnosticEvents.ReceivedError(key, result);
                 promise.SetException(result);
             }
             else

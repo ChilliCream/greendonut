@@ -2,49 +2,71 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on
+[Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
+adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
 ### Added
 
-- Non-generic interface for DataLoader [#37](https://github.com/ChilliCream/greendonut/issues/37).
-- Introduced `RequestBuffered` event [#41](https://github.com/ChilliCream/greendonut/issues/41).
-- Introduced `BufferedRequests` property [#41](https://github.com/ChilliCream/greendonut/issues/41).
-- Introduced `CachedValues` property [#41](https://github.com/ChilliCream/greendonut/issues/41).
-- `CancellationToken` to all public async method [#39](https://github.com/ChilliCream/greendonut/issues/39).
+- Non-generic interface for DataLoader
+  [#37](https://github.com/ChilliCream/greendonut/issues/37).
+- Introduced `RequestBuffered` event
+  [#41](https://github.com/ChilliCream/greendonut/issues/41).
+- Introduced `BufferedRequests` property
+  [#41](https://github.com/ChilliCream/greendonut/issues/41).
+- Introduced `CachedValues` property
+  [#41](https://github.com/ChilliCream/greendonut/issues/41).
+- `CancellationToken` to all public async method
+  [#39](https://github.com/ChilliCream/greendonut/issues/39).
+- New diagnostic activity `ExecuteSingleRequest` and event `BatchError`.
 
 ### Changed
 
-- Switched to implicit conversion to create error or value results [#40](https://github.com/ChilliCream/greendonut/issues/40).
-- Set `DataLoaderOptions` default for `AutoDispatching` to `false` [#36](https://github.com/ChilliCream/greendonut/issues/36).
-- Set `Defaults.MinimumCacheSize` to `1` [#36](https://github.com/ChilliCream/greendonut/issues/36).
-- Renamed method `Fetch` to `FetchAsync` [#38](https://github.com/ChilliCream/greendonut/issues/38).
-- Moved the `DispatchAsync` method from the `IDispatchableDataLoader` interface to the `IDataLoader` interface [#51](https://github.com/ChilliCream/greendonut/issues/51).
+- Switched to implicit conversion to create error or value results
+  [#40](https://github.com/ChilliCream/greendonut/issues/40).
+- Set `DataLoaderOptions` default for `AutoDispatching` to `false`
+  [#36](https://github.com/ChilliCream/greendonut/issues/36).
+- Set `Defaults.MinimumCacheSize` to `1`
+  [#36](https://github.com/ChilliCream/greendonut/issues/36).
+- Renamed method `Fetch` to `FetchAsync`
+  [#38](https://github.com/ChilliCream/greendonut/issues/38).
+- Moved the `DispatchAsync` method from the `IDispatchableDataLoader` interface
+  to the `IDataLoader` interface
+  [#51](https://github.com/ChilliCream/greendonut/issues/51).
 - Chaning for `Clear`, `Remove` and `Set` is not supported anymore.
+- Changed _DignosticSource_ name from `GreenDonut.Dispatching` to `GreenDonut`
+  [#64](https://github.com/ChilliCream/greendonut/issues/64).
 
 ### Fixed
 
-- Failed batch operations were cached [#42](https://github.com/ChilliCream/greendonut/issues/42).
-- Wrong CacheKeyResolver implementation [#52](https://github.com/ChilliCream/greendonut/issues/52).
+- Failed batch operations were cached
+  [#42](https://github.com/ChilliCream/greendonut/issues/42).
+- Wrong CacheKeyResolver implementation
+  [#52](https://github.com/ChilliCream/greendonut/issues/52).
 
 ### Removed
 
-- `ArgumentOutOfRangeException` for `keys` argument in the `LoadAsync` method. Thanks to [jbray1982](https://github.com/jbray1982) for fixing this.
-- `IDispatchableDataLoader` interface [#51](https://github.com/ChilliCream/greendonut/issues/51).
+- `ArgumentOutOfRangeException` for `keys` argument in the `LoadAsync` method.
+  Thanks to [jbray1982](https://github.com/jbray1982) for fixing this.
+- `IDispatchableDataLoader` interface
+  [#51](https://github.com/ChilliCream/greendonut/issues/51).
 
 ## [1.1.0] - 2018-11-05
 
 ### Added
 
 - Code Documentation for Exceptions.
-- An overload for Set which takes a bare value without a wrapping _Task_. Closes [#30](https://github.com/ChilliCream/greendonut/issues/30).
-- Instrumentation API. Closes [#29](https://github.com/ChilliCream/greendonut/issues/29).
+- An overload for Set which takes a bare value without a wrapping *Task*
+  [#30](https://github.com/ChilliCream/greendonut/issues/30).
+- Instrumentation API
+  [#29](https://github.com/ChilliCream/greendonut/issues/29).
 
 ### Changed
 
-- Set the _.Net Standard_ version to `1.3` in order to support _.Net 4.6_ framework.
+- Set the _.Net Standard_ version to `1.3` in order to support
+  _.Net Framework_ `4.6`.
 
 ## [1.0.3] - 2018-10-04
 
@@ -55,7 +77,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Switched for most cases to `TaskCreationOptions.RunContinuationsAsynchronously`.
+- Switched for most cases to
+  `TaskCreationOptions.RunContinuationsAsynchronously`.
 - Improved code documentation for the `DataLoader` class.
 
 ## [1.0.2] - 2018-09-27
