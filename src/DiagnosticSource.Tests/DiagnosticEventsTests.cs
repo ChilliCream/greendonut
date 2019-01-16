@@ -5,14 +5,13 @@ using Xunit;
 
 namespace GreenDonut
 {
-    public class DispatchingDiagnosticsTests
+    public class DiagnosticEventsTests
     {
-        [Fact(DisplayName = "ExecuteBatchRequest: Should record a batch request plus error"/*,
-            Skip = "Due to concurrency issues in the test listener"*/)]
+        [Fact(DisplayName = "ExecuteBatchRequest: Should record a batch request plus error")]
         public async Task ExecuteBatchRequest()
         {
-            var listener = new DispatchingListener();
-            var observer = new DispatchingObserver(listener);
+            var listener = new TestListener();
+            var observer = new TestObserver(listener);
 
             using (DiagnosticListener.AllListeners.Subscribe(observer))
             {
@@ -49,10 +48,9 @@ namespace GreenDonut
                     (item) =>
                     {
                         Assert.Equal("Foo", item.Key);
-                        Assert.True(item.Value.IsError);
-                        Assert.Equal("Quux", item.Value.Error.Message);
+                        Assert.Null(item.Value);
                     });
-                Assert.Collection(listener.Errors,
+                Assert.Collection(listener.BatchErrors,
                     (item) =>
                     {
                         Assert.Equal("Foo", item.Key);

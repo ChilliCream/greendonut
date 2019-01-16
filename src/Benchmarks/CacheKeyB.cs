@@ -1,6 +1,6 @@
 using System;
 
-namespace GreenDonut.Benchmark.Tests
+namespace GreenDonut.Benchmarks
 {
     public struct CacheKeyB<TKey>
         : IEquatable<CacheKeyB<TKey>>

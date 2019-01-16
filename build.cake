@@ -111,8 +111,10 @@ Task("Tests")
 
     DotNetCoreBuild("./src", buildSettings);
 
-    DotNetCoreTest("./src/Core.Tests", testSettings);
-    DotNetCoreTest("./src/Diagnostics.Tests", testSettings);
+    foreach(var file in GetFiles("./src/**/*.Tests.csproj"))
+    {
+        DotNetCoreTest(file.FullPath, testSettings);
+    }
 });
 
 Task("SonarBegin")

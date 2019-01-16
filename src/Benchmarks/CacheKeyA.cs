@@ -1,15 +1,15 @@
 using System;
 using System.Linq;
 
-namespace GreenDonut.Benchmark.Tests
+namespace GreenDonut.Benchmarks
 {
     public struct CacheKeyA<TKey>
         : IEquatable<CacheKeyA<TKey>>
     {
-        private CacheKeyType _keyType;
-        private object _objectKey;
-        private TKey _originKey;
-        private byte[] _primitiveKey;
+        private readonly CacheKeyType _keyType;
+        private readonly object _objectKey;
+        private readonly TKey _originKey;
+        private readonly byte[] _primitiveKey;
 
         public CacheKeyA(object key)
         {
@@ -17,6 +17,22 @@ namespace GreenDonut.Benchmark.Tests
             _objectKey = key;
             _originKey = default;
             _primitiveKey = null;
+        }
+
+        public CacheKeyA(TKey key)
+        {
+            _keyType = CacheKeyType.OriginKey;
+            _objectKey = null;
+            _originKey = key;
+            _primitiveKey = null;
+        }
+
+        public CacheKeyA(byte[] key)
+        {
+            _keyType = CacheKeyType.PrimitiveKey;
+            _objectKey = null;
+            _originKey = default;
+            _primitiveKey = key;
         }
 
         /// <inheritdoc />
@@ -82,22 +98,12 @@ namespace GreenDonut.Benchmark.Tests
 
         public static implicit operator CacheKeyA<TKey>(TKey key)
         {
-            return new CacheKeyA<TKey>
-            {
-                _keyType = CacheKeyType.OriginKey,
-                _originKey = key
-            };
+            return new CacheKeyA<TKey>(key);
         }
 
         public static implicit operator CacheKeyA<TKey>(int key)
         {
-            var cacheKey = new CacheKeyA<TKey>
-            {
-                _keyType = CacheKeyType.PrimitiveKey,
-                _primitiveKey = BitConverter.GetBytes(key)
-            };
-
-            return cacheKey;
+            return new CacheKeyA<TKey>(BitConverter.GetBytes(key));
         }
 
         #region CacheKeyType

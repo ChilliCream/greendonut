@@ -1,4 +1,4 @@
-namespace GreenDonut.Benchmark.Tests
+namespace GreenDonut.Benchmarks
 {
     public class CompoundKey
     {
