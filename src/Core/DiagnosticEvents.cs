@@ -22,8 +22,8 @@ namespace GreenDonut
         {
             var payload = new
             {
-                Exception = exception,
-                Keys = keys
+                exception,
+                keys
             };
 
             if (_source.IsEnabled(_errorEventName, payload))
@@ -38,8 +38,8 @@ namespace GreenDonut
         {
             var payload = new
             {
-                Exception = exception,
-                Key = key
+                exception,
+                key
             };
 
             if (_source.IsEnabled(_batchErrorEventName, payload))
@@ -55,9 +55,9 @@ namespace GreenDonut
         {
             var payload = new
             {
-                CacheKey = cacheKey,
-                Key = key,
-                Value = value
+                cacheKey,
+                key,
+                value
             };
 
             if (_source.IsEnabled(_cachedValueEventName, payload))
@@ -71,7 +71,7 @@ namespace GreenDonut
         {
             var payload = new
             {
-                Keys = keys
+                keys
             };
 
             if (_source.IsEnabled(_batchActivityName, payload))
@@ -89,14 +89,14 @@ namespace GreenDonut
         public static void StopBatching<TKey, TValue>(
             Activity activity,
             IReadOnlyList<TKey> keys,
-            IReadOnlyList<Result<TValue>> results)
+            IReadOnlyCollection<TValue> values)
         {
             if (activity != null)
             {
                 var payload = new
                 {
-                    Keys = keys,
-                    Results = results
+                    keys,
+                    values
                 };
 
                 if (_source.IsEnabled(_batchActivityName, payload))
@@ -110,7 +110,7 @@ namespace GreenDonut
         {
             var payload = new
             {
-                Key = key
+                key
             };
 
             if (_source.IsEnabled(_singleActivityName, payload))
@@ -128,14 +128,14 @@ namespace GreenDonut
         public static void StopSingle<TKey, TValue>(
             Activity activity,
             TKey key,
-            IReadOnlyList<Result<TValue>> results)
+            IReadOnlyCollection<TValue> values)
         {
             if (activity != null)
             {
                 var payload = new
                 {
-                    Key = key,
-                    Results = results
+                    key,
+                    values
                 };
 
                 if (_source.IsEnabled(_singleActivityName, payload))

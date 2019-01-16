@@ -48,8 +48,7 @@ namespace GreenDonut
                     (item) =>
                     {
                         Assert.Equal("Foo", item.Key);
-                        Assert.True(item.Value.IsError);
-                        Assert.Equal("Quux", item.Value.Error.Message);
+                        Assert.Null(item.Value);
                     });
                 Assert.Collection(listener.BatchErrors,
                     (item) =>

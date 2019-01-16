@@ -505,7 +505,8 @@ namespace GreenDonut
                 promise.SetException(error);
             }
 
-            DiagnosticEvents.StopSingle(activity, key, results);
+            DiagnosticEvents.StopSingle(activity, key,
+                results.Select(r => r.Value).ToArray());
         }
 
         private async Task FetchInternalAsync(
@@ -530,7 +531,7 @@ namespace GreenDonut
             }
 
             DiagnosticEvents.StopBatching(activity, keys,
-                results);
+                results.Select(r => r.Value).ToArray());
         }
 
         private async Task<IReadOnlyList<TValue>> LoadInternalAsync(

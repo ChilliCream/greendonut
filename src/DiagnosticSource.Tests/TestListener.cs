@@ -9,19 +9,19 @@ namespace GreenDonut
     public class TestListener
         : DiagnosticListener
     {
-        public readonly ConcurrentDictionary<string, Exception> BatchErrors =
-            new ConcurrentDictionary<string, Exception>();
-        public readonly ConcurrentQueue<string> Keys =
-            new ConcurrentQueue<string>();
-        public readonly ConcurrentDictionary<string, Result<string>> Values =
-            new ConcurrentDictionary<string, Result<string>>();
+        public readonly ConcurrentDictionary<object, Exception> BatchErrors =
+            new ConcurrentDictionary<object, Exception>();
+        public readonly ConcurrentQueue<object> Keys =
+            new ConcurrentQueue<object>();
+        public readonly ConcurrentDictionary<object, object> Values =
+            new ConcurrentDictionary<object, object>();
 
         public TestListener()
             : base("GreenDonut")
         { }
 
         [DiagnosticName("BatchError")]
-        public void OnBatchError(string key, Exception exception)
+        public void OnBatchError(object key, Exception exception)
         {
             BatchErrors.TryAdd(key, exception);
         }
@@ -31,9 +31,9 @@ namespace GreenDonut
 
         [DiagnosticName("ExecuteBatchRequest.Start")]
         public void OnExecuteBatchRequestStart(
-            IReadOnlyList<string> keys)
+            IReadOnlyList<object> keys)
         {
-            for (int i = 0; i < keys.Count; i++)
+            for (var i = 0; i < keys.Count; i++)
             {
                 Keys.Enqueue(keys[i]);
             }
@@ -41,12 +41,12 @@ namespace GreenDonut
 
         [DiagnosticName("ExecuteBatchRequest.Stop")]
         public void OnExecuteBatchRequestStop(
-            IReadOnlyList<string> keys,
-            IReadOnlyList<Result<string>> results)
+            IReadOnlyList<object> keys,
+            IReadOnlyList<object> values)
         {
-            for (int i = 0; i < keys.Count; i++)
+            for (var i = 0; i < keys.Count; i++)
             {
-                Values.TryAdd(keys[i], results[i]);
+                Values.TryAdd(keys[i], values[i]);
             }
         }
     }
