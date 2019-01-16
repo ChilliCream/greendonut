@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Tests", "Core.Tests\Core.Tests.csproj", "{AAB2CD73-2B67-4E2E-8C32-E045462800B4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmark.Tests", "Benchmark.Tests\Benchmark.Tests.csproj", "{054D3EA6-1DB2-4868-914B-21F7DCB87D13}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmarks", "Benchmarks\Benchmarks.csproj", "{054D3EA6-1DB2-4868-914B-21F7DCB87D13}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Diagnostics.Tests", "Diagnostics.Tests\Diagnostics.Tests.csproj", "{433F27CC-17C0-4051-A358-FDC0CE913220}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiagnosticSource.Tests", "DiagnosticSource.Tests\DiagnosticSource.Tests.csproj", "{433F27CC-17C0-4051-A358-FDC0CE913220}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

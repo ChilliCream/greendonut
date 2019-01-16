@@ -1,6 +1,6 @@
 using BenchmarkDotNet.Running;
 
-namespace GreenDonut.Benchmark.Tests
+namespace GreenDonut.Benchmarks
 {
     class Program
     {

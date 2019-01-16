@@ -3,12 +3,12 @@ using System.Diagnostics;
 
 namespace GreenDonut
 {
-    internal class DispatchingObserver
+    internal class TestObserver
         : IObserver<DiagnosticListener>
     {
-        private readonly DispatchingListener _listener;
+        private readonly TestListener _listener;
 
-        public DispatchingObserver(DispatchingListener listener)
+        public TestObserver(TestListener listener)
         {
             _listener = listener ??
                 throw new ArgumentNullException(nameof(listener));
@@ -20,7 +20,7 @@ namespace GreenDonut
 
         public void OnNext(DiagnosticListener value)
         {
-            if (value.Name == "GreenDonut.Dispatching")
+            if (value.Name == _listener.Name)
             {
                 value.SubscribeWithAdapter(_listener);
             }

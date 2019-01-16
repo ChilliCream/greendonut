@@ -3,7 +3,7 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Mathematics;
 using BenchmarkDotNet.Order;
 
-namespace GreenDonut.Benchmark.Tests
+namespace GreenDonut.Benchmarks
 {
     [CoreJob]
     [Orderer(SummaryOrderPolicy.FastestToSlowest)]

@@ -1,23 +1,29 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Extensions.DiagnosticAdapter;
 
 namespace GreenDonut
 {
-    public class DispatchingListener
+    public class TestListener
+        : DiagnosticListener
     {
-        public readonly ConcurrentDictionary<string, Exception> Errors =
+        public readonly ConcurrentDictionary<string, Exception> BatchErrors =
             new ConcurrentDictionary<string, Exception>();
         public readonly ConcurrentQueue<string> Keys =
             new ConcurrentQueue<string>();
         public readonly ConcurrentDictionary<string, Result<string>> Values =
             new ConcurrentDictionary<string, Result<string>>();
 
-        [DiagnosticName("Error")]
-        public void OnError(string key, Exception exception)
+        public TestListener()
+            : base("GreenDonut")
+        { }
+
+        [DiagnosticName("BatchError")]
+        public void OnBatchError(string key, Exception exception)
         {
-            Errors.TryAdd(key, exception);
+            BatchErrors.TryAdd(key, exception);
         }
 
         [DiagnosticName("ExecuteBatchRequest")]
