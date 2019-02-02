@@ -7,11 +7,16 @@ namespace GreenDonut
     internal static class DiagnosticEvents
     {
         private const string _diagnosticSourceName = "GreenDonut";
-        private const string _batchActivityName = "ExecuteBatchRequest";
-        private const string _singleActivityName = "ExecuteSingleRequest";
-        private const string _batchErrorEventName = "BatchError";
-        private const string _cachedValueEventName = "CachedValue";
-        private const string _errorEventName = "Error";
+        private const string _batchActivityName = _diagnosticSourceName +
+            ".ExecuteBatchRequest";
+        private const string _singleActivityName = _diagnosticSourceName +
+            ".ExecuteSingleRequest";
+        private const string _batchErrorEventName = _diagnosticSourceName +
+            ".BatchError";
+        private const string _cachedValueEventName = _diagnosticSourceName +
+            ".CachedValue";
+        private const string _errorEventName = _diagnosticSourceName +
+            ".Error";
 
         private static readonly DiagnosticSource _source =
             new DiagnosticListener(_diagnosticSourceName);

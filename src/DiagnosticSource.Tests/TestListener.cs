@@ -20,16 +20,16 @@ namespace GreenDonut
             : base("GreenDonut")
         { }
 
-        [DiagnosticName("BatchError")]
+        [DiagnosticName("GreenDonut.BatchError")]
         public void OnBatchError(object key, Exception exception)
         {
             BatchErrors.TryAdd(key, exception);
         }
 
-        [DiagnosticName("ExecuteBatchRequest")]
+        [DiagnosticName("GreenDonut.ExecuteBatchRequest")]
         public void OnExecuteBatchRequest() { }
 
-        [DiagnosticName("ExecuteBatchRequest.Start")]
+        [DiagnosticName("GreenDonut.ExecuteBatchRequest.Start")]
         public void OnExecuteBatchRequestStart(
             IReadOnlyList<object> keys)
         {
@@ -39,7 +39,7 @@ namespace GreenDonut
             }
         }
 
-        [DiagnosticName("ExecuteBatchRequest.Stop")]
+        [DiagnosticName("GreenDonut.ExecuteBatchRequest.Stop")]
         public void OnExecuteBatchRequestStop(
             IReadOnlyList<object> keys,
             IReadOnlyList<object> values)
