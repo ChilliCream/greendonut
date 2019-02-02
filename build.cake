@@ -54,45 +54,54 @@ Task("Clean")
 });
 
 Task("Restore")
-    .IsDependentOn("Clean")
+    .IsDependentOn("EnvironmentSetup")
     .Does(() =>
 {
-    using(var process = StartAndReturnProcess("msbuild",
-        new ProcessSettings{ Arguments = "src /t:restore /p:configuration=" + configuration}))
-    {
-        process.WaitForExit();
-    }
+    DotNetCoreRestore("./src/GreenDonut.sln");
 });
 
 Task("Build")
-    .IsDependentOn("Restore")
+    .IsDependentOn("EnvironmentSetup")
     .Does(() =>
 {
-    using(var process = StartAndReturnProcess("msbuild",
-        new ProcessSettings{ Arguments = "src /t:build /p:configuration=" + configuration}))
+    var settings = new DotNetCoreBuildSettings
     {
-        process.WaitForExit();
-    }
+        Configuration = configuration,
+    };
+
+    DotNetCoreBuild("./src/GreenDonut.sln", settings);
 });
 
 Task("Publish")
-    .IsDependentOn("Build")
+    .IsDependentOn("EnvironmentSetup")
     .Does(() =>
 {
     using(var process = StartAndReturnProcess("msbuild",
-        new ProcessSettings{ Arguments = "src /t:pack /p:configuration=" + configuration + " /p:IncludeSource=true /p:IncludeSymbols=true" }))
+        new ProcessSettings{ Arguments = "./src/GreenDonut.sln /t:restore /p:configuration=" + configuration }))
+    {
+        process.WaitForExit();
+    }
+
+    using(var process = StartAndReturnProcess("msbuild",
+        new ProcessSettings{ Arguments = "./src/GreenDonut.sln /t:build /p:configuration=" + configuration }))
+    {
+        process.WaitForExit();
+    }
+
+    using(var process = StartAndReturnProcess("msbuild",
+        new ProcessSettings{ Arguments = "./src/GreenDonut.sln /t:pack /p:configuration=" + configuration + " /p:IncludeSource=true /p:IncludeSymbols=true" }))
     {
         process.WaitForExit();
     }
 });
 
 Task("Tests")
+    .IsDependentOn("EnvironmentSetup")
     .Does(() =>
 {
     var buildSettings = new DotNetCoreBuildSettings
     {
-        Configuration = "Debug",
-        NoRestore = false,
+        Configuration = "Debug"
     };
 
     int i = 0;
@@ -104,12 +113,13 @@ Task("Tests")
         NoRestore = true,
         NoBuild = true,
         ArgumentCustomization = args => args
-            .Append($"/p:CollectCoverage=true")
+            .Append("/p:CollectCoverage=true")
+            .Append("/p:Exclude=[xunit.*]*")
             .Append("/p:CoverletOutputFormat=opencover")
-            .Append($"/p:CoverletOutput=\"../../{testOutputDir}/{i++}\" --blame")
+            .Append($"/p:CoverletOutput=\"../../{testOutputDir}/full_{i++}\" --blame")
     };
 
-    DotNetCoreBuild("./src", buildSettings);
+    DotNetCoreBuild("./src/GreenDonut.sln", buildSettings);
 
     foreach(var file in GetFiles("./src/**/*.Tests.csproj"))
     {
@@ -130,7 +140,7 @@ Task("SonarBegin")
         VsTestReportsPath = "**/*.trx",
         OpenCoverReportsPath = "**/*.opencover.xml",
         Exclusions = "**/*.js,**/*.html,**/*.css,**/src/Benchmark.Tests/**/*.*",
-        // Verbose = true,
+        Verbose = false,
         Version = packageVersion,
         ArgumentCustomization = args =>
         {

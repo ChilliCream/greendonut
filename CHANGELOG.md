@@ -21,6 +21,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `CancellationToken` to all public async method
   [#39](https://github.com/ChilliCream/greendonut/issues/39).
 - New diagnostic activity `ExecuteSingleRequest` and event `BatchError`.
+- GitHub Source Linking
+  [#69](https://github.com/ChilliCream/greendonut/issues/69).
 
 ### Changed
 
