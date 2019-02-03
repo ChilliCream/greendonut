@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace GreenDonut
 {
@@ -56,7 +57,7 @@ namespace GreenDonut
         public static void ReceivedValueFromCache<TKey, TValue>(
             TKey key,
             object cacheKey,
-            TValue value)
+            Task<TValue> value)
         {
             var payload = new
             {

@@ -15,7 +15,7 @@ namespace GreenDonut
             {
                 { "Foo", "Qux" },
                 { "Bar", "Quux" },
-                { "Baz", new Exception("Corge") }
+                { "Baz", new Exception("Error: Corge") }
             };
 
         [Fact(DisplayName = "VerifyEvents: Should match snapshot")]
@@ -31,18 +31,21 @@ namespace GreenDonut
                 {
                     AutoDispatching = true,
                     Batching = true,
-                    BatchRequestDelay = TimeSpan.FromMilliseconds(100)
+                    BatchRequestDelay = TimeSpan.FromMilliseconds(150),
+                    Caching = true
                 };
                 var batchLoader = new DataLoader<string, string>(
                     batchOptions,
                     FetchDataAsync);
                 var batchErrorLoader = new DataLoader<string, string>(
                     batchOptions,
-                    (keys, canncellationToken) => throw new Exception("Foo"));
+                    (keys, canncellationToken) =>
+                        throw new Exception("BatchError: Foo"));
                 var singleOptions = new DataLoaderOptions<string>
                 {
                     AutoDispatching = true,
-                    Batching = false
+                    Batching = false,
+                    Caching = true
                 };
                 var singleLoader = new DataLoader<string, string>(
                     singleOptions,
@@ -51,28 +54,28 @@ namespace GreenDonut
                 // act
                 await Catch(() => batchLoader.LoadAsync("Foo"))
                     .ConfigureAwait(false);
-                await Task.Delay(250).ConfigureAwait(false);
+                await Task.Delay(400).ConfigureAwait(false);
                 await Catch(() => batchLoader.LoadAsync("Foo", "Bar"))
                     .ConfigureAwait(false);
-                await Task.Delay(250).ConfigureAwait(false);
+                await Task.Delay(400).ConfigureAwait(false);
                 await Catch(() => batchLoader.LoadAsync("Bar", "Baz"))
                     .ConfigureAwait(false);
-                await Task.Delay(250).ConfigureAwait(false);
+                await Task.Delay(400).ConfigureAwait(false);
                 await Catch(() => batchLoader.LoadAsync("Qux"))
                     .ConfigureAwait(false);
-                await Task.Delay(250).ConfigureAwait(false);
+                await Task.Delay(400).ConfigureAwait(false);
                 await Catch(() => batchErrorLoader.LoadAsync("Foo"))
                     .ConfigureAwait(false);
-                await Task.Delay(250).ConfigureAwait(false);
+                await Task.Delay(400).ConfigureAwait(false);
                 await Catch(() => singleLoader.LoadAsync("Foo"))
                     .ConfigureAwait(false);
-                await Task.Delay(250).ConfigureAwait(false);
+                await Task.Delay(400).ConfigureAwait(false);
                 await Catch(() => singleLoader.LoadAsync("Foo", "Bar"))
                     .ConfigureAwait(false);
-                await Task.Delay(250).ConfigureAwait(false);
+                await Task.Delay(400).ConfigureAwait(false);
                 await Catch(() => singleLoader.LoadAsync("Bar", "Baz"))
                     .ConfigureAwait(false);
-                await Task.Delay(250).ConfigureAwait(false);
+                await Task.Delay(400).ConfigureAwait(false);
                 await Catch(() => singleLoader.LoadAsync("Qux"))
                     .ConfigureAwait(false);
 

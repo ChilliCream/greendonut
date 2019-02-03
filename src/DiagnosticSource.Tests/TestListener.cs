@@ -1,52 +1,57 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DiagnosticAdapter;
 
 namespace GreenDonut
 {
     public class TestListener
     {
-        public readonly ConcurrentQueue<KeyValuePair<object, Exception>>
+        public readonly ConcurrentQueue<KeyValuePair<string, string>>
             BatchErrors =
-                new ConcurrentQueue<KeyValuePair<object, Exception>>();
-        public readonly ConcurrentQueue<object> BatchKeys =
-            new ConcurrentQueue<object>();
-        public readonly ConcurrentQueue<KeyValuePair<object, object>>
+                new ConcurrentQueue<KeyValuePair<string, string>>();
+        public readonly ConcurrentQueue<string> BatchKeys =
+            new ConcurrentQueue<string>();
+        public readonly ConcurrentQueue<KeyValuePair<string, string>>
             BatchEntries =
-                new ConcurrentQueue<KeyValuePair<object, object>>();
-        public readonly ConcurrentQueue<KeyValuePair<object, object>>
+                new ConcurrentQueue<KeyValuePair<string, string>>();
+        public readonly ConcurrentQueue<KeyValuePair<string, Task<string>>>
             CachedEntries =
-                new ConcurrentQueue<KeyValuePair<object, object>>();
-        public readonly ConcurrentQueue<KeyValuePair<object, object>>
+                new ConcurrentQueue<KeyValuePair<string, Task<string>>>();
+        public readonly ConcurrentQueue<KeyValuePair<string, string>>
             Entries =
-                new ConcurrentQueue<KeyValuePair<object, object>>();
-        public readonly ConcurrentQueue<KeyValuePair<object, Exception>>
+                new ConcurrentQueue<KeyValuePair<string, string>>();
+        public readonly ConcurrentQueue<KeyValuePair<string, string>>
             Errors =
-                new ConcurrentQueue<KeyValuePair<object, Exception>>();
-        public readonly ConcurrentQueue<object> Keys =
-            new ConcurrentQueue<object>();
+                new ConcurrentQueue<KeyValuePair<string, string>>();
+        public readonly ConcurrentQueue<string> Keys =
+            new ConcurrentQueue<string>();
 
         [DiagnosticName("GreenDonut.BatchError")]
         public void OnBatchError(
-            IReadOnlyList<object> keys,
+            IReadOnlyList<string> keys,
             Exception exception)
         {
             BatchErrors.Enqueue(
-                new KeyValuePair<object, Exception>(keys, exception));
+                new KeyValuePair<string, string>(
+                    keys.FirstOrDefault(),
+                    exception.Message));
         }
 
         [DiagnosticName("GreenDonut.CachedValue")]
-        public void OnCachedValue(object key, object value)
+        public void OnCachedValue(string key, Task<string> value)
         {
-            CachedEntries.Enqueue(new KeyValuePair<object, object>(key, value));
+            CachedEntries.Enqueue(
+                new KeyValuePair<string, Task<string>>(key, value));
         }
 
         [DiagnosticName("GreenDonut.Error")]
-        public void OnError(object key, Exception exception)
+        public void OnError(string key, Exception exception)
         {
             Errors.Enqueue(
-                new KeyValuePair<object, Exception>(key, exception));
+                new KeyValuePair<string, string>(key, exception.Message));
         }
 
         [DiagnosticName("GreenDonut.ExecuteBatchRequest")]
@@ -54,7 +59,7 @@ namespace GreenDonut
 
         [DiagnosticName("GreenDonut.ExecuteBatchRequest.Start")]
         public void OnExecuteBatchRequestStart(
-            IReadOnlyList<object> keys)
+            IReadOnlyList<string> keys)
         {
             for (var i = 0; i < keys.Count; i++)
             {
@@ -64,13 +69,13 @@ namespace GreenDonut
 
         [DiagnosticName("GreenDonut.ExecuteBatchRequest.Stop")]
         public void OnExecuteBatchRequestStop(
-            IReadOnlyList<object> keys,
-            IReadOnlyList<object> values)
+            IReadOnlyList<string> keys,
+            IReadOnlyList<string> values)
         {
             for (var i = 0; i < keys.Count; i++)
             {
                 BatchEntries.Enqueue(
-                    new KeyValuePair<object, object>(keys[i], values[i]));
+                    new KeyValuePair<string, string>(keys[i], values[i]));
             }
         }
 
@@ -78,17 +83,18 @@ namespace GreenDonut
         public void OnExecuteSingleRequest() { }
 
         [DiagnosticName("GreenDonut.ExecuteSingleRequest.Start")]
-        public void OnExecuteSingleRequestStart(object key)
+        public void OnExecuteSingleRequestStart(string key)
         {
             Keys.Enqueue(key);
         }
 
         [DiagnosticName("GreenDonut.ExecuteSingleRequest.Stop")]
         public void OnExecuteSingleRequestStop(
-            object key,
-            IReadOnlyCollection<object> values)
+            string key,
+            IReadOnlyCollection<string> values)
         {
-            Entries.Enqueue(new KeyValuePair<object, object>(key, values));
+            Entries.Enqueue(new KeyValuePair<string, string>(key,
+                values.FirstOrDefault()));
         }
     }
 }
