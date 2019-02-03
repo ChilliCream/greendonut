@@ -1,29 +1,52 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Microsoft.Extensions.DiagnosticAdapter;
 
 namespace GreenDonut
 {
     public class TestListener
-        : DiagnosticListener
     {
-        public readonly ConcurrentDictionary<object, Exception> BatchErrors =
-            new ConcurrentDictionary<object, Exception>();
+        public readonly ConcurrentQueue<KeyValuePair<object, Exception>>
+            BatchErrors =
+                new ConcurrentQueue<KeyValuePair<object, Exception>>();
+        public readonly ConcurrentQueue<object> BatchKeys =
+            new ConcurrentQueue<object>();
+        public readonly ConcurrentQueue<KeyValuePair<object, object>>
+            BatchEntries =
+                new ConcurrentQueue<KeyValuePair<object, object>>();
+        public readonly ConcurrentQueue<KeyValuePair<object, object>>
+            CachedEntries =
+                new ConcurrentQueue<KeyValuePair<object, object>>();
+        public readonly ConcurrentQueue<KeyValuePair<object, object>>
+            Entries =
+                new ConcurrentQueue<KeyValuePair<object, object>>();
+        public readonly ConcurrentQueue<KeyValuePair<object, Exception>>
+            Errors =
+                new ConcurrentQueue<KeyValuePair<object, Exception>>();
         public readonly ConcurrentQueue<object> Keys =
             new ConcurrentQueue<object>();
-        public readonly ConcurrentDictionary<object, object> Values =
-            new ConcurrentDictionary<object, object>();
-
-        public TestListener()
-            : base("GreenDonut")
-        { }
 
         [DiagnosticName("GreenDonut.BatchError")]
-        public void OnBatchError(object key, Exception exception)
+        public void OnBatchError(
+            IReadOnlyList<object> keys,
+            Exception exception)
         {
-            BatchErrors.TryAdd(key, exception);
+            BatchErrors.Enqueue(
+                new KeyValuePair<object, Exception>(keys, exception));
+        }
+
+        [DiagnosticName("GreenDonut.CachedValue")]
+        public void OnCachedValue(object key, object value)
+        {
+            CachedEntries.Enqueue(new KeyValuePair<object, object>(key, value));
+        }
+
+        [DiagnosticName("GreenDonut.Error")]
+        public void OnError(object key, Exception exception)
+        {
+            Errors.Enqueue(
+                new KeyValuePair<object, Exception>(key, exception));
         }
 
         [DiagnosticName("GreenDonut.ExecuteBatchRequest")]
@@ -35,7 +58,7 @@ namespace GreenDonut
         {
             for (var i = 0; i < keys.Count; i++)
             {
-                Keys.Enqueue(keys[i]);
+                BatchKeys.Enqueue(keys[i]);
             }
         }
 
@@ -46,8 +69,26 @@ namespace GreenDonut
         {
             for (var i = 0; i < keys.Count; i++)
             {
-                Values.TryAdd(keys[i], values[i]);
+                BatchEntries.Enqueue(
+                    new KeyValuePair<object, object>(keys[i], values[i]));
             }
+        }
+
+        [DiagnosticName("GreenDonut.ExecuteSingleRequest")]
+        public void OnExecuteSingleRequest() { }
+
+        [DiagnosticName("GreenDonut.ExecuteSingleRequest.Start")]
+        public void OnExecuteSingleRequestStart(object key)
+        {
+            Keys.Enqueue(key);
+        }
+
+        [DiagnosticName("GreenDonut.ExecuteSingleRequest.Stop")]
+        public void OnExecuteSingleRequestStop(
+            object key,
+            IReadOnlyCollection<object> values)
+        {
+            Entries.Enqueue(new KeyValuePair<object, object>(key, values));
         }
     }
 }

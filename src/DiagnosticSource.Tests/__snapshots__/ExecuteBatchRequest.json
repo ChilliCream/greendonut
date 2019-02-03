@@ -1,0 +1,178 @@
+{
+  "BatchErrors": [
+    {
+      "Key": [
+        "Foo"
+      ],
+      "Value": {
+        "ClassName": "System.Exception",
+        "Message": "Foo",
+        "Data": null,
+        "InnerException": null,
+        "HelpURL": null,
+        "StackTraceString": "   at GreenDonut.DiagnosticEventsTests.<>c.<ExecuteBatchRequest>b__1_0(IReadOnlyList`1 keys, CancellationToken canncellationToken) in C:\\Work\\CC\\greendonut\\src\\DiagnosticSource.Tests\\DiagnosticEventsTests.cs:line 40\r\n   at GreenDonut.DataLoader`2.FetchAsync(IReadOnlyList`1 keys, CancellationToken cancellationToken) in C:\\Work\\CC\\greendonut\\src\\Core\\DataLoader.cs:line 77\r\n   at GreenDonut.DataLoaderBase`2.FetchInternalAsync(IDictionary`2 bufferedPromises, IReadOnlyList`1 keys, CancellationToken cancellationToken) in C:\\Work\\CC\\greendonut\\src\\Core\\DataLoaderBase.cs:line 523\r\n   at GreenDonut.DiagnosticEventsTests.Catch(Func`1 execute) in C:\\Work\\CC\\greendonut\\src\\DiagnosticSource.Tests\\DiagnosticEventsTests.cs:line 104",
+        "RemoteStackTraceString": null,
+        "RemoteStackIndex": 0,
+        "ExceptionMethod": null,
+        "HResult": -2146233088,
+        "Source": "GreenDonut.DiagnosticSource.Tests",
+        "WatsonBuckets": null
+      }
+    }
+  ],
+  "BatchKeys": [
+    "Foo",
+    "Bar",
+    "Baz",
+    "Qux",
+    "Foo"
+  ],
+  "BatchEntries": [
+    {
+      "Key": "Foo",
+      "Value": "Qux"
+    },
+    {
+      "Key": "Bar",
+      "Value": "Quux"
+    },
+    {
+      "Key": "Baz",
+      "Value": null
+    },
+    {
+      "Key": "Qux",
+      "Value": null
+    }
+  ],
+  "CachedEntries": [
+    {
+      "Key": "Foo",
+      "Value": {
+        "Result": "Qux",
+        "Id": 1,
+        "Exception": null,
+        "Status": "RanToCompletion",
+        "IsCanceled": false,
+        "IsCompleted": true,
+        "IsCompletedSuccessfully": true,
+        "CreationOptions": "RunContinuationsAsynchronously",
+        "AsyncState": null,
+        "IsFaulted": false
+      }
+    },
+    {
+      "Key": "Bar",
+      "Value": {
+        "Result": "Quux",
+        "Id": 2,
+        "Exception": null,
+        "Status": "RanToCompletion",
+        "IsCanceled": false,
+        "IsCompleted": true,
+        "IsCompletedSuccessfully": true,
+        "CreationOptions": "RunContinuationsAsynchronously",
+        "AsyncState": null,
+        "IsFaulted": false
+      }
+    },
+    {
+      "Key": "Foo",
+      "Value": {
+        "Result": "Qux",
+        "Id": 3,
+        "Exception": null,
+        "Status": "RanToCompletion",
+        "IsCanceled": false,
+        "IsCompleted": true,
+        "IsCompletedSuccessfully": true,
+        "CreationOptions": "RunContinuationsAsynchronously",
+        "AsyncState": null,
+        "IsFaulted": false
+      }
+    },
+    {
+      "Key": "Bar",
+      "Value": {
+        "Result": "Quux",
+        "Id": 4,
+        "Exception": null,
+        "Status": "RanToCompletion",
+        "IsCanceled": false,
+        "IsCompleted": true,
+        "IsCompletedSuccessfully": true,
+        "CreationOptions": "RunContinuationsAsynchronously",
+        "AsyncState": null,
+        "IsFaulted": false
+      }
+    }
+  ],
+  "Entries": [
+    {
+      "Key": "Foo",
+      "Value": [
+        "Qux"
+      ]
+    },
+    {
+      "Key": "Bar",
+      "Value": [
+        "Quux"
+      ]
+    },
+    {
+      "Key": "Baz",
+      "Value": [
+        null
+      ]
+    },
+    {
+      "Key": "Qux",
+      "Value": [
+        null
+      ]
+    }
+  ],
+  "Errors": [
+    {
+      "Key": "Baz",
+      "Value": {
+        "ClassName": "System.Exception",
+        "Message": "Corge",
+        "Data": null,
+        "InnerException": null,
+        "HelpURL": null,
+        "StackTraceString": "   at GreenDonut.DataLoaderBase`2.LoadInternalAsync(TKey[] keys, CancellationToken cancellationToken) in C:\\Work\\CC\\greendonut\\src\\Core\\DataLoaderBase.cs:line 541\r\n   at GreenDonut.DiagnosticEventsTests.Catch(Func`1 execute) in C:\\Work\\CC\\greendonut\\src\\DiagnosticSource.Tests\\DiagnosticEventsTests.cs:line 104\r\n   at GreenDonut.DataLoaderBase`2.LoadInternalAsync(TKey[] keys, CancellationToken cancellationToken) in C:\\Work\\CC\\greendonut\\src\\Core\\DataLoaderBase.cs:line 541\r\n   at GreenDonut.DiagnosticEventsTests.Catch(Func`1 execute) in C:\\Work\\CC\\greendonut\\src\\DiagnosticSource.Tests\\DiagnosticEventsTests.cs:line 104",
+        "RemoteStackTraceString": null,
+        "RemoteStackIndex": 0,
+        "ExceptionMethod": null,
+        "HResult": -2146233088,
+        "Source": "System.Private.CoreLib",
+        "WatsonBuckets": null
+      }
+    },
+    {
+      "Key": "Baz",
+      "Value": {
+        "ClassName": "System.Exception",
+        "Message": "Corge",
+        "Data": null,
+        "InnerException": null,
+        "HelpURL": null,
+        "StackTraceString": "   at GreenDonut.DataLoaderBase`2.LoadInternalAsync(TKey[] keys, CancellationToken cancellationToken) in C:\\Work\\CC\\greendonut\\src\\Core\\DataLoaderBase.cs:line 541\r\n   at GreenDonut.DiagnosticEventsTests.Catch(Func`1 execute) in C:\\Work\\CC\\greendonut\\src\\DiagnosticSource.Tests\\DiagnosticEventsTests.cs:line 104\r\n   at GreenDonut.DataLoaderBase`2.LoadInternalAsync(TKey[] keys, CancellationToken cancellationToken) in C:\\Work\\CC\\greendonut\\src\\Core\\DataLoaderBase.cs:line 541\r\n   at GreenDonut.DiagnosticEventsTests.Catch(Func`1 execute) in C:\\Work\\CC\\greendonut\\src\\DiagnosticSource.Tests\\DiagnosticEventsTests.cs:line 104",
+        "RemoteStackTraceString": null,
+        "RemoteStackIndex": 0,
+        "ExceptionMethod": null,
+        "HResult": -2146233088,
+        "Source": "System.Private.CoreLib",
+        "WatsonBuckets": null
+      }
+    }
+  ],
+  "Keys": [
+    "Foo",
+    "Bar",
+    "Baz",
+    "Qux"
+  ]
+}

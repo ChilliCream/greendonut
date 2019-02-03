@@ -31,9 +31,9 @@ namespace GreenDonut
                 keys
             };
 
-            if (_source.IsEnabled(_errorEventName, payload))
+            if (_source.IsEnabled(_batchErrorEventName, payload))
             {
-                _source.Write(_errorEventName, payload);
+                _source.Write(_batchErrorEventName, payload);
             }
         }
 
@@ -47,9 +47,9 @@ namespace GreenDonut
                 key
             };
 
-            if (_source.IsEnabled(_batchErrorEventName, payload))
+            if (_source.IsEnabled(_errorEventName, payload))
             {
-                _source.Write(_batchErrorEventName, payload);
+                _source.Write(_errorEventName, payload);
             }
         }
 
