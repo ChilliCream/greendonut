@@ -40,10 +40,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="__snapshots__\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="__snapshots__\*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
