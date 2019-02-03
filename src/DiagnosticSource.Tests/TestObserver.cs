@@ -20,7 +20,7 @@ namespace GreenDonut
 
         public void OnNext(DiagnosticListener value)
         {
-            if (value.Name == _listener.Name)
+            if (value.Name == "GreenDonut")
             {
                 value.SubscribeWithAdapter(_listener);
             }

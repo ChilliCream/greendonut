@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace GreenDonut
 {
@@ -31,9 +32,9 @@ namespace GreenDonut
                 keys
             };
 
-            if (_source.IsEnabled(_errorEventName, payload))
+            if (_source.IsEnabled(_batchErrorEventName, payload))
             {
-                _source.Write(_errorEventName, payload);
+                _source.Write(_batchErrorEventName, payload);
             }
         }
 
@@ -47,16 +48,16 @@ namespace GreenDonut
                 key
             };
 
-            if (_source.IsEnabled(_batchErrorEventName, payload))
+            if (_source.IsEnabled(_errorEventName, payload))
             {
-                _source.Write(_batchErrorEventName, payload);
+                _source.Write(_errorEventName, payload);
             }
         }
 
         public static void ReceivedValueFromCache<TKey, TValue>(
             TKey key,
             object cacheKey,
-            TValue value)
+            Task<TValue> value)
         {
             var payload = new
             {
