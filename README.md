@@ -53,7 +53,7 @@ _Dependency Injection_, you might wanne also take a look at the _Custom DataLoad
 #### Create a new instance
 
 Creating a new instance is easy as you will see in the following example. The tricky part here is to
-implement our data fetching logic - here shown as `FetchUsers` - which depends on our beckend
+implement our data fetching logic - here shown as `FetchUsers` - which depends on our backend
 resource. Once we have done that, we just pass our fetch function into the _DataLoader_ constructor.
 That's actually everything so far.
 
